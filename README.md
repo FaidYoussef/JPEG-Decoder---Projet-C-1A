@@ -3,7 +3,7 @@
 Projet C à réaliser en 1A à l'Ensimag.
 Réalisation d'un décodeur JPEG.
 
-![alt text](https://gitlab.ensimag.fr/formationc/projet/jpeg/2023/team6/pictures/JPEG_encoder_decoder_architecture.jpeg?raw=true)
+![JPEG encoder/decoder architecture](https://gitlab.ensimag.fr/formationc/projet/jpeg/2023/team6/pictures/JPEG_encoder_decoder_architecture.png?raw=true)
 
 
 ## Authors
