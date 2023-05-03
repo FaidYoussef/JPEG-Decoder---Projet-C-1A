@@ -33,8 +33,33 @@ int main(int argc, char **argv) {
     }
 
     // Récupération données en-tête
+    //unsigned char bflecture[2];
+    unsigned char bf[1]; // Buffer
+    unsigned char id[1]; // Buffer de lecture pour déterminer le type de données
 
+    while (1){
+        fread(bf, 1, 1, input);
+        //printf("%x\n", bf[0]);
+        if (bf[0] == 0xff){
+            fread(id, 1, 1, input);
+            if (id[0] == 0xdb){
+                printf("Quantization table\n");
 
+            } else if (id[0] == 0xc0){
+                printf("Start of frame\n");
+
+            } else if (id[0] == 0xc4){
+                printf("Huffman table\n");
+
+            } else if (id[0] == 0xda){
+                printf("Start of scan + data\n");
+
+            } else if (id[0] == 0xd9){
+                printf("Fin du fichier\n");
+                break;
+            }
+        }
+    }
 
     return EXIT_SUCCESS;
 }
