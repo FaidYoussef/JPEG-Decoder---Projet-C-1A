@@ -1,4 +1,25 @@
-# Notre décodeur JPEG à nous
+# Décodeur JPEG
+
+Projet C à réaliser en 1A à l'Ensimag.
+Réalisation d'un décodeur JPEG.
+
+![alt text](https://gitlab.ensimag.fr/formationc/projet/jpeg/2023/team6/blob/main/pictures/JPEG_encoder_decoder_architecture.jpeg?raw=true)
+
+
+## Authors
+
+- [@Youssef FAID](https://gitlab.ensimag.fr/faidy)
+- [@Jonathan MAROTTA](https://github.com/JonathanMAROTTA)
+- [@Gwénolé MARTIN](https://gitlab.ensimag.fr/martigwe)
+
+## Features
+
+- Décodeur JPEG 'baseline mode' # TODO
+- Décodeur JPEG 'progressive mode' #TODO
+
+
+
+## blabla git init
 
 Bienvenue sur la page d'accueil de _votre_ projet JPEG, un grand espace de liberté, sous le regard bienveillant de vos enseignants préférés.
 Le sujet sera disponible dès le mardi 2 mai à l'adresse suivante : [https://formationc.pages.ensimag.fr/projet/jpeg/jpeg/](https://formationc.pages.ensimag.fr/projet/jpeg/jpeg/).
