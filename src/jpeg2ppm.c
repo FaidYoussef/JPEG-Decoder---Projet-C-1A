@@ -1,7 +1,32 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
+short size_seg(FILE *input){
+    short length = 0;
+    short length2 = 0;
+    fread(&length, 1, 1, input);
+    length = length << 8;
+    fread(&length2, 1, 1, input);
+    length = length + length2;
+    return length;
+}
+
+int ipow(int b, int e)
+{
+  if (e==0) {
+    return 1;
+  } else if (b==0) {
+    return 0;
+  } else if (e%2==0) {
+    int tmp=ipow(b,e/2);
+    return tmp*tmp;
+  } else {
+    int tmp=ipow(b,(e-1)/2);
+    return b*tmp*tmp;
+  }
+}
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -33,20 +58,99 @@ int main(int argc, char **argv) {
     }
 
     // Récupération données en-tête
-    //unsigned char bflecture[2];
-    unsigned char bf[1]; // Buffer
-    unsigned char id[1]; // Buffer de lecture pour déterminer le type de données
+    unsigned char buffer[1];    // Buffer
+    unsigned char id[1];        // Buffer de lecture pour déterminer le type de segments
 
     while (1){
-        fread(bf, 1, 1, input);
-        //printf("%x\n", bf[0]);
-        if (bf[0] == 0xff){
+        fread(buffer, 1, 1, input);
+        if (buffer[0] == 0xff){
             fread(id, 1, 1, input);
             if (id[0] == 0xdb){
                 printf("Quantization table\n");
+                short length = 0;
+                length = size_seg(input);
+                length = length - 2 - 1;
+
+                fread(buffer, 1, 1, input);
+                if (buffer[0] == 0x00) {
+                    unsigned char *quantization_table_luminance = malloc(length*sizeof(unsigned char));
+                    fread(quantization_table_luminance, length, 1, input);
+                    // Affichage des tables de quantification
+                    for (int i=0; i<64; i++){
+                        printf("%x", quantization_table_luminance[i]);
+                    }
+                    printf("\n");
+                } else if (buffer[0] == 0x01) {
+                    unsigned char *quantization_table_chrominance = malloc(length*sizeof(unsigned char));
+                    fread(quantization_table_chrominance, length, 1, input);
+                    // Affichage des tables de quantification
+                    for (int i=0; i<64; i++){
+                        printf("%x", quantization_table_chrominance[i]);
+                    }
+                    printf("\n");
+                } else {
+                    fprintf(stderr, "Erreur dans la lecture des tables de quantification\n");
+                    return EXIT_FAILURE;
+                }
 
             } else if (id[0] == 0xc0){
                 printf("Start of frame\n");
+                short length = 0;
+                length = size_seg(input);
+                fread(buffer, 1, 1, input); // Précision
+                short height = 0;
+                short width = 0;
+                height = size_seg(input); // Size seg renvoie la valeur numérique issue de la lecture des 2 octets
+                width = size_seg(input); // Il faudrait modifier le nom de la fonction pour plus de clarté
+                printf("Hauteur : %d\n", height);
+                printf("Largeur : %d\n", width);
+                fread(buffer, 1, 1, input); // Nombre de composantes
+                short nb_components = 0;
+                nb_components = buffer[0];
+                printf("Nombre de composantes : %d\n", nb_components);
+                printf("Composantes :\n");
+                for (int i=0; i<nb_components; i++){
+                    fread(buffer, 1, 1, input); // ID composante
+                    short id_component = 0;
+                    id_component = buffer[0];
+                    fread(buffer, 1, 1, input); // Facteur d'échantillonnage
+                    short sampling_factor = 0;
+                    sampling_factor = buffer[0]; // Il faut faire une conversion car c'est un octet et on veut deux bits
+
+                    // On convertit en binaire
+                    char *sampling_factor_bin = malloc(8*sizeof(char));
+                    for (int i=0; i<8; i++){
+                        sampling_factor_bin[i] = '0';
+                    }
+                    int j = 7;
+                    while (sampling_factor != 0){
+                        if (sampling_factor % 2 == 1){
+                            sampling_factor_bin[j] = '1';
+                        }
+                        sampling_factor = sampling_factor / 2;
+                        j--;
+                    }
+                    // On convertit en décimal par paquets de 4 bits
+                    int sampling_factor_x = 0;
+                    int sampling_factor_y = 0;
+                    for (int i=0; i<4; i++){
+                        if (sampling_factor_bin[i] == '1'){
+                            sampling_factor_x = sampling_factor_x + ipow(2, 3-i);
+                        }
+                    }
+                    for (int i=4; i<8; i++){
+                        if (sampling_factor_bin[i] == '1'){
+                            sampling_factor_y = sampling_factor_y + ipow(2, 7-i);
+                        }
+                    }
+
+                    fread(buffer, 1, 1, input); // Tables de quantification
+                    short quantization_table = 0;
+                    quantization_table = buffer[0];
+                    printf("ID composante : %d\n", id_component);
+                    printf("Facteur d'échantillonnage X : %d\n", sampling_factor_x);
+                    printf("Facteur d'échantillonnage Y : %d\n", sampling_factor_y);
+                }
 
             } else if (id[0] == 0xc4){
                 printf("Huffman table\n");
@@ -60,6 +164,8 @@ int main(int argc, char **argv) {
             }
         }
     }
+
+    
 
     return EXIT_SUCCESS;
 }
