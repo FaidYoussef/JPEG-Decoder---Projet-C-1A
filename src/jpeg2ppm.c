@@ -23,10 +23,10 @@ int main(int argc, char **argv) {
     // Vérification JPEG Magic number 
     unsigned char first3bytes[3];
     fread(first3bytes, sizeof(first3bytes), 1, input);
-    unsigned char magicNumber[3] = {0xff, 0xd8, 0xff};
+    unsigned char JPEG_magic_Number[3] = {0xff, 0xd8, 0xff};
 
     for (int i=0; i<3; i++){
-        if (first3bytes[i] != magicNumber[i]){
+        if (first3bytes[i] != JPEG_magic_Number[i]){
             fprintf(stderr, "Le fichier %s n'est pas un fichier JPEG\n", argv[1]);
             return EXIT_FAILURE;
         }
