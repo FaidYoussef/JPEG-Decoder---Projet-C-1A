@@ -82,6 +82,9 @@ int main(int argc, char **argv) {
                         printf("%x", quantization_table_luminance[i]);
                     }
                     printf("\n");
+
+                    free(quantization_table_luminance);
+
                 } else if (buffer[0] == CHROMINANCE_ID) {
                     unsigned char *quantization_table_chrominance = malloc(length*sizeof(unsigned char));
                     fread(quantization_table_chrominance, length, 1, input);
@@ -90,6 +93,9 @@ int main(int argc, char **argv) {
                         printf("%x", quantization_table_chrominance[i]);
                     }
                     printf("\n");
+
+                    free(quantization_table_chrominance);
+                    
                 } else {
                     fprintf(stderr, "Erreur dans la lecture des tables de quantification\n");
                     return EXIT_FAILURE;
@@ -97,7 +103,7 @@ int main(int argc, char **argv) {
 
             } else if (id[0] == SOF_0){
                 printf("Start of frame\n");
-                short length = two_bytes_to_dec(input);
+                short length = two_bytes_to_dec(input); // Longueur du segment (Inutile pour le moment)
                 fread(buffer, 1, 1, input); // Précision (inutile pour le moment)
 
                 short height = two_bytes_to_dec(input);
@@ -131,11 +137,72 @@ int main(int argc, char **argv) {
 
             } else if (id[0] == DHT){
                 printf("Huffman table\n");
+                short length = two_bytes_to_dec(input); // Longueur du segment
+                length = length - 2 - 1; // On enlève la longueur du segment et l'octet de précision
+
+                fread(buffer, 1, 1, input); // ID de la table
+                // Les 4 bits de poids fort indiquent le type de table (DC ou AC)
+                // Les 4 bits de poids faible indiquent le numéro de la table
+                unsigned char id_table = buffer[0];
+                unsigned char type_table = id_table >> 4;
+                unsigned char num_table = id_table << 4;
+                num_table = num_table >> 4;
+                printf("Type de table : %d\n", type_table);
+                printf("Numéro de table : %d\n", num_table);
+
+                // Contenu de la table
+                unsigned char *huffman = malloc(length*sizeof(unsigned char));
+                fread(huffman, length, 1, input);
+                // Affichage des tables de Huffman
+                for (int i=0; i<length; i++){
+                    printf("%x", huffman[i]);
+                }
+                printf("\n");
+
+                free(huffman);
 
             } else if (id[0] == SOS){
                 printf("Start of scan + data\n");
+                short length = two_bytes_to_dec(input); // Longueur du segment
+
+                unsigned char nb_components = 0;
+                fread(buffer, 1, 1, input); // Nombre de composantes
+                nb_components = buffer[0];
+                printf("Nombre de composantes : %d\n", nb_components);
+
+                // Composantes
+                for (int i=0; i<nb_components; i++){
+                    fread(buffer, 1, 1, input); // ID composante
+                    unsigned char id_component = buffer[0];
+                    
+                    fread(buffer, 1, 1, input); // Tables de Huffman
+                    unsigned char id_table = buffer[0];
+                    unsigned char type_table = id_table >> 4;
+                    unsigned char num_table = id_table << 4;
+                    num_table = num_table >> 4;
+                    printf("ID composante : %d\n", id_component);
+                    printf("Type de table : %d\n", type_table);
+                    printf("Numéro de table : %d\n", num_table);
+                }
+
+                // Paramètres ignorés
+                fread(buffer, 1, 1, input); // Octet de début
+                fread(buffer, 1, 1, input); // Octet de fin
+                fread(buffer, 1, 1, input); // Approximation
+
+                // Data
+                unsigned char *data = malloc(length*sizeof(unsigned char));
+                fread(data, length, 1, input);
+                // Affichage des données
+                for (int i=0; i<length; i++){
+                    printf("%x", data[i]);
+                }
+                printf("\n");
+                
+                free(data);
 
             } else if (id[0] == EOI){
+                free(buffer);
                 printf("Fin du fichier\n");
                 break;
             }
