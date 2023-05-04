@@ -30,6 +30,11 @@ short two_bytes_to_dec(FILE *input){
     return length;
 }
 
+void ignore_bytes(FILE *input, int nb_bytes){
+    unsigned char buffer[nb_bytes];
+    fread(buffer, nb_bytes, 1, input);
+}
+
 int main(int argc, char **argv) {
     if (argc != 2) {
     	/* 
@@ -95,7 +100,7 @@ int main(int argc, char **argv) {
                     printf("\n");
 
                     free(quantization_table_chrominance);
-                    
+
                 } else {
                     fprintf(stderr, "Erreur dans la lecture des tables de quantification\n");
                     return EXIT_FAILURE;
@@ -103,8 +108,7 @@ int main(int argc, char **argv) {
 
             } else if (id[0] == SOF_0){
                 printf("Start of frame\n");
-                short length = two_bytes_to_dec(input); // Longueur du segment (Inutile pour le moment)
-                fread(buffer, 1, 1, input); // Précision (inutile pour le moment)
+                ignore_bytes(input, 3); // On ignore la longueur et la précision
 
                 short height = two_bytes_to_dec(input);
                 short width = two_bytes_to_dec(input);
@@ -163,7 +167,7 @@ int main(int argc, char **argv) {
 
             } else if (id[0] == SOS){
                 printf("Start of scan + data\n");
-                short length = two_bytes_to_dec(input); // Longueur du segment
+                ignore_bytes(input, 2); // Longueur du segment (ignoré)
 
                 unsigned char nb_components = 0;
                 fread(buffer, 1, 1, input); // Nombre de composantes
@@ -186,30 +190,53 @@ int main(int argc, char **argv) {
                 }
 
                 // Paramètres ignorés
-                fread(buffer, 1, 1, input); // Octet de début
-                fread(buffer, 1, 1, input); // Octet de fin
-                fread(buffer, 1, 1, input); // Approximation
+                ignore_bytes(input, 3); // Octet de début de spectre, octet de fin de spectre, approximation (ignorés)
 
-                // Data
-                unsigned char *data = malloc(length*sizeof(unsigned char));
-                fread(data, length, 1, input);
-                // Affichage des données
-                for (int i=0; i<length; i++){
-                    printf("%x", data[i]);
+                // On essaie une nouvelle méthode pour lire la data, pour enlever les 0
+                unsigned char *data = malloc(sizeof(unsigned char)); // Le malloc n'est pas bon car on ne connait pas la taille de la data
+                int nb_data = 0;
+                while (1){
+                    fread(buffer, 1, 1, input);
+                    if (buffer[0] == 0xFF){
+                        fread(buffer, 1, 1, input);
+                        if (buffer[0] == 0x00){
+                            data[nb_data] = 0xFF;
+                            nb_data++;
+                        } else if (buffer[0] == EOI){
+                            // On a fini la lecture des données
+                            free(data);
+                            printf("Fin du fichier\n");
+                            return EXIT_SUCCESS;
+                        } else {
+                            data[nb_data] = 0xFF;
+                            nb_data++;
+                            data[nb_data] = buffer[0];
+                            nb_data++;
+                        }
+                    } else {
+                        data[nb_data] = buffer[0];
+                        nb_data++;
+                    }
+
+                    unsigned char *tmp = realloc(data, (nb_data+1)*sizeof(unsigned char));
+                    if (tmp == NULL)
+                    {
+                        fprintf(stderr, "Erreur de réallocation mémoire\n");
+                        free(data);
+                        return EXIT_FAILURE;
+                    }               
+                    data = tmp;
                 }
-                printf("\n");
-                
-                free(data);
+
+                // On n'arrive jamais ici (impossible de break correctement)
+
+                // free(data);
 
             } else if (id[0] == EOI){
-                free(buffer);
                 printf("Fin du fichier\n");
                 break;
             }
         }
     }
-
-    
-
     return EXIT_SUCCESS;
 }
