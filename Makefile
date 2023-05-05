@@ -19,13 +19,25 @@ OBJ_FILES=$(patsubst src/%.c,obj/%.o,$(SRC_FILES))
 
 all: jpeg2ppm
 
-jpeg2ppm: $(OBJ_FILES) 
-	$(LD) $(OBJ_FILES) $(LDFLAGS) -o $@ -lm
+jpeg2ppm: $(OBJ_FILES)
+	$(LD) $(OBJ_FILES) $(LDFLAGS) -o $@ $(CFLAGS)
 
 obj/%.o: src/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
+tests: $(OBJ_FILES)
+	make -C tests/
+
+test-huffman: obj/huffman.o
+	make -C tests/ huffman-test 
+
+test-IDCT: obj/IDCT.o
+	make -C tests/ IDCT-test 
+
+test-quant_zigzag: obj/quant_zigzag.o
+	make -C tests/ quant_zigzag-test 
+
 .PHONY: clean
 
 clean:
-	rm -rf jpeg2ppm $(OBJ_FILES)
+	rm -rf jpeg2ppm tests/test_huffman tests/test_iDCT tests/test_quant_zigzag $(OBJ_FILES)
