@@ -4,6 +4,7 @@ LD = gcc
 # -O0 désactive les optimisations à la compilation
 # C'est utile pour débugger, par contre en "production"
 # on active au moins les optimisations de niveau 2 (-O2).
+# -lm on lie la bibliothèque mathématique (sqrt, cos, etc.)
 CFLAGS = -Wall -Wextra -std=c99 -Iinclude -O0 -g -lm
 LDFLAGS =
 

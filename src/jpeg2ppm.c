@@ -1,20 +1,22 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+#include 'huffman2.h'
 #include <stdbool.h>
 
 #define THREE_BYTES_LONG 3
 
 #define SEGMENT_START 0xff  // Segment start marker
-#define SOI 0xd8            // Start of Image
-#define SOF_0 0xc0          // Baseline DCT
-#define SOF_1 0xc1          // Extended sequential DCT
-#define SOF_2 0xc2          // Progressive DCT
-#define SOF_3 0xc3          // Lossless (sequential)
-#define DHT 0xc4            // Define Huffman Table(s)
-#define DQT 0xdb            // Define Quantization Table(s)
-#define SOS 0xda            // Start of Scan
-#define EOI 0xd9            // End of Image
+#define SOI     0xd8        // Start of Image
+#define SOF_0   0xc0        // Baseline DCT
+#define SOF_1   0xc1        // Extended sequential DCT
+#define SOF_2   0xc2        // Progressive DCT
+#define SOF_3   0xc3        // Lossless (sequential)
+#define DHT     0xc4        // Define Huffman Table(s)
+#define DQT     0xdb        // Define Quantization Table(s)
+#define SOS     0xda        // Start of Scan
+#define EOI     0xd9        // End of Image
 
 #define LUMINANCE_ID 0x00
 #define CHROMINANCE_ID 0x01
@@ -255,5 +257,22 @@ int main(int argc, char **argv) {
             }
         }
     }
+
+
+    //----------------------------------------------------
+
+    int* huff_table = calloc(20, sizeof(int));
+    huff_table[0] = 0x0;
+    huff_table[1] = 3;
+    huff_table[2] = 2;
+    huff_table[16] = 0x0d;
+    huff_table[17] = 0x0e;
+    huff_table[18] = 0x0a;
+    huff_table[19] = 0x0c;
+    huff_table[20] = 0x0b;
+
+    huffman2(huff_table, &huff_table[16]);
+    free(huff_table);
+
     return EXIT_SUCCESS;
 }
