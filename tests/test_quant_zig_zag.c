@@ -1,4 +1,8 @@
-#include <quant_zig_zag.h>
+#include <stdbool.h>
+#include "../include/quant_zigzag.h"
+#include "../src/quant_zigzag.c"
+
+bool verbose = 1;
 
 // Quantization table
 int quant_table[8][8] = {

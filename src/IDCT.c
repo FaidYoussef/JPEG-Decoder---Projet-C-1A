@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-#include <IDCT.h>
+#include "../include/IDCT.h"
 
 #define PI 3.14159265358979323846
 #define N 8

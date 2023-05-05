@@ -36,10 +36,10 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
-#include <jpeg2ppm.h>
-#include <huffman.h>
-#include <IDCT.h>
-#include <quant_zigzag.h>
+#include "../include/jpeg2ppm.h"
+#include "../include/huffman.h"
+#include "../include/IDCT.h"
+#include "../include/quant_zigzag.h"
 
 
 #define THREE_BYTES_LONG 3

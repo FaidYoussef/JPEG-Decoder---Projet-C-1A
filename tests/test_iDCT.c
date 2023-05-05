@@ -1,7 +1,10 @@
-#include <IDCT.h>
+#include <stdbool.h>
+#include "../include/IDCT.h"
+#include "../src/IDCT.c"
+
+bool verbose = 1;
 
 int main() {
-    verbose = 1;
     
     double input[N][N] = {
         // Mettez ici les coefficients DCT de la matrice 8x8
