@@ -37,11 +37,10 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
-
-#include <jpeg2ppm.h>
-#include <huffman.h>
-#include <IDCT.h>
-#include <quant_zigzag.h>
+#include "../include/jpeg2ppm.h"
+#include "../include/huffman.h"
+#include "../include/IDCT.h"
+#include "../include/quant_zigzag.h"
 
 
 #define THREE_BYTES_LONG 3
@@ -63,8 +62,6 @@
 /* variable globale */
 bool verbose = 0;
 
-
-
 short two_bytes_to_dec(FILE *input){
     // Lecture et renvoie de la valeur décimale de deux octets
     short length = 0;
@@ -74,6 +71,12 @@ short two_bytes_to_dec(FILE *input){
     fread(&length2, 1, 1, input);
     length = length + length2;
     return length;
+}
+
+unsigned char read_byte(FILE *input, unsigned char *buffer){
+    // Lecture et renvoie d'un octet
+    fread(buffer, 1, 1, input);
+    return buffer[0];
 }
 
 void ignore_bytes(FILE *input, int nb_bytes){
@@ -143,10 +146,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    //On déclare une variable globale verbose
-
+    // Mode verbose
     if (argc > 2){
-        // On souhaite créer un mode verbose
         if (strcmp(argv[2], "-v") == 0){
             verbose = 1;
         }
@@ -175,24 +176,21 @@ int main(int argc, char **argv) {
                 verbose ? printf("Hauteur : %d\n", height):0;
                 verbose ? printf("Largeur : %d\n", width):0;
 
-                fread(buffer, 1, 1, input); // Nombre de composantes
-                short nb_components = buffer[0];
+                unsigned char nb_components = read_byte(input, buffer);
                 verbose ? printf("Nombre de composantes : %d\n", nb_components):0;
 
                 verbose ? printf("Composantes :\n"):0;
                 for (int i=0; i<nb_components; i++){
-                    fread(buffer, 1, 1, input); // ID composante
-                    unsigned char id_component = buffer[0];
+                    unsigned char id_component = read_byte(input, buffer); // ID composante
                     
-                    fread(buffer, 1, 1, input); // Facteur d'échantillonnage
-                    unsigned char sampling_factor = buffer[0]; // Il faut faire une conversion car c'est un octet et on veut deux bits
+                    // Facteur d'échantillonnage
+                    unsigned char sampling_factor = read_byte(input, buffer); // Il faut faire une conversion car c'est un octet et on veut deux bits
 
                     unsigned char sampling_factor_x = sampling_factor >> 4;
                     unsigned char sampling_factor_y = sampling_factor << 4;
                     sampling_factor_y = sampling_factor_y >> 4;
 
-                    fread(buffer, 1, 1, input); // Tables de quantification
-                    short num_quantization_table = buffer[0];
+                    unsigned char num_quantization_table = read_byte(input, buffer); // Tables de quantification
                     verbose ? printf("ID composante : %d\n", id_component):0;
                     verbose ? printf("Facteur d'échantillonnage X : %d\n", sampling_factor_x):0;
                     verbose ? printf("Facteur d'échantillonnage Y : %d\n", sampling_factor_y):0;
@@ -202,12 +200,11 @@ int main(int argc, char **argv) {
             } else if (id[0] == DHT){
                 verbose ? printf("Huffman table\n"):0;
                 short length = two_bytes_to_dec(input); // Longueur du segment
-                length = length - 2 - 1; // On enlève la longueur du segment et l'octet de précision
-
-                fread(buffer, 1, 1, input); // ID de la table
+                length = length - 2 - 1; // On enlève la longueur du segment et l'octet de précision 
+                
+                unsigned char id_table = read_byte(input, buffer); // ID de la table
                 // Les 4 bits de poids fort indiquent le type de table (DC ou AC)
                 // Les 4 bits de poids faible indiquent le numéro de la table
-                unsigned char id_table = buffer[0];
                 unsigned char type_table = id_table >> 4;
                 unsigned char num_table = id_table << 4;
                 num_table = num_table >> 4;
@@ -229,18 +226,14 @@ int main(int argc, char **argv) {
                 verbose ? printf("Start of scan + data\n"):0;
                 ignore_bytes(input, 2); // Longueur du segment (ignoré)
 
-                unsigned char nb_components = 0;
-                fread(buffer, 1, 1, input); // Nombre de composantes
-                nb_components = buffer[0];
+                unsigned char nb_components = read_byte(input, buffer); // Nombre de composantes
                 verbose ? printf("Nombre de composantes : %d\n", nb_components):0;
 
                 // Composantes
                 for (int i=0; i<nb_components; i++){
-                    fread(buffer, 1, 1, input); // ID composante
-                    unsigned char id_component = buffer[0];
+                    unsigned char id_component = read_byte(input, buffer); // ID composante
                     
-                    fread(buffer, 1, 1, input); // Tables de Huffman
-                    unsigned char id_table = buffer[0];
+                    unsigned char id_table = read_byte(input, buffer); // ID de la table
                     unsigned char type_table = id_table >> 4;
                     unsigned char num_table = id_table << 4;
                     num_table = num_table >> 4;
@@ -301,19 +294,19 @@ int main(int argc, char **argv) {
 
 
     //----------------------------------------------------
-    // Testing Huffman in main program
-    int* huff_table = calloc(20, sizeof(int));
-    huff_table[0] = 0x0;
-    huff_table[1] = 3;
-    huff_table[2] = 2;
-    huff_table[16] = 0x0d;
-    huff_table[17] = 0x0e;
-    huff_table[18] = 0x0a;
-    huff_table[19] = 0x0c;
-    huff_table[20] = 0x0b;
+    // // Testing Huffman in main program
+    // int* huff_table = calloc(20, sizeof(int));
+    // huff_table[0] = 0x0;
+    // huff_table[1] = 3;
+    // huff_table[2] = 2;
+    // huff_table[16] = 0x0d;
+    // huff_table[17] = 0x0e;
+    // huff_table[18] = 0x0a;
+    // huff_table[19] = 0x0c;
+    // huff_table[20] = 0x0b;
 
-    huffman(huff_table, &huff_table[16]);
-    free(huff_table);
+    // huffman2(huff_table, &huff_table[16]);
+    // free(huff_table);
 
-    return EXIT_SUCCESS;
+    // return EXIT_SUCCESS;
 }
