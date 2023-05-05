@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include 'huffman2.h'
 #include <stdbool.h>
+#include 'huffman2.h'
 
 #define THREE_BYTES_LONG 3
 
@@ -23,6 +23,8 @@
 
 /* variable globale */
 bool verbose = 0;
+
+
 
 short two_bytes_to_dec(FILE *input){
     // Lecture et renvoie de la valeur décimale de deux octets
@@ -260,7 +262,7 @@ int main(int argc, char **argv) {
 
 
     //----------------------------------------------------
-
+    // Testing Huffman in main program
     int* huff_table = calloc(20, sizeof(int));
     huff_table[0] = 0x0;
     huff_table[1] = 3;
