@@ -1,4 +1,8 @@
-#include <huffman.h>
+#include <stdbool.h>
+#include "../include/huffman.h"
+#include "../src/huffman.c"
+
+bool verbose = 1;
 
 void main(void){
     verbose = 1;
