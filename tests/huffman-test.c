@@ -5,21 +5,34 @@
 
 bool verbose = 1;
 
-int main(void){
-    verbose = 1;
+int main() {
+    unsigned char *bitstream1 = malloc(15 * sizeof(unsigned char));
+    bitstream1 = "111100001010101";
+    unsigned char *expected_output1 = malloc(8 * sizeof(unsigned char));
+    expected_output1[0] = 0xb;
+    expected_output1[1] = 0xa;
+    expected_output1[2] = 0xd;
+    expected_output1[3] = 0xe;
+    expected_output1[4] = 0xe;
+    expected_output1[5] = 0xe;
+    expected_output1[6] = 0xd;
+    expected_output1[7] = 0x0;
+
+    unsigned char *bitstream2 = malloc(15 * sizeof(unsigned char));
+    bitstream2 = "111100001010100";
+    unsigned char *expected_output2 = malloc(8 * sizeof(unsigned char));
+    expected_output2[0] = 0xb;
+    expected_output2[1] = 0xa;
+    expected_output2[2] = 0xd;
+    expected_output2[3] = 0xe;
+    expected_output2[4] = 0xe;
+    expected_output2[5] = 0xe;
+    expected_output2[6] = 0xe;
+    expected_output2[7] = 0x0;
+
+    test_decode_bitstream(bitstream1, expected_output1);
+    test_decode_bitstream(bitstream2, expected_output1);
+    test_decode_bitstream(bitstream2, expected_output2);
     
-    int* huff_table = calloc(20, sizeof(int));
-    huff_table[0] = 0x0;
-    huff_table[1] = 3;
-    huff_table[2] = 2;
-    huff_table[16] = 0x0d;
-    huff_table[17] = 0x0e;
-    huff_table[18] = 0x0a;
-    huff_table[19] = 0x0c;
-    // huff_table[20] = 0x0b;
-
-    huffman(huff_table, &huff_table[16]);
-    free(huff_table);
-
     return EXIT_SUCCESS;
 }

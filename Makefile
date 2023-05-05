@@ -40,4 +40,4 @@ test-quant_zigzag: obj/quant_zigzag.o
 .PHONY: clean
 
 clean:
-	rm -rf jpeg2ppm tests/test_huffman tests/test_iDCT tests/test_quant_zigzag $(OBJ_FILES)
+	rm -rf jpeg2ppm tests/huffman-test tests/IDCT-test tests/quant_zigzag-test $(OBJ_FILES)

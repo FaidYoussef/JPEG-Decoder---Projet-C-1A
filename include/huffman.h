@@ -1,26 +1,25 @@
-#ifndef _HUFFMAN_H_
-#define _HUFFMAN_H_
-
 #include <stdio.h>
+#include <stdint.h>
+#include <string.h>
 #include <stdlib.h>
 
-#define SHORT_LENGTH 16
-#define HUFFMAN_TABLE_SIZE 16
 
+struct node ;
 
-// structure d'un noeud de l'arbre de Huffman
-struct node;
+// Crée un nouveau noeud
+struct node *create_node(unsigned char symbol, struct node *left, struct node *right);
 
-// fonction qui crée un noeud de l'arbre de Huffman
-struct node* create_node(unsigned char symbol);
+// Affiche la représentation binaire d'un entier
+void print_binary(uint16_t value, int length);
 
-// fonction qui parcours un arbre binaire de gauche à droite et qui affiche les symboles
-void print_tree(struct node *root);
+// Affiche la représentation binaire d'un code de huffman
+void print_huffman_codes(int bit_lengths[], unsigned char symbols[], int n);
 
-// fonction qui fait une rotation à gauche d'un short
-short rotate_left_short(short code, int taille);
+// Construit l'arbre de huffman à partir de la table de huffman
+void build_huffman_tree(struct node **root, unsigned char *huff_table) ;
 
-// fonction qui construit l'arbre de Huffman à partir de la table de Huffman
-void huffman(int* huff_table, int *pData);
+// Décode un bitstream à partir de la table de huffman
+unsigned char *decode_bitstream(unsigned char *huff_table, unsigned char *bitstream);
 
-#endif
+// Teste la fonction decode_bitstream
+void test_decode_bitstream(unsigned char bitstream[], unsigned char expected_output);
