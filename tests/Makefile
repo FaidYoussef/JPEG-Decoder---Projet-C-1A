@@ -3,7 +3,7 @@ CFLAGS = -std=c99 -Wall -Wextra -g -O3 -mavx -I../include
 LDFLAGS = -lm
 
 TESTS = huffman-test \
-	iDCT-test \
+	IDCT-test \
 	quant_zigzag-test
 
 SRC = $(TESTS:=.c)

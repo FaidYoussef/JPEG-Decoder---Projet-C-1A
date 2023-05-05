@@ -1,25 +1,12 @@
+#include <stdlib.h>
 #include <stdbool.h>
-#include "../include/quant_zigzag.h"
-#include "../src/quant_zigzag.c"
+
+#include <quant_zigzag.h>
 
 bool verbose = 1;
 
-// Quantization table
-int quant_table[8][8] = {
-    {16, 11, 10, 16, 24, 40, 51, 61},
-    {12, 12, 14, 19, 26, 58, 60, 55},
-    {14, 13, 16, 24, 40, 57, 69, 56},
-    {14, 17, 22, 29, 51, 87, 80, 62},
-    {18, 22, 37, 56, 68, 109, 103, 77},
-    {24, 35, 55, 64, 81, 104, 113, 92},
-    {49, 64, 78, 87, 103, 121, 120, 101},
-    {72, 92, 95, 98, 112, 100, 103, 99}
-};
-
 // tests quantization & inverse quantization & inverse zig-zag
-
 int main(void) {
-    verbose = 1;
 
     int block[8][8] = {
         {139, 144, 149, 153, 155, 155, 155, 155},
@@ -32,8 +19,8 @@ int main(void) {
         {162, 162, 161, 161, 163, 158, 158, 158}
     };
 
-    int qblock[8][8];
     int i, j;
+    int qblock[8][8];
     int block2[8][8];
     int block3[64];
     for (i = 0; i < 64; i++) {
@@ -71,5 +58,5 @@ int main(void) {
         printf("\n");
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

@@ -1,6 +1,7 @@
+#include <stdlib.h>
 #include <stdbool.h>
-#include "../include/IDCT.h"
-#include "../src/IDCT.c"
+
+#include <IDCT.h>
 
 bool verbose = 1;
 
@@ -29,5 +30,5 @@ int main() {
         printf("\n");
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

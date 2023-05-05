@@ -21,6 +21,6 @@ void print_tree(struct node *root);
 short rotate_left_short(short code, int taille);
 
 // fonction qui construit l'arbre de Huffman à partir de la table de Huffman
-void huffman2(int* huff_table, int *pData);
+void huffman(int* huff_table, int *pData);
 
 #endif

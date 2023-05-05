@@ -36,10 +36,11 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
-#include "../include/jpeg2ppm.h"
-#include "../include/huffman.h"
-#include "../include/IDCT.h"
-#include "../include/quant_zigzag.h"
+
+#include <jpeg2ppm.h>
+#include <huffman.h>
+#include <IDCT.h>
+#include <quant_zigzag.h>
 
 
 #define THREE_BYTES_LONG 3
@@ -310,7 +311,7 @@ int main(int argc, char **argv) {
     huff_table[19] = 0x0c;
     huff_table[20] = 0x0b;
 
-    huffman2(huff_table, &huff_table[16]);
+    huffman(huff_table, &huff_table[16]);
     free(huff_table);
 
     return EXIT_SUCCESS;

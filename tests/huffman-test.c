@@ -1,10 +1,11 @@
+#include <stdlib.h>
 #include <stdbool.h>
-#include "../include/huffman.h"
-#include "../src/huffman.c"
+
+#include <huffman.h>
 
 bool verbose = 1;
 
-void main(void){
+int main(void){
     verbose = 1;
     
     int* huff_table = calloc(20, sizeof(int));
@@ -15,9 +16,10 @@ void main(void){
     huff_table[17] = 0x0e;
     huff_table[18] = 0x0a;
     huff_table[19] = 0x0c;
-    huff_table[20] = 0x0b;
+    // huff_table[20] = 0x0b;
 
-    huffman2(huff_table, &huff_table[16]);
+    huffman(huff_table, &huff_table[16]);
     free(huff_table);
 
+    return EXIT_SUCCESS;
 }

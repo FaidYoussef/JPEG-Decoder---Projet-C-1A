@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "../include/huffman.h"
+
+#include <huffman.h>
 
 #define SHORT_LENGTH_FOR_8X8_BLOCK 16
 #define HUFFMAN_TABLE_SIZE 16
@@ -48,7 +49,7 @@ short rotate_left_short(short code, int taille) {
 
 
 // fonction qui construit l'arbre de Huffman à partir de la table de Huffman
-void huffman2(int* huff_table, int *pData) {
+void huffman(int* huff_table, int *pData) {
     struct node *root = create_node(NULL);
     struct node *current_node = root;
     int* current_symbol_address = pData;
