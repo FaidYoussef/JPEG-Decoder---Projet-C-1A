@@ -1,9 +1,9 @@
-#include <math.h>
 #include <stdio.h>
+#include <math.h>
+#include <IDCT.h>
 
 #define PI 3.14159265358979323846
 #define N 8
-
 
 // C function in the iDCT formula
 double C(int x) {
@@ -21,8 +21,8 @@ void idct(double input[N][N], double output[N][N]) {
                     double cu = C(u);
                     double cv = C(v);
                     double dct_uv = input[u][v];
-                    double cos_xu = cos(((2 * x + 1) * u * PI) / (2 * N));
-                    double cos_yv = cos(((2 * y + 1) * v * PI) / (2 * N));
+                    double cos_xu = cos(    (double)(   ((float)(2 * x + 1) * u * PI) / (2 * N) )   );
+                    double cos_yv = cos(    (double)(   ((float)(2 * y + 1) * v * PI) / (2 * N) )   );
                     sum += cu * cv * dct_uv * cos_xu * cos_yv;
                 }
             }

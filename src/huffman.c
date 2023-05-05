@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <huffman.h>
 
 #define SHORT_LENGTH_FOR_8X8_BLOCK 16
 #define HUFFMAN_TABLE_SIZE 16
 
-extern verbose;
+extern bool verbose;
 
 
 // structure d'un noeud de l'arbre de Huffman

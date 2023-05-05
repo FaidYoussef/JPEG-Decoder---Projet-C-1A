@@ -3,7 +3,11 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
-#include 'huffman2.h'
+#include <jpeg2ppm.h>
+#include <huffman.h>
+#include <IDCT.h>
+#include <quant_zigzag.h>
+
 
 #define THREE_BYTES_LONG 3
 
