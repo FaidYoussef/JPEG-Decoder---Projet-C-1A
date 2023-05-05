@@ -19,6 +19,9 @@
 #define LUMINANCE_ID 0x00
 #define CHROMINANCE_ID 0x01
 
+/* variable globale */
+bool verbose = 0;
+
 short two_bytes_to_dec(FILE *input){
     // Lecture et renvoie de la valeur décimale de deux octets
     short length = 0;
@@ -37,7 +40,7 @@ void ignore_bytes(FILE *input, int nb_bytes){
 
 void get_qt(FILE *input, unsigned char *buffer, unsigned char *qt_luminance, unsigned char *qt_chrominance) {
     // On souhaite récupérer les tables de quantification
-    printf("Quantization table\n");
+    verbose ? printf("Quantization table\n"):0;
         short length = 0;
         length = two_bytes_to_dec(input);
         length = length - 2 - 1;
@@ -47,9 +50,9 @@ void get_qt(FILE *input, unsigned char *buffer, unsigned char *qt_luminance, uns
             fread(qt_luminance, length, 1, input);
             // Affichage des tables de quantification
             for (int i=0; i<64; i++){
-                printf("%x", qt_luminance[i]);
+                verbose ? printf("%x", qt_luminance[i]):0;
             }
-            printf("\n");
+            verbose ? printf("\n"):0;
 
             free(qt_luminance);
 
@@ -57,9 +60,9 @@ void get_qt(FILE *input, unsigned char *buffer, unsigned char *qt_luminance, uns
             fread(qt_chrominance, length, 1, input);
             // Affichage des tables de quantification
             for (int i=0; i<64; i++){
-                printf("%x", qt_chrominance[i]);
+                verbose ? printf("%x", qt_chrominance[i]):0;
             }
-            printf("\n");
+            verbose ? printf("\n"):0;
 
             free(qt_chrominance);
 
@@ -97,6 +100,15 @@ int main(int argc, char **argv) {
         }
     }
 
+    //On déclare une variable globale verbose
+
+    if (argc > 2){
+        // On souhaite créer un mode verbose
+        if (strcmp(argv[2], "-v") == 0){
+            verbose = 1;
+        }
+    }
+
     // Récupération données en-tête
     unsigned char buffer[1];    // Buffer
     unsigned char id[1];        // Buffer de lecture pour déterminer le type de segments
@@ -112,19 +124,19 @@ int main(int argc, char **argv) {
                 get_qt(input, buffer, quantization_table_luminance, quantization_table_chrominance);
 
             } else if (id[0] == SOF_0){
-                printf("Start of frame\n");
+                verbose ? printf("Start of frame\n"):0;
                 ignore_bytes(input, 3); // On ignore la longueur et la précision
 
                 short height = two_bytes_to_dec(input);
                 short width = two_bytes_to_dec(input);
-                printf("Hauteur : %d\n", height);
-                printf("Largeur : %d\n", width);
+                verbose ? printf("Hauteur : %d\n", height):0;
+                verbose ? printf("Largeur : %d\n", width):0;
 
                 fread(buffer, 1, 1, input); // Nombre de composantes
                 short nb_components = buffer[0];
-                printf("Nombre de composantes : %d\n", nb_components);
+                verbose ? printf("Nombre de composantes : %d\n", nb_components):0;
 
-                printf("Composantes :\n");
+                verbose ? printf("Composantes :\n"):0;
                 for (int i=0; i<nb_components; i++){
                     fread(buffer, 1, 1, input); // ID composante
                     unsigned char id_component = buffer[0];
@@ -138,14 +150,14 @@ int main(int argc, char **argv) {
 
                     fread(buffer, 1, 1, input); // Tables de quantification
                     short num_quantization_table = buffer[0];
-                    printf("ID composante : %d\n", id_component);
-                    printf("Facteur d'échantillonnage X : %d\n", sampling_factor_x);
-                    printf("Facteur d'échantillonnage Y : %d\n", sampling_factor_y);
-                    printf("Numéro de la table de quantification : %d\n", num_quantization_table);
+                    verbose ? printf("ID composante : %d\n", id_component):0;
+                    verbose ? printf("Facteur d'échantillonnage X : %d\n", sampling_factor_x):0;
+                    verbose ? printf("Facteur d'échantillonnage Y : %d\n", sampling_factor_y):0;
+                    verbose ? printf("Numéro de la table de quantification : %d\n", num_quantization_table):0;
                 }
 
             } else if (id[0] == DHT){
-                printf("Huffman table\n");
+                verbose ? printf("Huffman table\n"):0;
                 short length = two_bytes_to_dec(input); // Longueur du segment
                 length = length - 2 - 1; // On enlève la longueur du segment et l'octet de précision
 
@@ -156,28 +168,28 @@ int main(int argc, char **argv) {
                 unsigned char type_table = id_table >> 4;
                 unsigned char num_table = id_table << 4;
                 num_table = num_table >> 4;
-                printf("Type de table : %d\n", type_table);
-                printf("Numéro de table : %d\n", num_table);
+                verbose ? printf("Type de table : %d\n", type_table):0;
+                verbose ? printf("Numéro de table : %d\n", num_table):0;
 
                 // Contenu de la table
                 unsigned char *huffman = malloc(length*sizeof(unsigned char));
                 fread(huffman, length, 1, input);
                 // Affichage des tables de Huffman
                 for (int i=0; i<length; i++){
-                    printf("%x", huffman[i]);
+                    verbose ? printf("%x", huffman[i]):0;
                 }
-                printf("\n");
+                verbose ? printf("\n"):0;
 
                 free(huffman);
 
             } else if (id[0] == SOS){
-                printf("Start of scan + data\n");
+                verbose ? printf("Start of scan + data\n"):0;
                 ignore_bytes(input, 2); // Longueur du segment (ignoré)
 
                 unsigned char nb_components = 0;
                 fread(buffer, 1, 1, input); // Nombre de composantes
                 nb_components = buffer[0];
-                printf("Nombre de composantes : %d\n", nb_components);
+                verbose ? printf("Nombre de composantes : %d\n", nb_components):0;
 
                 // Composantes
                 for (int i=0; i<nb_components; i++){
@@ -189,9 +201,9 @@ int main(int argc, char **argv) {
                     unsigned char type_table = id_table >> 4;
                     unsigned char num_table = id_table << 4;
                     num_table = num_table >> 4;
-                    printf("ID composante : %d\n", id_component);
-                    printf("Type de table : %d\n", type_table);
-                    printf("Numéro de table : %d\n", num_table);
+                    verbose ? printf("ID composante : %d\n", id_component):0;
+                    verbose ? printf("Type de table : %d\n", type_table):0;
+                    verbose ? printf("Numéro de table : %d\n", num_table):0;
                 }
 
                 // Paramètres ignorés
@@ -210,7 +222,7 @@ int main(int argc, char **argv) {
                         } else if (buffer[0] == EOI){
                             // On a fini la lecture des données
                             free(data);
-                            printf("Fin du fichier\n");
+                            verbose ? printf("Fin du fichier\n"):0;
                             return EXIT_SUCCESS;
                         } else {
                             data[nb_data] = 0xFF;
@@ -226,7 +238,7 @@ int main(int argc, char **argv) {
                     unsigned char *tmp = realloc(data, (nb_data+1)*sizeof(unsigned char));
                     if (tmp == NULL)
                     {
-                        fprintf(stderr, "Erreur de réallocation mémoire\n");
+                        verbose ? fprintf(stderr, "Erreur de réallocation mémoire\n"):0;
                         free(data);
                         return EXIT_FAILURE;
                     }               
@@ -238,7 +250,7 @@ int main(int argc, char **argv) {
                 // free(data);
 
             } else if (id[0] == EOI){
-                printf("Fin du fichier\n");
+                verbose ? printf("Fin du fichier\n"):0;
                 break;
             }
         }
