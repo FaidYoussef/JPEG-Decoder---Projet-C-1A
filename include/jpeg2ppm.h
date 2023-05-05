@@ -24,6 +24,8 @@
 
 short two_bytes_to_dec(FILE *input);
 
+unsigned char read_byte(FILE *input, unsigned char *buffer);
+
 void ignore_bytes(FILE *input, int nb_bytes);
 
 void get_qt(FILE *input, unsigned char *buffer, unsigned char *qt_luminance, unsigned char *qt_chrominance);
