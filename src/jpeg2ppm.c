@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define THREE_BYTES_LONG 3
 
@@ -18,7 +19,6 @@
 #define LUMINANCE_ID 0x00
 #define CHROMINANCE_ID 0x01
 
-
 short two_bytes_to_dec(FILE *input){
     // Lecture et renvoie de la valeur décimale de deux octets
     short length = 0;
@@ -35,8 +35,41 @@ void ignore_bytes(FILE *input, int nb_bytes){
     fread(buffer, nb_bytes, 1, input);
 }
 
+void get_qt(FILE *input, unsigned char *buffer, unsigned char *qt_luminance, unsigned char *qt_chrominance) {
+    // On souhaite récupérer les tables de quantification
+    printf("Quantization table\n");
+        short length = 0;
+        length = two_bytes_to_dec(input);
+        length = length - 2 - 1;
+
+        fread(buffer, 1, 1, input);
+        if (buffer[0] == LUMINANCE_ID) {
+            fread(qt_luminance, length, 1, input);
+            // Affichage des tables de quantification
+            for (int i=0; i<64; i++){
+                printf("%x", qt_luminance[i]);
+            }
+            printf("\n");
+
+            free(qt_luminance);
+
+        } else if (buffer[0] == CHROMINANCE_ID) {
+            fread(qt_chrominance, length, 1, input);
+            // Affichage des tables de quantification
+            for (int i=0; i<64; i++){
+                printf("%x", qt_chrominance[i]);
+            }
+            printf("\n");
+
+            free(qt_chrominance);
+
+        } else {
+            fprintf(stderr, "Erreur dans la lecture des tables de quantification\n");
+        }
+}
+
 int main(int argc, char **argv) {
-    if (argc != 2) {
+    if (argc == 1) {
     	/* 
             Si y'a pas au moins un argument en ligne de commandes, on
     	    boude. 
@@ -73,38 +106,10 @@ int main(int argc, char **argv) {
         if (buffer[0] == SEGMENT_START){
             fread(id, 1, 1, input);
             if (id[0] == DQT){
-                printf("Quantization table\n");
-                short length = 0;
-                length = two_bytes_to_dec(input);
-                length = length - 2 - 1;
+                unsigned char *quantization_table_luminance = malloc(64*sizeof(unsigned char));
+                unsigned char *quantization_table_chrominance = malloc(64*sizeof(unsigned char));
 
-                fread(buffer, 1, 1, input);
-                if (buffer[0] == LUMINANCE_ID) {
-                    unsigned char *quantization_table_luminance = malloc(length*sizeof(unsigned char));
-                    fread(quantization_table_luminance, length, 1, input);
-                    // Affichage des tables de quantification
-                    for (int i=0; i<64; i++){
-                        printf("%x", quantization_table_luminance[i]);
-                    }
-                    printf("\n");
-
-                    free(quantization_table_luminance);
-
-                } else if (buffer[0] == CHROMINANCE_ID) {
-                    unsigned char *quantization_table_chrominance = malloc(length*sizeof(unsigned char));
-                    fread(quantization_table_chrominance, length, 1, input);
-                    // Affichage des tables de quantification
-                    for (int i=0; i<64; i++){
-                        printf("%x", quantization_table_chrominance[i]);
-                    }
-                    printf("\n");
-
-                    free(quantization_table_chrominance);
-
-                } else {
-                    fprintf(stderr, "Erreur dans la lecture des tables de quantification\n");
-                    return EXIT_FAILURE;
-                }
+                get_qt(input, buffer, quantization_table_luminance, quantization_table_chrominance);
 
             } else if (id[0] == SOF_0){
                 printf("Start of frame\n");
@@ -197,10 +202,10 @@ int main(int argc, char **argv) {
                 int nb_data = 0;
                 while (1){
                     fread(buffer, 1, 1, input);
-                    if (buffer[0] == 0xFF){
+                    if (buffer[0] == SEGMENT_START){
                         fread(buffer, 1, 1, input);
                         if (buffer[0] == 0x00){
-                            data[nb_data] = 0xFF;
+                            data[nb_data] = SEGMENT_START;
                             nb_data++;
                         } else if (buffer[0] == EOI){
                             // On a fini la lecture des données
