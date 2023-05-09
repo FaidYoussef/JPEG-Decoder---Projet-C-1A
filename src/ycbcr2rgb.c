@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <ycbcr2rgb.h>
+
 // Fonction pour saturer les valeurs entre 0 et 255
 uint8_t saturer(int valeur) {
     if (valeur < 0) {
@@ -23,17 +25,3 @@ void ycbcr_vers_rgb(uint8_t Y, uint8_t Cb, uint8_t Cr, uint8_t *R, uint8_t *G, u
     *G = saturer(g);
     *B = saturer(b);
 }
-
-// int main() {
-//     uint8_t Y, Cb, Cr;
-//     uint8_t R, G, B;
-
-//     printf("Entrez les valeurs de Y, Cb et Cr (0-255) séparées par des espaces : ");
-//     scanf("%hhu %hhu %hhu", &Y, &Cb, &Cr);
-
-//     ycbcr_vers_rgb(Y, Cb, Cr, &R, &G, &B);
-
-//     printf("Les valeurs RGB correspondantes sont : R=%d, G=%d, B=%d\n", R, G, B);
-
-//     return 0;
-// }
