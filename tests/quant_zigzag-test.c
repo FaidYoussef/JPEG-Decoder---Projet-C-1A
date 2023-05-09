@@ -19,44 +19,36 @@ int main(void) {
         {162, 162, 161, 161, 163, 158, 158, 158}
     };
 
-    int i, j;
     int qblock[8][8];
     int block2[8][8];
     int block3[64];
+    int i;
     for (i = 0; i < 64; i++) {
         block3[i] = i;
     }
 
+    printf("Original block:\n");
+    // print_block(block);
+
+
     quantize(block, qblock);
     inv_quantize(qblock, block2);
 
-    for (i = 0; i < 8; i++) {
-        for (j =0; j < 8; j++) {
-            printf("%d ", qblock[i][j]);
-        }
-        printf("\n");
-    }
 
-    printf("\n");
+    printf("Quantized block:\n");
+    // print_block(qblock);
 
-    for (i = 0; i < 8; i++) {
-        for (j =0; j < 8; j++) {
-            printf("%d ", block2[i][j]);
-        }
-        printf("\n");
-    }
 
-    printf("\n");
+    printf("Inverse quantized block:\n");
+    // print_block(block2);
 
 
     inv_zig_zag(block3, block2);
 
-    for (i = 0; i < 8; i++) {
-        for (j =0; j < 8; j++) {
-            printf("%d ", block2[i][j]);
-        }
-        printf("\n");
-    }
+
+    printf("Inverse zig-zag block:\n");
+    // print_block(block2);
+
 
     return EXIT_SUCCESS;
 }

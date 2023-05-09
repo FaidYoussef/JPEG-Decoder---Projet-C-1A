@@ -24,16 +24,16 @@ void ycbcr_vers_rgb(uint8_t Y, uint8_t Cb, uint8_t Cr, uint8_t *R, uint8_t *G, u
     *B = saturer(b);
 }
 
-int main() {
-    uint8_t Y, Cb, Cr;
-    uint8_t R, G, B;
+// int main() {
+//     uint8_t Y, Cb, Cr;
+//     uint8_t R, G, B;
 
-    printf("Entrez les valeurs de Y, Cb et Cr (0-255) séparées par des espaces : ");
-    scanf("%hhu %hhu %hhu", &Y, &Cb, &Cr);
+//     printf("Entrez les valeurs de Y, Cb et Cr (0-255) séparées par des espaces : ");
+//     scanf("%hhu %hhu %hhu", &Y, &Cb, &Cr);
 
-    ycbcr_vers_rgb(Y, Cb, Cr, &R, &G, &B);
+//     ycbcr_vers_rgb(Y, Cb, Cr, &R, &G, &B);
 
-    printf("Les valeurs RGB correspondantes sont : R=%d, G=%d, B=%d\n", R, G, B);
+//     printf("Les valeurs RGB correspondantes sont : R=%d, G=%d, B=%d\n", R, G, B);
 
-    return 0;
-}
+//     return 0;
+// }

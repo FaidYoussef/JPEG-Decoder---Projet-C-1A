@@ -35,9 +35,12 @@ test-IDCT: obj/IDCT.o
 	make -C tests/ IDCT-test 
 
 test-quant_zigzag: obj/quant_zigzag.o
-	make -C tests/ quant_zigzag-test 
+	make -C tests/ quant_zigzag-test
+
+test-RLE_decode: obj/RLE_decode.o
+	make -C tests/ RLE_decode-test 
 
 .PHONY: clean
 
 clean:
-	rm -rf jpeg2ppm tests/huffman-test tests/IDCT-test tests/quant_zigzag-test $(OBJ_FILES)
+	rm -rf jpeg2ppm tests/huffman-test tests/IDCT-test tests/quant_zigzag-test tests/RLE_decode $(OBJ_FILES)

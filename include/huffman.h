@@ -1,3 +1,5 @@
+#ifndef _HUFFMAN_H_
+#define _HUFFMAN_H_
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -23,3 +25,5 @@ unsigned char *decode_bitstream(unsigned char *huff_table, unsigned char *bitstr
 
 // Teste la fonction decode_bitstream
 void test_decode_bitstream(unsigned char bitstream[], unsigned char expected_output);
+
+#endif

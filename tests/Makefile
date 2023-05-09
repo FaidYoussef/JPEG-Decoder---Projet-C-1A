@@ -4,7 +4,8 @@ LDFLAGS = -lm
 
 TESTS = huffman-test \
 	IDCT-test \
-	quant_zigzag-test
+	quant_zigzag-test\
+	RLE_decode-test\
 
 SRC = $(TESTS:=.c)
 OBJ = $(TESTS:=.o)

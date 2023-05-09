@@ -16,4 +16,7 @@ void inv_quantize(int qblock[8][8], int block[8][8]);
 // Inverse Zig-Zag function
 void inv_zig_zag(int block[64], int qblock[8][8]);
 
+// Display block in matrix format
+void print_block(int **block);
+
 #endif

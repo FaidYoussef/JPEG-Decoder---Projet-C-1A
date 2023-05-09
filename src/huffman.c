@@ -112,7 +112,9 @@ unsigned char *decode_bitstream(unsigned char *huff_table, unsigned char *bitstr
 
 // Teste la fonction decode_bitstream
 void test_decode_bitstream(unsigned char *bitstream, unsigned char *expected_output) {
-    unsigned char huff_table[] = {0, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xd, 0xe, 0xa, 0xc, 0xb};
+    unsigned char huff_table[] = {0, 2, 1, 2, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x11, 0x12, 0xf, 0x8, 0x13, 0x0, 0x9, 0xd, 0x17, 0x1c, 0x1d, 0x25};
+    // 17, 18, 15, 8, 19, 0, 9, 13, 23, 28, 29, 37
+    // unsigned char huff_table[] = {0, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xd, 0xe, 0xa, 0xc, 0xb};
     unsigned char *decoded_bitstream = decode_bitstream(huff_table, bitstream);
 
     if (strcmp((char *)decoded_bitstream, (char *)expected_output) == 0) {

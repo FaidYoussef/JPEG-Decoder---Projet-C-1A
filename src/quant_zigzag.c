@@ -71,3 +71,13 @@ void inv_zig_zag(int block[64], int qblock[8][8]) {
         }
     }
 }
+
+void print_block(int *block[8]){
+    for (int i = 0; i < 8; i++) {
+        for (int j =0; j < 8; j++) {
+            printf("%d ", block[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
