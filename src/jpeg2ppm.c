@@ -51,11 +51,13 @@ int main(int argc, char **argv) {
     }
 
     char *filename = argv[1];
-    bool extraction = extract(filename);
+    struct JPEG *jpeg = extract(filename);
+    /*
     if (!extraction) {
         fprintf(stderr, "Erreur lors de l'extraction du fichier\n");
         return EXIT_FAILURE;
     }
+    */
 
     // On récupère les informations du fichier JPEG
     unsigned char *huff_table;
