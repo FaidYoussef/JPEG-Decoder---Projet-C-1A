@@ -27,6 +27,7 @@ struct StartOfFrame;
 struct HuffmanTable;
 struct ComponentSOS;
 struct StartOfScan;
+struct JPEG;
 
 short two_bytes_to_dec(FILE *input);
 
@@ -42,4 +43,4 @@ struct HuffmanTable get_DHT(FILE *input, unsigned char *buffer);
 
 struct StartOfScan getSOS(FILE *input, unsigned char *buffer);
 
-bool extract(char *filename);
+struct JPEG extract(char *filename);

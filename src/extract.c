@@ -44,6 +44,14 @@ struct StartOfScan {
     struct ComponentSOS *components;
 };
 
+struct JPEG {
+    struct QuantizationTable *quantization_tables;
+    struct StartOfFrame start_of_frame;
+    struct HuffmanTable *huffman_tables;
+    struct StartOfScan start_of_scan;
+    unsigned char *data;
+};
+
 short two_bytes_to_dec(FILE *input){
     // Lecture et renvoie de la valeur décimale de deux octets
     short length = 0;
@@ -216,12 +224,11 @@ struct StartOfScan getSOS(FILE *input, unsigned char *buffer){
     return sos;
 }
 
-bool extract(char *filename) { 
+struct JPEG extract(char *filename) { 
     // Ouverture du fichier et vérification de la conformité du type
     FILE *input;
     if( (input = fopen(filename, "r")) == NULL) {
         fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", filename);
-        return false;
     }
 
     // Vérification JPEG Magic number 
@@ -232,13 +239,14 @@ bool extract(char *filename) {
     for (int i=0; i<3; i++){
         if (first3bytes[i] != JPEG_magic_Number[i]){
             fprintf(stderr, "Le fichier %s n'est pas un fichier JPEG\n", filename);
-            return false;
         }
     }
 
     // Récupération données en-tête
     unsigned char buffer[1];    // Buffer
     unsigned char id[1];        // Buffer de lecture pour déterminer le type de segments
+
+    struct JPEG jpeg;
 
     while (1){
         fread(buffer, 1, 1, input);
@@ -249,11 +257,16 @@ bool extract(char *filename) {
                 // Pour le moment, on ne lit qu'une Quantization table (on écrase l'ancienne)
                 // A voir pour le comportement final
                 struct QuantizationTable quantization_table = get_qt(input, buffer);
+                
+                jpeg.quantization_tables[quantization_table.id] = quantization_table;
+
                 free(quantization_table.data);
 
             } else if (id[0] == SOF_0){
 
                 struct StartOfFrame sof = get_SOF(input, buffer);
+                jpeg.start_of_frame = sof;
+
                 free(sof.components);
 
             } else if (id[0] == DHT){
@@ -261,11 +274,27 @@ bool extract(char *filename) {
                 // Pour le moment, on ne lit qu'une seule table de Huffman (on écrase l'ancienne)
                 // A voir pour le comportement final
                 struct HuffmanTable huffman_table = get_DHT(input, buffer);
+                
+                if (huffman_table.type_table == 0) {
+                    if (huffman_table.num_table == 0) {
+                        jpeg.huffman_tables[0] = huffman_table;
+                    } else {
+                        jpeg.huffman_tables[1] = huffman_table;
+                    }
+                } else {
+                    if (huffman_table.num_table == 0) {
+                        jpeg.huffman_tables[2] = huffman_table;
+                    } else {
+                        jpeg.huffman_tables[3] = huffman_table;
+                    }
+                }
+
                 free(huffman_table.data);
 
             } else if (id[0] == SOS){
                 
                 struct StartOfScan sos = getSOS(input, buffer);
+                jpeg.start_of_scan = sos;
 
                 // On lit la data en enlevant les 0 (à cause du byte stuffing)
                 unsigned char *data = malloc(sizeof(unsigned char)); // Le malloc n'est pas bon car on ne connait pas la taille de la data
@@ -284,7 +313,8 @@ bool extract(char *filename) {
                             getVerbose() ? printf("Fin du fichier\n"):0;
                             free(sos.components);
                             free(data);
-                            return true;
+                            jpeg.data = data;
+                            return jpeg;
                         } else {
                             data[nb_data] = 0xFF;
                             nb_data++;
@@ -301,7 +331,6 @@ bool extract(char *filename) {
                     {
                         getVerbose() ? fprintf(stderr, "Erreur de réallocation mémoire\n"):0;
                         free(data);
-                        return false;
                     }               
                     data = tmp;
                 }
@@ -316,5 +345,5 @@ bool extract(char *filename) {
             }
         }
     }
-    return true;
+    return jpeg;
 }
