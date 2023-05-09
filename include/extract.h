@@ -45,6 +45,6 @@ struct HuffmanTable get_DHT(FILE *input, unsigned char *buffer);
 
 struct StartOfScan getSOS(FILE *input, unsigned char *buffer);
 
-struct JPEG extract(char *filename);
+struct JPEG * extract(char *filename);
 
 #endif

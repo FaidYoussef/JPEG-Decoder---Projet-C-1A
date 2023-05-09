@@ -83,7 +83,7 @@ struct QuantizationTable get_qt(FILE *input, unsigned char *buffer) {
 
     struct QuantizationTable qt;
     unsigned char *data = malloc(length*sizeof(unsigned char));
-
+    
     fread(buffer, 1, 1, input);
     if (buffer[0] == LUMINANCE_ID) {
         fread(data, length, 1, input);
@@ -224,7 +224,7 @@ struct StartOfScan getSOS(FILE *input, unsigned char *buffer){
     return sos;
 }
 
-struct JPEG extract(char *filename) { 
+struct JPEG * extract(char *filename) { 
     // Ouverture du fichier et vérification de la conformité du type
     FILE *input;
     if( (input = fopen(filename, "r")) == NULL) {
@@ -246,7 +246,10 @@ struct JPEG extract(char *filename) {
     unsigned char buffer[1];    // Buffer
     unsigned char id[1];        // Buffer de lecture pour déterminer le type de segments
 
-    struct JPEG jpeg;
+    struct JPEG *jpeg = malloc(sizeof(struct JPEG));
+    jpeg->quantization_tables = malloc(2*sizeof(struct QuantizationTable));
+    jpeg->huffman_tables = malloc(4*sizeof(struct HuffmanTable));
+    jpeg->data = malloc(sizeof(unsigned char)); // ET LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa
 
     while (1){
         fread(buffer, 1, 1, input);
@@ -258,14 +261,14 @@ struct JPEG extract(char *filename) {
                 // A voir pour le comportement final
                 struct QuantizationTable quantization_table = get_qt(input, buffer);
                 
-                jpeg.quantization_tables[quantization_table.id] = quantization_table;
+                jpeg->quantization_tables[quantization_table.id] = quantization_table;
 
-                free(quantization_table.data);
+                //free(quantization_table.data);
 
             } else if (id[0] == SOF_0){
 
                 struct StartOfFrame sof = get_SOF(input, buffer);
-                jpeg.start_of_frame = sof;
+                jpeg->start_of_frame = sof;
 
                 free(sof.components);
 
@@ -277,15 +280,15 @@ struct JPEG extract(char *filename) {
                 
                 if (huffman_table.type_table == 0) {
                     if (huffman_table.num_table == 0) {
-                        jpeg.huffman_tables[0] = huffman_table;
+                        jpeg->huffman_tables[0] = huffman_table;
                     } else {
-                        jpeg.huffman_tables[1] = huffman_table;
+                        jpeg->huffman_tables[1] = huffman_table;
                     }
                 } else {
                     if (huffman_table.num_table == 0) {
-                        jpeg.huffman_tables[2] = huffman_table;
+                        jpeg->huffman_tables[2] = huffman_table;
                     } else {
-                        jpeg.huffman_tables[3] = huffman_table;
+                        jpeg->huffman_tables[3] = huffman_table;
                     }
                 }
 
@@ -294,7 +297,7 @@ struct JPEG extract(char *filename) {
             } else if (id[0] == SOS){
                 
                 struct StartOfScan sos = getSOS(input, buffer);
-                jpeg.start_of_scan = sos;
+                jpeg->start_of_scan = sos;
 
                 // On lit la data en enlevant les 0 (à cause du byte stuffing)
                 unsigned char *data = malloc(sizeof(unsigned char)); // Le malloc n'est pas bon car on ne connait pas la taille de la data
@@ -311,9 +314,10 @@ struct JPEG extract(char *filename) {
                             // On a fini la lecture des données
                             getVerbose() ? printf("Taille de la data : %d\n", nb_data):0;
                             getVerbose() ? printf("Fin du fichier\n"):0;
+                            //unsigned char *tmp2 = realloc(jpeg->data, (nb_data+1)*sizeof(unsigned char));
                             free(sos.components);
                             free(data);
-                            jpeg.data = data;
+                            jpeg->data = data; // IL FAUT REGARDER ICIIIIIIIIIIIIIIIIIIIIIIIIIIII µµµµµµµµµ***µµ*************************************************************************************************
                             return jpeg;
                         } else {
                             data[nb_data] = 0xFF;
