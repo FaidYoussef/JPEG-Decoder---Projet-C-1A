@@ -31,13 +31,7 @@
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢧⣁⠦⠟⡁⢣⠐⡡⠂⡍⠰⢁⠎⡄⠣⢄⡉⠲⢦⣂⣉⢴⠗⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 //  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⢲⢥⣂⠅⣂⠑⡈⢅⠊⡐⠌⢡⢂⣌⣡⠶⣛⣙⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 
-
 #include <jpeg2ppm.h>
-#include "../include/huffman.h"
-#include "../include/IDCT.h"
-#include "../include/quant_zigzag.h"
-#include "../include/extract.h"
-#include "../include/verbose.h"
 
 int main(int argc, char **argv) {
     if (argc == 1) {
