@@ -34,13 +34,19 @@ test-huffman: obj/huffman.o
 test-IDCT: obj/IDCT.o
 	make -C tests/ IDCT-test 
 
+test-ppm: obj/ppm.o
+	make -C tests/ ppm-test 
+
 test-quant_zigzag: obj/quant_zigzag.o
 	make -C tests/ quant_zigzag-test
 
 test-RLE_decode: obj/RLE_decode.o
-	make -C tests/ RLE_decode-test 
+	make -C tests/ RLE_decode-test
+
+test-ycbcr2rgb: obj/ycbcr2rgb.o
+	make -C tests/ ycbcr2rgb-test 
 
 .PHONY: clean
 
 clean:
-	rm -rf jpeg2ppm tests/huffman-test tests/IDCT-test tests/quant_zigzag-test tests/RLE_decode $(OBJ_FILES)
+	rm -rf jpeg2ppm tests/huffman-test tests/IDCT-test tests/ppm tests/quant_zigzag-test tests/RLE_decode tests/ycbcr2rgb $(OBJ_FILES)
