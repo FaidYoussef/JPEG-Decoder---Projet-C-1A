@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 
-void rle_decode(unsigned char *huffman_decoded_data, unsigned char *decoded_output);
+unsigned char* rle_decode(unsigned char *huffman_decoded_data);
 
 void print_RLE_result(unsigned char *decoded_output);
 

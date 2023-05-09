@@ -7,9 +7,9 @@
 #define N 8
 
 // C function in the iDCT formula
-double C(int x);
+int C(int x);
 
 // Inverse Discrete Cosine Transform function
-void idct(double input[N][N], double output[N][N]);
+int* idct(int input[N * N]);
 
 #endif

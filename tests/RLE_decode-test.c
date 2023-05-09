@@ -14,9 +14,7 @@ int main() {
     huffman_decoded_data[6] = 0x0;
     huffman_decoded_data[7] = 0x39;
 
-    unsigned char *decoded_output = calloc(64, sizeof(char));
-
-    rle_decode(huffman_decoded_data, decoded_output);
+    unsigned char *decoded_output = rle_decode(huffman_decoded_data);
     print_RLE_result(decoded_output);
     
 
@@ -34,9 +32,7 @@ int main() {
     huffman_decoded_data2[10] = 0x0;
     huffman_decoded_data2[11] = 0x51;
 
-    unsigned char *decoded_output2 = calloc(64, sizeof(char));
-
-    rle_decode(huffman_decoded_data2, decoded_output2);
+    unsigned char *decoded_output2 = rle_decode(huffman_decoded_data2);
     print_RLE_result(decoded_output2);
 
     // On libère la mémoire

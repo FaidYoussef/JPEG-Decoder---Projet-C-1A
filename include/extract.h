@@ -1,3 +1,5 @@
+#ifndef _EXTRACT_H_
+#define _EXTRACT_H_
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,3 +45,5 @@ struct HuffmanTable get_DHT(FILE *input, unsigned char *buffer);
 struct StartOfScan getSOS(FILE *input, unsigned char *buffer);
 
 bool extract(char *filename);
+
+#endif

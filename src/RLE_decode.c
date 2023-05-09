@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include <RLE_decode.h>
 
 
-void rle_decode(unsigned char *huffman_decoded_data, unsigned char *decoded_output) {
+unsigned char* rle_decode(unsigned char *huffman_decoded_data) {
     int compteur=0, cpt2 = 0;
+    unsigned char *decoded_output = calloc(64, sizeof(unsigned char));
     while (1) {
         decoded_output[compteur] = huffman_decoded_data[cpt2];
         if ((int) decoded_output[compteur] == 0x0) {
@@ -19,9 +21,10 @@ void rle_decode(unsigned char *huffman_decoded_data, unsigned char *decoded_outp
         }
         cpt2++;
     }
+
+    return decoded_output;
 }
 
-// On affiche le résultat
 void print_RLE_result(unsigned char *decoded_output) {
     printf("Bloc 8x8 décodé:\n");
     for (int i = 0; i < 8; i++) {
