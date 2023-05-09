@@ -19,4 +19,7 @@ int ** inv_zig_zag(int block[64]);
 // Display block in matrix format
 void print_block(int **block);
 
+// Display block in matrix format
+void print_block(int **block);
+
 #endif
