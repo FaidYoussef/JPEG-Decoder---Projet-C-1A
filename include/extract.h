@@ -25,12 +25,21 @@
 #define CHROMINANCE_ID 0x01
 
 struct QuantizationTable;
+unsigned char get_qt_id(struct QuantizationTable *qt);
+unsigned char * get_qt_data(struct QuantizationTable *qt);
+
 struct ComponentSOF;
 struct StartOfFrame;
 struct HuffmanTable;
 struct ComponentSOS;
 struct StartOfScan;
+
 struct JPEG;
+struct QuantizationTable * get_JPEG_qt(struct JPEG *jpeg);
+struct StartOfFrame get_JPEG_sof(struct JPEG *jpeg);
+struct HuffmanTable * get_JPEG_ht(struct JPEG *jpeg);
+struct StartOfScan get_JPEG_sos(struct JPEG *jpeg);
+unsigned char * get_JPEG_data(struct JPEG* jpeg);
 
 short two_bytes_to_dec(FILE *input);
 

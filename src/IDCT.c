@@ -222,8 +222,8 @@
 #include <IDCT.h>
 
 #define PI 3.14159265358979323846
-#define N 8
-#define NN N*N
+// #define N 8
+// #define NN N*N
 
 double C[N];
 double cos_values[N][N][N][N];

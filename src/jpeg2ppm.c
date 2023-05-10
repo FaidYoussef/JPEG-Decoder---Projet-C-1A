@@ -52,6 +52,7 @@ int main(int argc, char **argv) {
 
     char *filename = argv[1];
     struct JPEG *jpeg = extract(filename);
+    // struct JPEG *jpeg = NULL;
 
 
     //****************************************************************************************************************************************************************
@@ -70,9 +71,9 @@ int main(int argc, char **argv) {
                             1, 1, 1, 1, 1, 1, 1, 1};
 
 
-    unsigned char *huffman_decoded_bitstream    = decode_bitstream(huff_table, (unsigned char*) (jpeg->data));
+    unsigned char *huffman_decoded_bitstream    = decode_bitstream(huff_table, get_JPEG_data(jpeg));
     unsigned char *rle_decoded_bitstream        = rle_decode(huffman_decoded_bitstream);
-    int *dequantized_values                     = inv_quantize(rle_decoded_bitstream, quant_table);
+    int *dequantized_values                     = inv_quantize(rle_decoded_bitstream, get_JPEG_qt(jpeg)[0], get_JPEG_qt(jpeg)[1]);
     int* idct_ed_values                         = idct(dequantized_values);
 
 

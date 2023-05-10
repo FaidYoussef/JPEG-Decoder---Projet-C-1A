@@ -7,11 +7,14 @@
 #include <utils.h>
 
 #define N 8
+#define NN N*N
 
-// C function in the iDCT formula
-int C(int x);
+
+void initialize();
+
+void load();
 
 // Inverse Discrete Cosine Transform function
-int* idct(int input[N * N]);
+void idct(int input[NN], int output[NN]);
 
 #endif

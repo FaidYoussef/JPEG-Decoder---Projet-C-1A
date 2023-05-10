@@ -10,19 +10,13 @@
 
 
 //Quantization function using quant_table
-int* quantize(int block[64], int *quant_table);
+int* quantize(int *block, int *quant_table_DC, int *quant_table_AC);
 
 // Inverse quantization function using quant_table
-int* inv_quantize(int qblock[64], int *quant_table);
+int* inv_quantize(int *qblock, int *quant_table_DC, int *quant_table_AC)
 
 // Inverse Zig-Zag function
-int ** inv_zig_zag(int block[64]);
-
-// Display block in matrix format
-void print_block(int **block);
-
-// Display block in matrix format
-void print_block(int **block);
+int ** inv_zig_zag(int *block);
 
 // Display block in matrix format
 void print_block(int **block);

@@ -3,6 +3,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <huffman.h>
+#include <utils.h>
+
 
 struct node {
     unsigned char symbol;
@@ -33,7 +36,7 @@ void print_binary(uint16_t value, int length) {
 
 
 // Affiche la représentation binaire d'un code de huffman
-void print_huffman_codes(int bit_lengths[], unsigned char symbols[], int n) {
+void print_huffman_codes(int *bit_lengths, unsigned char *symbols, int n) {
     uint16_t code = 0;
     int symbol_index = 0;
 

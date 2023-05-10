@@ -7,7 +7,9 @@
 #include <ppm.h>
 #include <quant_zigzag.h>
 #include <RLE_decode.h>
+#include <utils.h>
 #include <verbose.h>
 #include <ycbcr2rgb.h>
+
 
 #endif

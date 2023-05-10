@@ -7,13 +7,17 @@
 
 
 //Quantization function using quant_table
-int* quantize(int block[64], int *quant_table) {
+int* quantize(int *block, int *quant_table_DC, int *quant_table_AC) {
     int* qblock = malloc(64 * sizeof(int));
     check_memory_allocation((void *) qblock);
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            qblock[i * 8 + j] = (block[i * 8 + j] / quant_table[i * 8 + j]);
+            if(i==0 && j==0) {
+                block[0] = qblock[0] * quant_table_DC[0];
+            } else {
+                qblock[i * 8 + j] = (block[i * 8 + j] / quant_table_AC[i * 8 + j]);
+            }
         }
     }
 
@@ -22,13 +26,17 @@ int* quantize(int block[64], int *quant_table) {
 
 // Inverse quantization function using quant_table
 // qblock : les données qui sont quantifiées
-int* inv_quantize(int qblock[64], int *quant_table) {
+int* inv_quantize(int *qblock, int *quant_table_DC, int *quant_table_AC) {
     int* block = malloc(64 * sizeof(int));
     check_memory_allocation((void *) block);
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            block[i * 8 + j] = qblock[i * 8 + j] * quant_table[i * 8 + j];
+            if(i==0 && j==0) {
+                block[0] = qblock[0] * quant_table_DC[0];
+            } else {
+                block[i * 8 + j] = qblock[i * 8 + j] * quant_table_AC[i * 8 + j];
+            }
         }
     }
 
@@ -36,7 +44,7 @@ int* inv_quantize(int qblock[64], int *quant_table) {
 }
 
 // Inverse Zig-Zag function
-int ** inv_zig_zag(int block[64]) {
+int ** inv_zig_zag(int *block) {
     int **qblock = (int**) malloc(8 * sizeof(int*));
     check_memory_allocation((void *) qblock);
     for (int i = 0; i < 8; i++) {

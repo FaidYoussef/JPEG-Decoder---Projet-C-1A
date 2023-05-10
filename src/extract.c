@@ -8,6 +8,14 @@ struct QuantizationTable {
     unsigned char *data;
 };
 
+unsigned char get_qt_id(struct QuantizationTable *qt){
+    return qt->id;
+}
+
+unsigned char * get_qt_data(struct QuantizationTable *qt){
+    return qt->data;
+}
+
 // Start of Frame
 
 struct ComponentSOF {
@@ -52,6 +60,26 @@ struct JPEG {
     struct StartOfScan start_of_scan;
     unsigned char *data;
 };
+
+struct QuantizationTable * get_JPEG_qt(struct JPEG *jpeg){
+    return jpeg->quantization_tables;
+}
+
+struct StartOfFrame get_JPEG_sof(struct JPEG *jpeg){
+    return jpeg->start_of_frame;
+}
+
+struct HuffmanTable * get_JPEG_ht(struct JPEG *jpeg){
+    return jpeg->huffman_tables;
+}
+
+struct StartOfScan get_JPEG_sos(struct JPEG *jpeg){
+    return jpeg->start_of_scan;
+}
+
+unsigned char * get_JPEG_data(struct JPEG* jpeg){
+    return jpeg->data;
+}
 
 short two_bytes_to_dec(FILE *input){
     // Lecture et renvoie de la valeur décimale de deux octets
@@ -242,7 +270,7 @@ struct JPEG * extract(char *filename) {
     FILE *input;
     if( (input = fopen(filename, "r")) == NULL) {
         fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", filename);
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 
     // Vérification JPEG Magic number 
@@ -253,7 +281,7 @@ struct JPEG * extract(char *filename) {
     for (int i=0; i<3; i++){
         if (first3bytes[i] != JPEG_magic_Number[i]){
             fprintf(stderr, "Le fichier %s n'est pas un fichier JPEG\n", filename);
-            return EXIT_FAILURE;
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -363,7 +391,7 @@ struct JPEG * extract(char *filename) {
                             return jpeg;
                         } else if (feof(input)){    // On atteint la fin du fichier avant d'avoir lu un marker EOI
                             getVerbose() ? printf("Fin du fichier atteinte avant d'avoir lu un EOI !!!\n"):0;
-                            return EXIT_FAILURE;
+                            exit(EXIT_FAILURE);
                         } else {    // On a autre chose que du byte stuffing ou un marker autre que EOI ********** Remarque : si on a un autre marker que EOI, on ne le traite pas
                             jpeg->data[nb_data] = 0xFF;
                             nb_data++;
