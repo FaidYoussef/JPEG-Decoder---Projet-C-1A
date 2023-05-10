@@ -61,7 +61,7 @@ struct JPEG {
     unsigned char *data;
 };
 
-struct QuantizationTable * get_JPEG_qt(struct JPEG *jpeg){
+struct QuantizationTable ** get_JPEG_qt(struct JPEG *jpeg){
     return jpeg->quantization_tables;
 }
 

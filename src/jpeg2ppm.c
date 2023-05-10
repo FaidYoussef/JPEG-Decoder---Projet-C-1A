@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 
     char *filename = argv[1];
     struct JPEG *jpeg = extract(filename);
-    // struct JPEG *jpeg = NULL;
+    printf("Fichier JPEG lu");
 
 
     //****************************************************************************************************************************************************************
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
 
     unsigned char *huffman_decoded_bitstream    = decode_bitstream(huff_table, get_JPEG_data(jpeg));
     unsigned char *rle_decoded_bitstream        = rle_decode(huffman_decoded_bitstream);
-    int *dequantized_values                     = inv_quantize(rle_decoded_bitstream, get_JPEG_qt(jpeg)[0], get_JPEG_qt(jpeg)[1]);
+    int *dequantized_values                     = inv_quantize(rle_decoded_bitstream, get_qt_data(get_JPEG_qt(jpeg)[0]), get_qt_data(get_JPEG_qt(jpeg)[1]));
     int* idct_ed_values                         = idct(dequantized_values);
 
 
@@ -82,10 +82,10 @@ int main(int argc, char **argv) {
     free(rle_decoded_bitstream);
     free(dequantized_values);
     free(idct_ed_values);
-    free (jpeg->quantization_tables);
-    free(jpeg->huffman_tables);
+    // free (jpeg->quantization_tables);
+    // free(jpeg->huffman_tables);
     // free les huffman trees
-    free(jpeg->data);
+    // free(jpeg->data);
 
 
     return EXIT_SUCCESS;

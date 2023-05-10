@@ -35,7 +35,7 @@ struct ComponentSOS;
 struct StartOfScan;
 
 struct JPEG;
-struct QuantizationTable * get_JPEG_qt(struct JPEG *jpeg);
+struct QuantizationTable ** get_JPEG_qt(struct JPEG *jpeg);
 struct StartOfFrame get_JPEG_sof(struct JPEG *jpeg);
 struct HuffmanTable * get_JPEG_ht(struct JPEG *jpeg);
 struct StartOfScan get_JPEG_sos(struct JPEG *jpeg);
