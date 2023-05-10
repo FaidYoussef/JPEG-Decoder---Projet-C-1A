@@ -13,7 +13,7 @@
 int* quantize(int *block, int *quant_table_DC, int *quant_table_AC);
 
 // Inverse quantization function using quant_table
-int* inv_quantize(int *qblock, int *quant_table_DC, int *quant_table_AC);
+int* inv_quantize(unsigned char *qblock, unsigned char *quant_table_DC, unsigned char *quant_table_AC);
 
 // Inverse Zig-Zag function
 int ** inv_zig_zag(int *block);

@@ -1,10 +1,11 @@
 #include <extract.h>
 #include <utils.h>
 
-// Quantization tables
 
+// Quantization tables
 struct QuantizationTable {
     unsigned char id;
+    int length;
     unsigned char *data;
 };
 
@@ -12,12 +13,16 @@ unsigned char get_qt_id(struct QuantizationTable *qt){
     return qt->id;
 }
 
+int get_qt_length(struct QuantizationTable *qt){
+    return qt->length;
+}
+
 unsigned char * get_qt_data(struct QuantizationTable *qt){
     return qt->data;
 }
 
-// Start of Frame
 
+// Start of Frame
 struct ComponentSOF {
     unsigned char id;
     unsigned char sampling_factor_x;
@@ -32,16 +37,33 @@ struct StartOfFrame {
     struct ComponentSOF *components;
 };
 
-// DHT (Tables de Huffman)
 
+// DHT (Tables de Huffman)
 struct HuffmanTable {
     unsigned char class;
     unsigned char destination;
+    int length;
     unsigned char *data;
 };
 
-// Start of Scan
+unsigned char get_ht_class(struct HuffmanTable *ht){
+    return ht->class;
+}
 
+unsigned char get_ht_destination(struct HuffmanTable *ht){
+    return ht->destination;
+}
+
+int get_ht_length(struct HuffmanTable *ht){
+    return ht->length;
+}
+
+unsigned char * get_ht_data(struct HuffmanTable *ht){
+    return ht->data;
+}
+
+
+// Start of Scan
 struct ComponentSOS {
     unsigned char id_table;
     unsigned char class;
@@ -53,12 +75,15 @@ struct StartOfScan {
     struct ComponentSOS *components;
 };
 
+
+// Structure JPEG
 struct JPEG {
-    struct QuantizationTable *quantization_tables;
+    struct QuantizationTable **quantization_tables;
     struct StartOfFrame start_of_frame;
-    struct HuffmanTable *huffman_tables;
+    struct HuffmanTable **huffman_tables;
     struct StartOfScan start_of_scan;
     unsigned char *data;
+    size_t data_size;
 };
 
 struct QuantizationTable ** get_JPEG_qt(struct JPEG *jpeg){
@@ -69,7 +94,7 @@ struct StartOfFrame get_JPEG_sof(struct JPEG *jpeg){
     return jpeg->start_of_frame;
 }
 
-struct HuffmanTable * get_JPEG_ht(struct JPEG *jpeg){
+struct HuffmanTable ** get_JPEG_ht(struct JPEG *jpeg){
     return jpeg->huffman_tables;
 }
 
@@ -80,6 +105,15 @@ struct StartOfScan get_JPEG_sos(struct JPEG *jpeg){
 unsigned char * get_JPEG_data(struct JPEG* jpeg){
     return jpeg->data;
 }
+
+size_t get_JPEG_data_size(struct JPEG* jpeg){
+    return jpeg->data_size;
+}
+
+
+
+
+
 
 short two_bytes_to_dec(FILE *input){
     // Lecture et renvoie de la valeur décimale de deux octets
@@ -92,56 +126,61 @@ short two_bytes_to_dec(FILE *input){
     return length;
 }
 
+
 unsigned char read_byte(FILE *input, unsigned char *buffer){
     // Lecture et renvoie d'un octet
     fread(buffer, 1, 1, input);
     return buffer[0];
 }
 
+
 void ignore_bytes(FILE *input, int nb_bytes){
     unsigned char buffer[nb_bytes];
     fread(buffer, nb_bytes, 1, input);
 }
 
-struct QuantizationTable get_qt(FILE *input, unsigned char *buffer) {
+
+// Récupère les données de la table de quantification
+struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
     // On souhaite récupérer les tables de quantification
     getVerbose() ? printf("Quantization table\n"):0;
     short length = 0;
     length = two_bytes_to_dec(input);
     length = length - 2 - 1;
 
-    struct QuantizationTable qt;
-    unsigned char *data = malloc(length*sizeof(unsigned char));
-    check_memory_allocation((void *) data);
+    struct QuantizationTable *qt = malloc(sizeof(struct QuantizationTable));
+    qt->data = malloc(length * sizeof(unsigned char *));
+    check_memory_allocation((void *) qt->data);
     
     fread(buffer, 1, 1, input);
     if (buffer[0] == LUMINANCE_ID) {
-        fread(data, length, 1, input);
+        fread(qt->data, length, 1, input);
         // Affichage des tables de quantification
         for (int i=0; i<length; i++){
-            getVerbose() ? printf("%x", data[i]):0;
+            getVerbose() ? printf("%x", qt->data[i]):0;
         }
         getVerbose() ? printf("\n"):0;
-        qt.id = LUMINANCE_ID;
-        qt.data = data;
+        qt->id = LUMINANCE_ID;
 
     } else if (buffer[0] == CHROMINANCE_ID) {
-        fread(data, length, 1, input);
+        fread(qt->data, length, 1, input);
         // Affichage des tables de quantification
         for (int i=0; i<length; i++){
-            getVerbose() ? printf("%x", data[i]):0;
+            getVerbose() ? printf("%x", qt->data[i]):0;
         }
         getVerbose() ? printf("\n"):0;
-        qt.id = CHROMINANCE_ID;
-        qt.data = data;
+        qt->id = CHROMINANCE_ID;
 
     } else {
         fprintf(stderr, "Erreur dans la lecture des tables de quantification\n");
     }
+    qt->length = length;
 
     return qt;
 }
 
+
+// Récupère les données du segment Start_Of_Frame
 struct StartOfFrame get_SOF(FILE *input, unsigned char *buffer) {
     getVerbose() ? printf("Start of frame\n"):0;
     ignore_bytes(input, 3); // On ignore la longueur et la précision
@@ -189,7 +228,9 @@ struct StartOfFrame get_SOF(FILE *input, unsigned char *buffer) {
     return sof;
 }
 
-struct HuffmanTable get_DHT(FILE *input, unsigned char *buffer) {
+
+// Récupère les données de la table de Huffman
+struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
     getVerbose() ? printf("Huffman table\n"):0;
     short length = two_bytes_to_dec(input); // Longueur du segment
     length = length - 2 - 1; // On enlève la longueur du segment et l'octet de précision 
@@ -220,14 +261,17 @@ struct HuffmanTable get_DHT(FILE *input, unsigned char *buffer) {
     }
     getVerbose() ? printf("\n"):0;
 
-    struct HuffmanTable huffman_table;
-    huffman_table.class = class;
-    huffman_table.destination = destination;
-    huffman_table.data = huffman;
+    struct HuffmanTable *huffman_table = malloc(sizeof(struct HuffmanTable));
+    huffman_table->class = class;
+    huffman_table->destination = destination;
+    huffman_table->length = length;
+    huffman_table->data = huffman;
 
     return huffman_table;
 } 
 
+
+// Récupère les données du segment Start_Of_Scan
 struct StartOfScan getSOS(FILE *input, unsigned char *buffer){
     getVerbose() ? printf("Start of scan + data\n"):0;
     ignore_bytes(input, 2); // Longueur du segment (ignoré)
@@ -265,7 +309,10 @@ struct StartOfScan getSOS(FILE *input, unsigned char *buffer){
     return sos;
 }
 
-struct JPEG * extract(char *filename) { 
+
+// Récupère les données du fichier JPEG
+struct JPEG * extract(char *filename) {
+
     // Ouverture du fichier et vérification de la conformité du type
     FILE *input;
     if( (input = fopen(filename, "r")) == NULL) {
@@ -285,17 +332,20 @@ struct JPEG * extract(char *filename) {
         }
     }
 
-    // Récupération données en-tête
+    // Ajouter la vérification de la présence de JFIF dans le marker APP0
+
+
+    // Récupération des données de l'en-tête
     unsigned char buffer[1];    // Buffer
     unsigned char id[1];        // Buffer de lecture pour déterminer le type de segments
 
-    struct JPEG *jpeg = malloc(sizeof(struct JPEG));
+    struct JPEG *jpeg = malloc(1 * sizeof(struct JPEG));
     check_memory_allocation((void *) jpeg);
     jpeg->quantization_tables = malloc(2*sizeof(struct QuantizationTable));
     check_memory_allocation((void *) jpeg->quantization_tables);
     jpeg->huffman_tables = malloc(4*sizeof(struct HuffmanTable));
     check_memory_allocation((void *) jpeg->huffman_tables);
-    jpeg->data = malloc(sizeof(unsigned char)); // ET LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa
+    jpeg->data = malloc(sizeof(unsigned char));
     check_memory_allocation((void *) jpeg->data);
 
     while (!feof(input)){ // On arrête la boucle si on arrive à la fin du fichier sans avoir lu de marker EOF
@@ -307,13 +357,17 @@ struct JPEG * extract(char *filename) {
                 // BREAKING-UPDATE : on possède au maximum 2 tables de quantification (luminance et chrominance)
                 // index 0 : luminance
                 // index 1 : chrominance
-                struct QuantizationTable quantization_table = get_qt(input, buffer);
+                struct QuantizationTable *quantization_table = get_qt(input, buffer);
                 
-                if(quantization_table.id == LUMINANCE_ID) {
-                    if(jpeg->quantization_tables[0].data != NULL) free(jpeg->quantization_tables[0].data);
+                if(quantization_table->id == LUMINANCE_ID) {
+                    if(jpeg->quantization_tables != NULL
+                        && jpeg->quantization_tables[0] != NULL
+                        && jpeg->quantization_tables[0]->data != NULL) free(jpeg->quantization_tables[0]->data);
                     jpeg->quantization_tables[0] = quantization_table;
                 } else {
-                    if(jpeg->quantization_tables[1].data != NULL) free(jpeg->quantization_tables[1].data);
+                    if(jpeg->quantization_tables != NULL
+                        && jpeg->quantization_tables[1] != NULL
+                        && jpeg->quantization_tables[1]->data != NULL) free(jpeg->quantization_tables[1]->data);
                     jpeg->quantization_tables[1] = quantization_table;
                 }
 
@@ -334,27 +388,33 @@ struct JPEG * extract(char *filename) {
                 // index 2 >>> class|destination : 10 >>> chrominance|DC
                 // index 3 >>> class|destination : 11 >>> chrominance|AC
                 // Si une nouvelle table de Huffman redéfinie une table déjà existante, on écrase l'ancienne
-                struct HuffmanTable huffman_table = get_DHT(input, buffer);
+                struct HuffmanTable *huffman_table = get_DHT(input, buffer);
                 
-                if (huffman_table.class == 0) {
-                    if (huffman_table.destination == 0) {
-                        if (jpeg->huffman_tables[0].data != NULL) free(jpeg->huffman_tables[0].data);
+                if (huffman_table->class == 0) {
+                    if (huffman_table->destination == 0) {
+                        if (jpeg->huffman_tables != NULL
+                            && jpeg->huffman_tables[0] != NULL
+                            && jpeg->huffman_tables[0]->data != NULL) free(jpeg->huffman_tables[0]->data);
                         jpeg->huffman_tables[0] = huffman_table;
                     } else {
-                        if (jpeg->huffman_tables[1].data != NULL) free(jpeg->huffman_tables[1].data);
+                        if (jpeg->huffman_tables != NULL
+                            && jpeg->huffman_tables[1] != NULL
+                            && jpeg->huffman_tables[1]->data != NULL) free(jpeg->huffman_tables[1]->data);
                         jpeg->huffman_tables[1] = huffman_table;
                     }
                 } else {
-                    if (huffman_table.destination == 0) {
-                        if (jpeg->huffman_tables[2].data != NULL) free(jpeg->huffman_tables[2].data);
+                    if (huffman_table->destination == 0) {
+                        if (jpeg->huffman_tables != NULL
+                            && jpeg->huffman_tables[2] != NULL
+                            && jpeg->huffman_tables[2]->data != NULL) free(jpeg->huffman_tables[2]->data);
                         jpeg->huffman_tables[2] = huffman_table;
                     } else {
-                        if (jpeg->huffman_tables[3].data != NULL) free(jpeg->huffman_tables[3].data);
+                        if (jpeg->huffman_tables != NULL
+                            && jpeg->huffman_tables[3] != NULL
+                            && jpeg->huffman_tables[3]->data != NULL) free(jpeg->huffman_tables[3]->data);
                         jpeg->huffman_tables[3] = huffman_table;
                     }
                 }
-
-                free(huffman_table.data);
 
             } else if (id[0] == SOS){
                 
@@ -384,6 +444,7 @@ struct JPEG * extract(char *filename) {
                             nb_data++;
                         } else if (buffer[0] == EOI){   // On supprimer le dernier 0xff du marker EOI
                             jpeg->data[nb_data -1] = 0x0;
+                            jpeg->data_size = nb_data;
                             // On a fini la lecture des données
                             getVerbose() ? printf("Taille de la data : %d\n", nb_data):0;
                             getVerbose() ? printf("Fin du fichier\n"):0;

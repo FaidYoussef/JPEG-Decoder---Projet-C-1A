@@ -2,7 +2,6 @@
 #include <ppm.h>
 
 int main() {
-    // Remplacez ceci par les données de votre image décodée
     int width = 4;
     int height = 4;
     unsigned char image_data[] = {

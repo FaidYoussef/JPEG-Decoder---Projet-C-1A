@@ -33,6 +33,7 @@
 
 #include <jpeg2ppm.h>
 
+
 int main(int argc, char **argv) {
     if (argc == 1) {
     	/* 
@@ -52,26 +53,41 @@ int main(int argc, char **argv) {
 
     char *filename = argv[1];
     struct JPEG *jpeg = extract(filename);
-    printf("Fichier JPEG lu");
-
 
     //****************************************************************************************************************************************************************
     //****************************************************************************************************************************************************************
-    
-    // On récupère les informations du fichier JPEG
-    unsigned char *huff_table;
-    // int *quant_table;
-    int quant_table[64] = { 1, 1, 1, 1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1, 1, 1, 1};
 
+    printf("\n\n\n\n");
+    printf("ht0_data:\n");
+    unsigned char *ht0 = get_JPEG_ht(jpeg)[0];
+    for (size_t i = 0; i< get_ht_length(ht0); i++){
+        printf("%d", get_ht_data(ht0)[i]);
+    }
+    printf("\n\n");
 
-    unsigned char *huffman_decoded_bitstream    = decode_bitstream(huff_table, get_JPEG_data(jpeg));
+    printf("ht2_data:\n");
+    unsigned char *ht2 = get_JPEG_ht(jpeg)[2];
+    for (size_t i = 0; i< get_ht_length(ht2); i++){
+        printf("%d", get_ht_data(ht2)[i]);
+    }
+    printf("\n\n");
+
+    printf("ht0_data=%p\n", get_ht_data(get_JPEG_ht(jpeg)[0])); // table_ht 00 >>> index 0
+    printf("ht1_data=%p\n", get_ht_data(get_JPEG_ht(jpeg)[2])); // table_ht 01 >>> index 2 !!!!!!
+    printf("jpeg_data_size=%zu\n", get_JPEG_data_size(jpeg));
+
+    printf("jpeg_data=%p\n", get_JPEG_data(jpeg));
+    printf("jpeg_image_data:\n");
+    unsigned char *jpeg_data = get_JPEG_data(jpeg);
+    for (size_t i = 0; i< get_JPEG_data_size(jpeg); i++){
+        printf("%x", jpeg_data[i]);
+    }
+    printf("\n\n");
+
+    // ok jusqu'ici
+
+    unsigned char *huffman_decoded_bitstream    = decode_bitstream2(get_ht_data(get_JPEG_ht(jpeg)[0]), get_ht_data(get_JPEG_ht(jpeg)[2]), get_JPEG_data(jpeg), get_JPEG_data_size(jpeg));
+    printf("apres traitement huffman\n");
     unsigned char *rle_decoded_bitstream        = rle_decode(huffman_decoded_bitstream);
     int *dequantized_values                     = inv_quantize(rle_decoded_bitstream, get_qt_data(get_JPEG_qt(jpeg)[0]), get_qt_data(get_JPEG_qt(jpeg)[1]));
     int* idct_ed_values                         = idct(dequantized_values);
