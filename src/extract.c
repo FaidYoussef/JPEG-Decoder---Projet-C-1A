@@ -1,4 +1,5 @@
 #include <extract.h>
+#include <utils.h>
 
 // Quantization tables
 
@@ -26,8 +27,8 @@ struct StartOfFrame {
 // DHT (Tables de Huffman)
 
 struct HuffmanTable {
-    unsigned char type_table;
-    unsigned char num_table;
+    unsigned char class;
+    unsigned char destination;
     unsigned char *data;
 };
 
@@ -35,8 +36,8 @@ struct HuffmanTable {
 
 struct ComponentSOS {
     unsigned char id_table;
-    unsigned char type_table;
-    unsigned char num_table;
+    unsigned char class;
+    unsigned char destination;
 };
 
 struct StartOfScan {
@@ -83,6 +84,7 @@ struct QuantizationTable get_qt(FILE *input, unsigned char *buffer) {
 
     struct QuantizationTable qt;
     unsigned char *data = malloc(length*sizeof(unsigned char));
+    check_memory_allocation((void *) data);
     
     fread(buffer, 1, 1, input);
     if (buffer[0] == LUMINANCE_ID) {
@@ -125,6 +127,7 @@ struct StartOfFrame get_SOF(FILE *input, unsigned char *buffer) {
     getVerbose() ? printf("Nombre de composantes : %d\n", nb_components):0;
 
     struct ComponentSOF *components = malloc(nb_components*sizeof(struct ComponentSOF));
+    check_memory_allocation((void *) components);
 
     getVerbose() ? printf("Composantes :\n"):0;
     for (int i=0; i<nb_components; i++){
@@ -164,17 +167,25 @@ struct HuffmanTable get_DHT(FILE *input, unsigned char *buffer) {
     length = length - 2 - 1; // On enlève la longueur du segment et l'octet de précision 
     
     unsigned char id_table = read_byte(input, buffer); // ID de la table
-    // Les 4 bits de poids fort indiquent le type de table (DC ou AC)
-    // Les 4 bits de poids faible indiquent le numéro de la table
-    unsigned char type_table = id_table >> 4;
-    unsigned char num_table = id_table << 4;
-    num_table = num_table >> 4;
-    getVerbose() ? printf("Type de table : %d\n", type_table):0;
-    getVerbose() ? printf("Numéro de table : %d\n", num_table):0;
+    // Les 4 bits de poids fort indiquent la classe de la table (DC ou AC)
+    // 0 : DC or lossless table,
+    // 1 : AC
+    // Les 4 bits de poids faible indiquent la destination de la table (luminance ou chrominance)
+    // Specifies one of four possible destinations at the decoder into which the Huffman table shall be installed
+    // 0 : luminance
+    // 1 : chrominance
+    unsigned char class = id_table >> 4;
+    unsigned char destination = id_table << 4;
+    destination = destination >> 4;
+    getVerbose() ? printf("Classe de la table : %d\n", class):0;
+    getVerbose() ? printf("Destination de la table : %d\n", destination):0;
 
     // Contenu de la table
     unsigned char *huffman = malloc(length*sizeof(unsigned char));
+    check_memory_allocation((void *) huffman);
+
     fread(huffman, length, 1, input);
+
     // Affichage des tables de Huffman
     for (int i=0; i<length; i++){
         getVerbose() ? printf("%x", huffman[i]):0;
@@ -182,8 +193,8 @@ struct HuffmanTable get_DHT(FILE *input, unsigned char *buffer) {
     getVerbose() ? printf("\n"):0;
 
     struct HuffmanTable huffman_table;
-    huffman_table.type_table = type_table;
-    huffman_table.num_table = num_table;
+    huffman_table.class = class;
+    huffman_table.destination = destination;
     huffman_table.data = huffman;
 
     return huffman_table;
@@ -197,21 +208,23 @@ struct StartOfScan getSOS(FILE *input, unsigned char *buffer){
     getVerbose() ? printf("Nombre de composantes : %d\n", nb_components):0;
 
     struct ComponentSOS *components = malloc(nb_components*sizeof(struct ComponentSOS));
+    check_memory_allocation((void *) components);
+
     // Composantes
     for (int i=0; i<nb_components; i++){
         unsigned char id_component = read_byte(input, buffer); // ID composante
         
         unsigned char id_table = read_byte(input, buffer); // ID de la table
-        unsigned char type_table = id_table >> 4;
-        unsigned char num_table = id_table << 4;
-        num_table = num_table >> 4;
+        unsigned char class = id_table >> 4;
+        unsigned char destination = id_table << 4;
+        destination = destination >> 4;
         getVerbose() ? printf("ID composante : %d\n", id_component):0;
-        getVerbose() ? printf("Type de table : %d\n", type_table):0;
-        getVerbose() ? printf("Numéro de table : %d\n", num_table):0;
+        getVerbose() ? printf("Type de table : %d\n", class):0;
+        getVerbose() ? printf("Numéro de table : %d\n", destination):0;
 
         components[i].id_table = id_component;
-        components[i].type_table = type_table;
-        components[i].num_table = num_table;
+        components[i].class = class;
+        components[i].destination = destination;
     }
 
     // Paramètres ignorés
@@ -229,6 +242,7 @@ struct JPEG * extract(char *filename) {
     FILE *input;
     if( (input = fopen(filename, "r")) == NULL) {
         fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", filename);
+        return EXIT_FAILURE;
     }
 
     // Vérification JPEG Magic number 
@@ -239,6 +253,7 @@ struct JPEG * extract(char *filename) {
     for (int i=0; i<3; i++){
         if (first3bytes[i] != JPEG_magic_Number[i]){
             fprintf(stderr, "Le fichier %s n'est pas un fichier JPEG\n", filename);
+            return EXIT_FAILURE;
         }
     }
 
@@ -247,21 +262,32 @@ struct JPEG * extract(char *filename) {
     unsigned char id[1];        // Buffer de lecture pour déterminer le type de segments
 
     struct JPEG *jpeg = malloc(sizeof(struct JPEG));
+    check_memory_allocation((void *) jpeg);
     jpeg->quantization_tables = malloc(2*sizeof(struct QuantizationTable));
+    check_memory_allocation((void *) jpeg->quantization_tables);
     jpeg->huffman_tables = malloc(4*sizeof(struct HuffmanTable));
+    check_memory_allocation((void *) jpeg->huffman_tables);
     jpeg->data = malloc(sizeof(unsigned char)); // ET LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa
+    check_memory_allocation((void *) jpeg->data);
 
-    while (1){
+    while (!feof(input)){ // On arrête la boucle si on arrive à la fin du fichier sans avoir lu de marker EOF
         fread(buffer, 1, 1, input);
         if (buffer[0] == SEGMENT_START){
             fread(id, 1, 1, input);
             if (id[0] == DQT){
                 
-                // Pour le moment, on ne lit qu'une Quantization table (on écrase l'ancienne)
-                // A voir pour le comportement final
+                // BREAKING-UPDATE : on possède au maximum 2 tables de quantification (luminance et chrominance)
+                // index 0 : luminance
+                // index 1 : chrominance
                 struct QuantizationTable quantization_table = get_qt(input, buffer);
                 
-                jpeg->quantization_tables[quantization_table.id] = quantization_table;
+                if(quantization_table.id == LUMINANCE_ID) {
+                    if(jpeg->quantization_tables[0].data != NULL) free(jpeg->quantization_tables[0].data);
+                    jpeg->quantization_tables[0] = quantization_table;
+                } else {
+                    if(jpeg->quantization_tables[1].data != NULL) free(jpeg->quantization_tables[1].data);
+                    jpeg->quantization_tables[1] = quantization_table;
+                }
 
                 //free(quantization_table.data);
 
@@ -274,20 +300,28 @@ struct JPEG * extract(char *filename) {
 
             } else if (id[0] == DHT){
                 
-                // Pour le moment, on ne lit qu'une seule table de Huffman (on écrase l'ancienne)
-                // A voir pour le comportement final
+                // BREAKING-UPDATE : on possède au maximum 4 tables de Huffman
+                // index 0 >>> class|destination : 00 >>> luminance|DC
+                // index 1 >>> class|destination : 01 >>> luminance|AC
+                // index 2 >>> class|destination : 10 >>> chrominance|DC
+                // index 3 >>> class|destination : 11 >>> chrominance|AC
+                // Si une nouvelle table de Huffman redéfinie une table déjà existante, on écrase l'ancienne
                 struct HuffmanTable huffman_table = get_DHT(input, buffer);
                 
-                if (huffman_table.type_table == 0) {
-                    if (huffman_table.num_table == 0) {
+                if (huffman_table.class == 0) {
+                    if (huffman_table.destination == 0) {
+                        if (jpeg->huffman_tables[0].data != NULL) free(jpeg->huffman_tables[0].data);
                         jpeg->huffman_tables[0] = huffman_table;
                     } else {
+                        if (jpeg->huffman_tables[1].data != NULL) free(jpeg->huffman_tables[1].data);
                         jpeg->huffman_tables[1] = huffman_table;
                     }
                 } else {
-                    if (huffman_table.num_table == 0) {
+                    if (huffman_table.destination == 0) {
+                        if (jpeg->huffman_tables[2].data != NULL) free(jpeg->huffman_tables[2].data);
                         jpeg->huffman_tables[2] = huffman_table;
                     } else {
+                        if (jpeg->huffman_tables[3].data != NULL) free(jpeg->huffman_tables[3].data);
                         jpeg->huffman_tables[3] = huffman_table;
                     }
                 }
@@ -300,43 +334,46 @@ struct JPEG * extract(char *filename) {
                 jpeg->start_of_scan = sos;
 
                 // On lit la data en enlevant les 0 (à cause du byte stuffing)
-                unsigned char *data = malloc(sizeof(unsigned char)); // Le malloc n'est pas bon car on ne connait pas la taille de la data
+                int data_size = 1024; // On donne une estimation de la taille des données à récupérer
+                jpeg->data = malloc(data_size * sizeof(unsigned char *));
+                check_memory_allocation((void *) jpeg->data);
+
                 int nb_data = 0;
-                while (1){
+
+                while (!feof(input)){ // On arrête la boucle si on arrive à la fin du fichier sans avoir lu de marker EOF
                     fread(buffer, 1, 1, input);
+
+                    if(nb_data >= data_size -1){
+                        data_size *= 2;
+                        jpeg->data = realloc(jpeg->data, data_size * sizeof(unsigned char *));
+                        check_memory_allocation((void *) jpeg->data);
+                    }
+
                     if (buffer[0] == SEGMENT_START){
                         fread(buffer, 1, 1, input);
-                        if (buffer[0] == 0x00){
-                            // pour le moment on a le dernier FF dans les données
-                            data[nb_data] = SEGMENT_START;
+                        if (buffer[0] == 0x00){ // On a du byte stuffing et on le supprime
+                            jpeg->data[nb_data] = SEGMENT_START;
                             nb_data++;
-                        } else if (buffer[0] == EOI){
+                        } else if (buffer[0] == EOI){   // On supprimer le dernier 0xff du marker EOI
+                            jpeg->data[nb_data -1] = 0x0;
                             // On a fini la lecture des données
                             getVerbose() ? printf("Taille de la data : %d\n", nb_data):0;
                             getVerbose() ? printf("Fin du fichier\n"):0;
-                            //unsigned char *tmp2 = realloc(jpeg->data, (nb_data+1)*sizeof(unsigned char));
                             free(sos.components);
-                            free(data);
-                            jpeg->data = data; // IL FAUT REGARDER ICIIIIIIIIIIIIIIIIIIIIIIIIIIII µµµµµµµµµ***µµ*************************************************************************************************
                             return jpeg;
-                        } else {
-                            data[nb_data] = 0xFF;
+                        } else if (feof(input)){    // On atteint la fin du fichier avant d'avoir lu un marker EOI
+                            getVerbose() ? printf("Fin du fichier atteinte avant d'avoir lu un EOI !!!\n"):0;
+                            return EXIT_FAILURE;
+                        } else {    // On a autre chose que du byte stuffing ou un marker autre que EOI ********** Remarque : si on a un autre marker que EOI, on ne le traite pas
+                            jpeg->data[nb_data] = 0xFF;
                             nb_data++;
-                            data[nb_data] = buffer[0];
+                            jpeg->data[nb_data] = buffer[0];
                             nb_data++;
                         }
                     } else {
-                        data[nb_data] = buffer[0];
+                        jpeg->data[nb_data] = buffer[0];
                         nb_data++;
                     }
-
-                    unsigned char *tmp = realloc(data, (nb_data+1)*sizeof(unsigned char));
-                    if (tmp == NULL)
-                    {
-                        getVerbose() ? fprintf(stderr, "Erreur de réallocation mémoire\n"):0;
-                        free(data);
-                    }               
-                    data = tmp;
                 }
 
                 // On n'arrive jamais ici (impossible de break correctement)

@@ -6,6 +6,8 @@
 #include <math.h>
 #include <string.h>
 
+#include <utils.h>
+
 
 //Quantization function using quant_table
 int* quantize(int block[64], int *quant_table);

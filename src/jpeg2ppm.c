@@ -52,35 +52,28 @@ int main(int argc, char **argv) {
 
     char *filename = argv[1];
     struct JPEG *jpeg = extract(filename);
-    /*
-    if (!extraction) {
-        fprintf(stderr, "Erreur lors de l'extraction du fichier\n");
-        return EXIT_FAILURE;
-    }
-    */
 
+
+    //****************************************************************************************************************************************************************
+    //****************************************************************************************************************************************************************
+    
     // On récupère les informations du fichier JPEG
     unsigned char *huff_table;
-    unsigned char *bitstream;
-    // int quant_table[8][8]; // a modifier et mettre en vecteur
+    // int *quant_table;
+    int quant_table[64] = { 1, 1, 1, 1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1};
 
 
-
-    unsigned char *huffman_decoded_bitstream    = decode_bitstream(huff_table, bitstream);
+    unsigned char *huffman_decoded_bitstream    = decode_bitstream(huff_table, (unsigned char*) (jpeg->data));
     unsigned char *rle_decoded_bitstream        = rle_decode(huffman_decoded_bitstream);
-
-    int quant_table[8][8] = {
-    {1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1}
-};
-    int *dequantized_values = inv_quantize(rle_decoded_bitstream, quant_table);
-    int* idct_ed_values = idct(dequantized_values);
+    int *dequantized_values                     = inv_quantize(rle_decoded_bitstream, quant_table);
+    int* idct_ed_values                         = idct(dequantized_values);
 
 
     // On libère la mémoire
@@ -88,6 +81,10 @@ int main(int argc, char **argv) {
     free(rle_decoded_bitstream);
     free(dequantized_values);
     free(idct_ed_values);
+    free (jpeg->quantization_tables);
+    free(jpeg->huffman_tables);
+    // free les huffman trees
+    free(jpeg->data);
 
 
     return EXIT_SUCCESS;

@@ -15,6 +15,7 @@ int C(int x) {
 // Inverse Discrete Cosine Transform function
 int* idct(int input[N * N]) {
     int *output = malloc(N * N * sizeof(int));
+    check_memory_allocation((void *) output);
 
     for (int x = 0; x < N; x++) {
         for (int y = 0; y < N; y++) {
@@ -31,7 +32,7 @@ int* idct(int input[N * N]) {
                 }
             }
 
-            output[x * N + y] = (int) round(sum * 0.25);
+            output[x * N + y] = round(sum * 0.25);
         }
     }
     

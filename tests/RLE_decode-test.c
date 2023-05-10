@@ -5,6 +5,7 @@
 
 int main() {
     unsigned char *huffman_decoded_data = malloc(8 * sizeof(char));
+    check_memory_allocation((void *) huffman_decoded_data);
     huffman_decoded_data[0] = 0x1;
     huffman_decoded_data[1] = 0x2;
     huffman_decoded_data[2] = 0x3;
@@ -19,6 +20,7 @@ int main() {
     
 
     unsigned char *huffman_decoded_data2 = malloc(12 * sizeof(char));
+    check_memory_allocation((void *) huffman_decoded_data2);
     huffman_decoded_data2[0] = 0x1;
     huffman_decoded_data2[1] = 0x2;
     huffman_decoded_data2[2] = 0x3;

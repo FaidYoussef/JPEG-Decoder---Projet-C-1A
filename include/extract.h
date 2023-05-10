@@ -5,6 +5,7 @@
 #include <string.h>
 #include <math.h>
 
+#include <utils.h>
 #include <verbose.h>
 
 #define THREE_BYTES_LONG 3

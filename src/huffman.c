@@ -14,9 +14,12 @@ struct node {
 // Crée un nouveau noeud
 struct node *create_node(unsigned char symbol, struct node *left, struct node *right) {
     struct node *new_node = (struct node *)malloc(sizeof(struct node));
+    check_memory_allocation((void *) new_node);
+
     new_node->symbol = symbol;
     new_node->left = left;
     new_node->right = right;
+    
     return new_node;
 }
 
@@ -88,6 +91,8 @@ unsigned char *decode_bitstream(unsigned char *huff_table, unsigned char *bitstr
 
     size_t max_output_size = 1024;
     unsigned char *decoded_bitstream = (unsigned char *)malloc(max_output_size);
+    check_memory_allocation((void *) decoded_bitstream);
+
     size_t output_pos = 0;
 
     current_node = root;

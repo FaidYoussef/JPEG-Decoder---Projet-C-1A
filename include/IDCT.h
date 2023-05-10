@@ -4,6 +4,8 @@
 #include <math.h>
 #include <stdio.h>
 
+#include <utils.h>
+
 #define N 8
 
 // C function in the iDCT formula
