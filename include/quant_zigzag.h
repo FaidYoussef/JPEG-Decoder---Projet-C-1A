@@ -19,6 +19,6 @@ int* inv_quantize(unsigned char *qblock, unsigned char *quant_table_DC, unsigned
 int ** inv_zig_zag(int *block);
 
 // Display block in matrix format
-void print_block(int **block);
+void print_block(int block[8][8]);
 
 #endif

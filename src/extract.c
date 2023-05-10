@@ -5,7 +5,7 @@
 // Quantization tables
 struct QuantizationTable {
     unsigned char id;
-    int length;
+    size_t length;
     unsigned char *data;
 };
 
@@ -13,7 +13,7 @@ unsigned char get_qt_id(struct QuantizationTable *qt){
     return qt->id;
 }
 
-int get_qt_length(struct QuantizationTable *qt){
+size_t get_qt_length(struct QuantizationTable *qt){
     return qt->length;
 }
 
@@ -42,7 +42,7 @@ struct StartOfFrame {
 struct HuffmanTable {
     unsigned char class;
     unsigned char destination;
-    int length;
+    size_t length;
     unsigned char *data;
 };
 
@@ -54,7 +54,7 @@ unsigned char get_ht_destination(struct HuffmanTable *ht){
     return ht->destination;
 }
 
-int get_ht_length(struct HuffmanTable *ht){
+size_t get_ht_length(struct HuffmanTable *ht){
     return ht->length;
 }
 

@@ -59,14 +59,14 @@ int main(int argc, char **argv) {
 
     printf("\n\n\n\n");
     printf("ht0_data:\n");
-    unsigned char *ht0 = get_JPEG_ht(jpeg)[0];
+    struct HuffmanTable *ht0 = get_JPEG_ht(jpeg)[0];
     for (size_t i = 0; i< get_ht_length(ht0); i++){
         printf("%d", get_ht_data(ht0)[i]);
     }
     printf("\n\n");
 
     printf("ht2_data:\n");
-    unsigned char *ht2 = get_JPEG_ht(jpeg)[2];
+    struct HuffmanTable *ht2 = get_JPEG_ht(jpeg)[2];
     for (size_t i = 0; i< get_ht_length(ht2); i++){
         printf("%d", get_ht_data(ht2)[i]);
     }

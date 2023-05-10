@@ -26,6 +26,7 @@
 
 struct QuantizationTable;
 unsigned char get_qt_id(struct QuantizationTable *qt);
+size_t get_qt_length(struct QuantizationTable *qt);
 unsigned char * get_qt_data(struct QuantizationTable *qt);
 
 struct ComponentSOF;
@@ -35,6 +36,7 @@ struct StartOfFrame;
 struct HuffmanTable;
 unsigned char get_ht_class(struct HuffmanTable *ht);
 unsigned char get_ht_destination(struct HuffmanTable *ht);
+size_t get_ht_length(struct HuffmanTable *ht);
 unsigned char * get_ht_data(struct HuffmanTable *ht);
 
 struct ComponentSOS;
