@@ -57,15 +57,15 @@ void print_huffman_codes(int *bit_lengths, unsigned char *symbols, int n) {
 
 
 // Construit l'arbre de huffman à partir de la table de huffman
-void build_huffman_tree(struct node **root, unsigned char *huff_table) {
-    struct node *current_node;
-    *root = create_node(0, NULL, NULL);
+struct node * build_huffman_tree(unsigned char *huff_table) {
+    struct node *root, *current_node;
+    root = create_node(0, NULL, NULL);
     int pos = 16;
     uint16_t code = 0;
 
     for (int i = 1; i <= 16; i++) {
         for (int j = 0; j < huff_table[i - 1]; j++) {
-            current_node = *root;
+            current_node = root;
             for (int k = i - 1; k >= 0; k--) {
                 if (code & (1 << k)) {
                     if (!current_node->right) {
@@ -84,13 +84,15 @@ void build_huffman_tree(struct node **root, unsigned char *huff_table) {
         }
         code <<= 1;
     }
+    return root;
 }
 
 
 // Décode un bitstream à partir de la table de huffman
-unsigned char *decode_bitstream(unsigned char *huff_table, unsigned char *bitstream) {
-    struct node *root, *current_node;
-    build_huffman_tree(&root, huff_table);
+unsigned char *decode_bitstream(unsigned char *ht_DC, unsigned char *ht_AC, unsigned char *bitstream) {
+    struct node *root_ht_DC, *root_ht_AC, *current_node;
+    root_ht_DC = build_huffman_tree(ht_DC);
+    root_ht_AC = build_huffman_tree(ht_AC);
 
     size_t max_output_size = 1024;
     unsigned char *decoded_bitstream = (unsigned char *)malloc(max_output_size);
@@ -98,8 +100,23 @@ unsigned char *decode_bitstream(unsigned char *huff_table, unsigned char *bitstr
 
     size_t output_pos = 0;
 
-    current_node = root;
-    for (size_t i = 0; bitstream[i] != '\0'; i++) {
+    current_node = root_ht_DC;
+    for (size_t i = 0; i<1; i++) {
+        current_node = (bitstream[i] == '1') ? current_node->right : current_node->left;
+
+        if (!current_node->left && !current_node->right) {
+            decoded_bitstream[output_pos++] = current_node->symbol;
+            current_node = root;
+
+            if (output_pos >= max_output_size) {
+                max_output_size *= 2;
+                decoded_bitstream = (unsigned char *)realloc(decoded_bitstream, max_output_size);
+            }
+        }
+    }
+
+    current_node = root_ht_AC;
+    for (size_t i = 1; bitstream[i] != '\0'; i++) {
         current_node = (bitstream[i] == '1') ? current_node->right : current_node->left;
 
         if (!current_node->left && !current_node->right) {

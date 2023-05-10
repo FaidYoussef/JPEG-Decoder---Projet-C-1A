@@ -19,7 +19,7 @@ void print_binary(uint16_t value, int length);
 void print_huffman_codes(int *bit_lengths, unsigned char *symbols, int n);
 
 // Construit l'arbre de huffman à partir de la table de huffman
-void build_huffman_tree(struct node **root, unsigned char *huff_table) ;
+struct node * build_huffman_tree(unsigned char *huff_table) ;
 
 // Décode un bitstream à partir de la table de huffman
 unsigned char *decode_bitstream(unsigned char *huff_table, unsigned char *bitstream);
