@@ -6,6 +6,7 @@
 
 #include <utils.h>
 
+#define PI 3.14159265358979323846
 #define N 8
 #define NN N*N
 
@@ -15,6 +16,6 @@ void initialize();
 void load();
 
 // Inverse Discrete Cosine Transform function
-void idct(int input[NN], int output[NN]);
+int * idct(int input[NN]);
 
 #endif
