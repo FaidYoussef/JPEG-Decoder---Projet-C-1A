@@ -2,6 +2,7 @@
 #include <stdbool.h>
 
 #include <RLE_decode.h>
+#include <utils.h>
 
 int main() {
     unsigned char *huffman_decoded_data = malloc(8 * sizeof(char));

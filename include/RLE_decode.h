@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <utils.h>
 
 unsigned char* rle_decode(unsigned char *huffman_decoded_data);
 

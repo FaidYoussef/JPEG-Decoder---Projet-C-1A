@@ -250,14 +250,14 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
     getVerbose() ? printf("Destination de la table : %d\n", destination):0;
 
     // Contenu de la table
-    unsigned char *huffman = malloc(length*sizeof(unsigned char));
-    check_memory_allocation((void *) huffman);
+    unsigned char *huffman_data = malloc(length*sizeof(unsigned char));
+    check_memory_allocation((void *) huffman_data);
 
-    fread(huffman, length, 1, input);
+    fread(huffman_data, length, 1, input);
 
     // Affichage des tables de Huffman
     for (int i=0; i<length; i++){
-        getVerbose() ? printf("%x", huffman[i]):0;
+        getVerbose() ? printf("%x", huffman_data[i]):0;
     }
     getVerbose() ? printf("\n"):0;
 
@@ -265,7 +265,7 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
     huffman_table->class = class;
     huffman_table->destination = destination;
     huffman_table->length = length;
-    huffman_table->data = huffman;
+    huffman_table->data = huffman_data;
 
     return huffman_table;
 } 
@@ -384,8 +384,8 @@ struct JPEG * extract(char *filename) {
                 
                 // BREAKING-UPDATE : on possède au maximum 4 tables de Huffman
                 // index 0 >>> class|destination : 00 >>> luminance|DC
-                // index 1 >>> class|destination : 01 >>> luminance|AC
-                // index 2 >>> class|destination : 10 >>> chrominance|DC
+                // index 1 >>> class|destination : 01 >>> chrominance|DC
+                // index 2 >>> class|destination : 10 >>> luminance|AC
                 // index 3 >>> class|destination : 11 >>> chrominance|AC
                 // Si une nouvelle table de Huffman redéfinie une table déjà existante, on écrase l'ancienne
                 struct HuffmanTable *huffman_table = get_DHT(input, buffer);
@@ -449,9 +449,11 @@ struct JPEG * extract(char *filename) {
                             getVerbose() ? printf("Taille de la data : %d\n", nb_data):0;
                             getVerbose() ? printf("Fin du fichier\n"):0;
                             free(sos.components);
+                            fclose(input);
                             return jpeg;
                         } else if (feof(input)){    // On atteint la fin du fichier avant d'avoir lu un marker EOI
                             getVerbose() ? printf("Fin du fichier atteinte avant d'avoir lu un EOI !!!\n"):0;
+                            fclose(input);
                             exit(EXIT_FAILURE);
                         } else {    // On a autre chose que du byte stuffing ou un marker autre que EOI ********** Remarque : si on a un autre marker que EOI, on ne le traite pas
                             jpeg->data[nb_data] = 0xFF;
@@ -471,9 +473,11 @@ struct JPEG * extract(char *filename) {
 
             } else if (id[0] == EOI){
                 getVerbose() ? printf("Fin du fichier\n"):0;
+                fclose(input);
                 break;
             }
         }
     }
+    fclose(input);
     return jpeg;
 }

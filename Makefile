@@ -7,7 +7,7 @@ LD = gcc
 # C'est utile pour débugger, par contre en "production"
 # on active au moins les optimisations de niveau 2 (-O2).
 # -lm on lie la bibliothèque mathématique (sqrt, cos, etc.)
-CFLAGS = -Wall -Wextra -std=c99 -Iinclude -O0 -mavx -g -lm
+CFLAGS = -Wall -Wextra -std=c99 -Iinclude -O0 -g -lm
 LDFLAGS =
 
 # Par défaut, on compile tous les fichiers source (.c) qui se trouvent dans le

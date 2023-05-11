@@ -22,7 +22,7 @@ void print_huffman_codes(int *bit_lengths, unsigned char *symbols, int n);
 struct node * build_huffman_tree(unsigned char *huff_table) ;
 
 // Décode un bitstream à partir de la table de huffman
-unsigned char *decode_bitstream(unsigned char *ht_DC, unsigned char *ht_AC, unsigned char *bitstream);
+unsigned char * decode_bitstream(unsigned char *ht_DC, unsigned char *ht_AC, unsigned char *bitstream);
 
 unsigned char * decode_bitstream2(unsigned char *ht_DC, unsigned char *ht_AC, unsigned char *bitstream, size_t bitstream_size_in_bits);
 
