@@ -94,13 +94,3 @@ void print_block(int block[8][8]){
     }
     printf("\n");
 }
-
-void print_block(int *block[8]){
-    for (int i = 0; i < 8; i++) {
-        for (int j =0; j < 8; j++) {
-            printf("%d ", block[i][j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
