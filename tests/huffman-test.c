@@ -6,6 +6,11 @@
 bool verbose = 1;
 
 int main() {
+    int decimal_value = 0x30;
+    int hexadecimal_value = dec2hex(decimal_value);
+    printf("Decimal value: %d, Hexadecimal value: %x\n", decimal_value, hexadecimal_value);
+
+
     unsigned char *bitstream1 = malloc(15*4 * sizeof(unsigned char));
     check_memory_allocation((void *) bitstream1);
     bitstream1 = (unsigned char*) "111100001010101111100001010101111100001010101111100001010101";

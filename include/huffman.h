@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include <utils.h>
+#include <verbose.h>
 
 struct node ;
 
@@ -18,15 +19,18 @@ void print_binary(uint16_t value, int length);
 // Affiche la représentation binaire d'un code de huffman
 void print_huffman_codes(int *bit_lengths, unsigned char *symbols, int n);
 
+// Conversion decimal vers hexadecimal
+int dec2hex(int decimal);
+
 // Construit l'arbre de huffman à partir de la table de huffman
 struct node * build_huffman_tree(unsigned char *huff_table) ;
 
-// Décode un bitstream à partir de la table de huffman
-unsigned char * decode_bitstream(unsigned char *ht_DC, unsigned char *ht_AC, unsigned char *bitstream);
-
-unsigned char * decode_bitstream2(unsigned char *ht_DC, unsigned char *ht_AC, unsigned char *bitstream, size_t bitstream_size_in_bits);
+// Décode un bitstream
+// utilise les tables de Huffman
+// puis récupère les valeurs à encoder via Run/Size data
+unsigned char * decode_bitstream(unsigned char *ht_DC, unsigned char *ht_AC, unsigned char *bitstream, size_t bitstream_size_in_bits);
 
 // Teste la fonction decode_bitstream
-void test_decode_bitstream(unsigned char *bitstream, unsigned char *expected_output);
+void test_decode_bitstream(unsigned char *bitstream, size_t bitstream_size_in_bits, unsigned char *expected_output);
 
 #endif

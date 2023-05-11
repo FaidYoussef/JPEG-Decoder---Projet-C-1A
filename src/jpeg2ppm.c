@@ -91,22 +91,29 @@ int main(int argc, char **argv) {
     // ok jusqu'ici
 
     printf("avant traitement huffman\n");
-    unsigned char *huffman_decoded_bitstream    = decode_bitstream2(p_ht0_data, p_ht2_data, p_jpeg_data, jpeg_data_size);
+    unsigned char *huffman_decoded_bitstream    = decode_bitstream(p_ht0_data, p_ht2_data, p_jpeg_data, jpeg_data_size);
     printf("apres traitement huffman\n");
     // unsigned char *rle_decoded_bitstream        = rle_decode(huffman_decoded_bitstream);
     // int *dequantized_values                     = inv_quantize(rle_decoded_bitstream, get_qt_data(get_JPEG_qt(jpeg)[0]), get_qt_data(get_JPEG_qt(jpeg)[1]));
     // int* idct_ed_values                         = idct(dequantized_values);
 
 
-    // // On libère la mémoire
+    // On libère la mémoire
     // free(huffman_decoded_bitstream);
     // free(rle_decoded_bitstream);
     // free(dequantized_values);
     // free(idct_ed_values);
-    // // free (jpeg->quantization_tables);
-    // // free(jpeg->huffman_tables);
-    // // free les huffman trees
-    // // free(jpeg->data);
+    // free (jpeg->quantization_tables);
+    // free(jpeg->huffman_tables);
+    // free les huffman trees
+    // free(jpeg->data);
+
+
+    // Note -1 : Il faut également vérifier que le nombre de code pour chaque longueur est valide dans build_huffman_tree() in huffman.c !!!
+    // Note 0 : prévoir de détecter si image N&B, couleur ou couleur avec alpha (>nb de composantes ?) pour adapter le décodage du bitstream en conséquence !!!
+    // Note 1 : prévoir de repasser toutes les structures en [8][8] ou [64] pour optimiser l'utilisation mémoire et accélérer l'exécution du programme !!!
+    // Note 2 : prévoir de reformater nos sorties du mode verbose pour rendre la lecture plus facile&jolie ... s'inspirer de jpeg2blabla ?
+    // Note 3 : prévoir de refaire des vrais tests avec toutes ces fonctions modifiées depuis début de semaine !!!
 
 
     return EXIT_SUCCESS;
