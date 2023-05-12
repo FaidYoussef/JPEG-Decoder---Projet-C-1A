@@ -13,8 +13,8 @@ struct node ;
 // Crée un nouveau noeud
 struct node *create_node(unsigned char symbol, struct node *left, struct node *right);
 
-// Affiche la représentation binaire d'un entier
-void print_binary(uint16_t value, int length);
+// Renvoie la valeur du coefficient à partir de sa magnitude et de son indice dans la classe de magnitude
+int recover_coeff_value(int8_t magnitude, int indice_dans_classe_magnitude);
 
 // Affiche la représentation binaire d'un code de huffman
 void print_huffman_codes(int *bit_lengths, unsigned char *symbols, int n);

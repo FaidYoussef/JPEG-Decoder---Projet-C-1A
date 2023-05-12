@@ -55,16 +55,16 @@ void print_huffman_codes(int *bit_lengths, unsigned char *symbols, int n) {
     }
 }
 
-// fonction qui convertit une valeur décimale en hexadécimal et la retourne
-int dec2hex(int decimal) {
-    int hexadecimal = 0, i = 1, reste;
-    while (decimal != 0){
-        reste = decimal % 16;
-        decimal /= 16;
-        hexadecimal += reste * i;
-        i *= 10;
+// Renvoie la valeur du coefficient à partir de sa magnitude et de son indice dans la classe de magnitude
+int recover_coeff_value(int8_t magnitude, int indice_dans_classe_magnitude) {
+    if (indice_dans_classe_magnitude < 0){
+        printf("Error: invalid DC coefficient\n");
+        return 0;
     }
-    return hexadecimal;
+    if (magnitude != 0 && indice_dans_classe_magnitude < (1 << (magnitude - 1))){
+        indice_dans_classe_magnitude -= (1 << magnitude) - 1;
+    }
+    return indice_dans_classe_magnitude;
 }
 
 
@@ -157,26 +157,30 @@ unsigned char * decode_bitstream(unsigned char *ht_DC_data, unsigned char *ht_AC
                 exit(EXIT_FAILURE);
             }
 
-            if (!current_node->left && !current_node->right) {  // on est sur une feuille
+            // On est sur une feuille
+            if (!current_node->left && !current_node->right) {
                 // (2) On récupère la valeur de magnitude associée
-                int magnitude_DC = current_node->symbol;
+                uint8_t magnitude_DC = current_node->symbol;
+
+                if (magnitude_DC < 0) {
+                    fprintf(stderr, "Error: invalid DC magnitude - negative value\n");
+                    exit(EXIT_FAILURE);
+                } else if (magnitude_DC > 11) {
+                    fprintf(stderr, "Error: invalid DC magnitude - value over 11\n");
+                    exit(EXIT_FAILURE);
+                }
                 
                 // (3) On récupère l'indice dans la classe de magnitude associé
                 // Il faut lire le bon nombre de bit(s) ... et reconstruire l'indice bit après bit
                 int indice_dans_classe_magnitude_DC = 0;
-                for (int j = 0; j < magnitude_DC; j++){
-                    indice_dans_classe_magnitude_DC += (bitstream[(i + 1 + j) / 8] >> (7 - ((i + 1 + j) % 8))) & 1;    // pas sûr de ce calcul ... à verifier !!!
+                for (uint8_t j = 0; j < magnitude_DC; j++){
                     indice_dans_classe_magnitude_DC <<= 1;
+                    indice_dans_classe_magnitude_DC += (bitstream[(i + 1 + j) / 8] >> (7 - ((i + 1 + j) % 8))) & 1;
                 }
                 // (4) On récupère finalement la valeur du coefficient DC à partir de la magnitude et de l'indice dans la classe de magnitude
-                int DC_value = 0;
-                // ***** A COMPLETER *****
-                // ***** A COMPLETER *****
-                // ***** A COMPLETER *****
-
-                decoded_bitstream[output_pos++] = DC_value;
+                decoded_bitstream[output_pos++] = recover_coeff_value(int8_t magnitude_DC, int indice_dans_classe_magnitude_DC);
                 nombre_de_valeurs_decodees++;
-                getVerbose() ? fprintf(stderr, " | %x-%d | ", DC_value, nombre_de_valeurs_decodees):0;
+                getVerbose() ? fprintf(stderr, "\t\t| %x-%d | \n", DC_value, nombre_de_valeurs_decodees):0;
 
                 // On prépare la suite en repositionnant le current_node sur la racine de l'arbre des coefficients AC
                 current_node = root_ht_AC_data;
@@ -196,6 +200,7 @@ unsigned char * decode_bitstream(unsigned char *ht_DC_data, unsigned char *ht_AC
         // On décode pour trouver les 63 valeurs des coefficients AC
         while(nombre_de_valeurs_decodees < 64){
             for (size_t i = current_pos; i < bitstream_size_in_bits; i++) {
+                fprintf(stderr, "current_pos = %ld\n", current_pos);
                 // (1) On lit le code de Huffman
                 // On détermine le bit actuel en inspectant l'octet approprié dans bitstream
                 // puis en décalant et en masquant le bit approprié
@@ -210,45 +215,67 @@ unsigned char * decode_bitstream(unsigned char *ht_DC_data, unsigned char *ht_AC
                     exit(EXIT_FAILURE);
                 }
 
+                // On est sur une feuille
                 if (!current_node->left && !current_node->right) {
                     // (2) On récupère le Run/Size associé pour déterminer :
                     // >>> 4 MSB : combien de coefficients nuls précèdent ce coefficient AC
                     // >>> 4 LSB : la magnitude du coefficient AC (Note: valeur comprise entre 0 et A >>> prévoir vérification de la conformité de la valeur lue)
-                    int run_and_size = current_node->symbol;
+                    uint8_t run_and_size = current_node->symbol;
+                    fprintf(stderr, ">>> run_and_size = %x\n", run_and_size);
 
-                    // (3) On ajoute le bon nombre de coefficients nuls avant le coefficient AC
-                    int nb_de_coeff_nuls_a_ajouter_avant = run_and_size >> 4;
-                    for (int j = 0; j < nb_de_coeff_nuls_a_ajouter_avant; j++){
-                        decoded_bitstream[output_pos++] = 0;
+                    
+                    // 
+                    if (run_and_size == 0x0){   // (3a) On gère le cas spécial EOB
+                        for (int j = 0; j < (64 - nombre_de_valeurs_decodees); j++){
+                            decoded_bitstream[output_pos++] = 0;
+                            nombre_de_valeurs_decodees++;
+                            getVerbose() ? fprintf(stderr, "%x-%d | ", 0x0, nombre_de_valeurs_decodees):0;
+
+                            // On réaffecte la position courante dans le bitstream pour la suite
+                            current_pos++;
+                        }
+                    } else if (run_and_size == 0x78){   // (3b) On gère le cas spécial ZRL
+                        for (int j = 0; j < (64 - nombre_de_valeurs_decodees); j++){
+                            decoded_bitstream[output_pos++] = 0;
+                            nombre_de_valeurs_decodees++;
+                            getVerbose() ? fprintf(stderr, "%x-%d | ", 0x0, nombre_de_valeurs_decodees):0;
+
+                            // On réaffecte la position courante dans le bitstream pour la suite
+                            current_pos++;
+                        }
+                    } else {    // (3) Sinon On ajoute le bon nombre de coefficients nuls avant le coefficient AC
+                        uint8_t nb_de_coeff_nuls_a_ajouter_avant = run_and_size >> 4;
+                        for (int8_t j = 0; j < nb_de_coeff_nuls_a_ajouter_avant; j++){
+                            decoded_bitstream[output_pos++] = 0;
+                            nombre_de_valeurs_decodees++;
+                            getVerbose() ? fprintf(stderr, "\t\t\t| %x-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
+                        }
+
+                        // (4) Puis on récupère la magnitude du coefficient AC
+                        uint8_t magnitude_AC = run_and_size;
+                        magnitude_AC <<= 4;
+                        magnitude_AC >>= 4;
+                        fprintf(stderr, "magnitude_AC = %x - ", magnitude_AC);
+                        uint8_t indice_dans_classe_magnitude_AC = 0;
+                        for (uint8_t j = 0; j < magnitude_AC; j++){
+                            indice_dans_classe_magnitude_AC <<= 1;
+                            indice_dans_classe_magnitude_AC = (bitstream[(int)((current_pos + 1 + j) / 8)] >> (7 - ((current_pos + 1 + j) % 8))) & 1;
+                            fprintf(stderr, "%x", indice_dans_classe_magnitude_AC);
+                        }
+
+                        // (5) On récupère finalement la valeur du coefficient AC à partir de la magnitude et de l'indice dans la classe de magnitude
+                        decoded_bitstream[output_pos++] = recover_coeff_value(int8_t magnitude_AC, int indice_dans_classe_magnitude_AC);
                         nombre_de_valeurs_decodees++;
-                        getVerbose() ? fprintf(stderr, "%x-%d | ", 0x0, nombre_de_valeurs_decodees):0;
+                        getVerbose() ? fprintf(stderr, "\t\t%x-%d | \n", AC_value, nombre_de_valeurs_decodees):0;
+
+                        // On réaffecte la position courante dans le bitstream pour la suite
+                        current_pos = i + magnitude_AC;
+                        i += magnitude_AC;
+
                     }
-
-                    // (4) On récupère la magnitude du coefficient AC
-                    int magnitude_AC = run_and_size;  // attention il faut lire en decimal et non pas en hexadécimal >>> à modifier !!!
-                    magnitude_AC <<= 4;
-                    magnitude_AC >>= 4;
-                    int indice_dans_classe_magnitude_AC = 0;
-                    for (int j = 0; j < magnitude_AC; j++){
-                        indice_dans_classe_magnitude_AC = bitstream[i + 1 + j];
-                        indice_dans_classe_magnitude_AC <<= 1;
-                    }
-
-                    // (5) On récupère finalement la valeur du coefficient AC à partir de la magnitude et de l'indice dans la classe de magnitude
-                    int AC_value = 0;
-                    // ***** A COMPLETER *****
-                    // ***** A COMPLETER *****
-                    // ***** A COMPLETER *****
-
-                    decoded_bitstream[output_pos++] = AC_value;
-                    nombre_de_valeurs_decodees++;
-                    getVerbose() ? fprintf(stderr, "%x-%d | ", AC_value, nombre_de_valeurs_decodees):0;
 
                     // On prépare la suite en repositionnant le current_node sur la racine de l'arbre des AC
                     current_node = root_ht_AC_data;
-
-                    // Et on réaffecte la position courante dans le bitstream pour la suite
-                    current_pos = i + magnitude_AC + 1;
 
                     // On réalloue de la mémoire si nécessaire
                     if (output_pos >= max_output_size) {
@@ -256,6 +283,7 @@ unsigned char * decode_bitstream(unsigned char *ht_DC_data, unsigned char *ht_AC
                         decoded_bitstream = (unsigned char *)realloc(decoded_bitstream, max_output_size);
                     }
                 }
+                current_pos++;
             }
 
             // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
