@@ -5,9 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <extract.h>
+
 #define NB_VALUES_IN_8x8_BLOCK 64
 
 
-int check_memory_allocation(void *allocated_data);
+int check_memory_allocation(void *allocated_data, struct JPEG *jpeg);
 
 #endif

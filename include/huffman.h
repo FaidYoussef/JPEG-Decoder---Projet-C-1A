@@ -15,11 +15,11 @@
 struct node;
 
 // Crée un nouveau noeud
-struct node * create_node(unsigned char symbol, struct node *left, struct node *right);
+struct node * create_node(unsigned char symbol, struct node *left, struct node *right, struct JPEG *jpeg);
 
 //**********************************************************************************************************************
 // Construit l'arbre de huffman à partir de la table de huffman
-struct node * build_huffman_tree(unsigned char *huff_table);
+struct node * build_huffman_tree(unsigned char *ht_data, struct JPEG *jpeg);
 
 // Fonction qui free l'arbre de Huffman
 void free_huffman_tree(struct node *root);

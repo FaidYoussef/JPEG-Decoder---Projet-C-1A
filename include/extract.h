@@ -2,6 +2,7 @@
 #define _EXTRACT_H_
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
 #include <math.h>
@@ -47,7 +48,7 @@ void set_value_in_MCU(struct ComponentSOF *component, int index_of_mcu, int inde
 struct StartOfFrame;
 void initialize_sof(struct StartOfFrame *sof);
 unsigned char get_sof_nb_components(struct StartOfFrame *sof);
-struct ComponentSOF * get_sof_components(struct StartOfFrame *sof);
+struct ComponentSOF ** get_sof_components(struct StartOfFrame *sof);
 
 //**********************************************************************************************************************
 struct HuffmanTable;
@@ -85,11 +86,11 @@ unsigned char read_byte(FILE *input, unsigned char *buffer);
 
 void ignore_bytes(FILE *input, int nb_bytes);
 
-struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer);
+struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer, struct JPEG *jpeg);
 
 int get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg);
 
-struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer);
+struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer, struct JPEG *jpeg);
 
 int getSOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg);
 

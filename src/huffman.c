@@ -22,9 +22,9 @@ struct node {
 
 
 // Crée un nouveau noeud
-struct node *create_node(unsigned char symbol, struct node *left, struct node *right) {
+struct node *create_node(unsigned char symbol, struct node *left, struct node *right, struct JPEG *jpeg) {
     struct node *new_node = (struct node *) malloc(sizeof(struct node));
-    check_memory_allocation((void *) new_node);
+    check_memory_allocation((void *) new_node, jpeg);
 
     new_node->symbol = symbol;
     new_node->left = left;
@@ -36,7 +36,8 @@ struct node *create_node(unsigned char symbol, struct node *left, struct node *r
 
 //**********************************************************************************************************************
 // Construit l'arbre de huffman à partir de la table de huffman
-struct node * build_huffman_tree(unsigned char *ht_data) {
+struct node * build_huffman_tree(unsigned char *ht_data, struct JPEG *jpeg) {
+    getHighlyVerbose() ? fprintf(stderr, "\tHuffman Tree :\n"):0;
     // On vérifie que la table de Huffman est valide
     if (ht_data == NULL) {
         fprintf(stderr, "Error: invalid Huffman table\n");
@@ -45,14 +46,16 @@ struct node * build_huffman_tree(unsigned char *ht_data) {
     // Il faut également vérifier que le nombre de code pour chaque longueur est valide
     for (uint16_t i = 0; i < 16; i++) {
         uint16_t nb_max_symbols_per_level = (ONE << (i+1)) - 1;
-        if (ht_data[i] >= nb_max_symbols_per_level) {
+        getHighlyVerbose() ? fprintf(stderr, "\t\tnb_max_symbols_per_level: %d\n", nb_max_symbols_per_level):0;
+        getHighlyVerbose() ? fprintf(stderr, "\t\tht_data[%d]: %d\n", i, ht_data[i]):0;
+        if (ht_data[i] > nb_max_symbols_per_level) {
             fprintf(stderr, "Error: invalid Huffman table - too much symbols per level\n");
             exit(EXIT_FAILURE);
         }
     }
 
     struct node *root, *current_node;
-    root = create_node(0, NULL, NULL);
+    root = create_node(0, NULL, NULL, jpeg);
     int pos = 16;
     uint16_t code = 0;
 
@@ -62,12 +65,12 @@ struct node * build_huffman_tree(unsigned char *ht_data) {
             for (int k = i - 1; k >= 0; k--) {
                 if (code & (1 << k)) {
                     if (!current_node->right) {
-                        current_node->right = create_node(0, NULL, NULL);
+                        current_node->right = create_node(0, NULL, NULL, jpeg);
                     }
                     current_node = current_node->right;
                 } else {
                     if (!current_node->left) {
-                        current_node->left = create_node(0, NULL, NULL);
+                        current_node->left = create_node(0, NULL, NULL, jpeg);
                     }
                     current_node = current_node->left;
                 }
@@ -193,6 +196,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
         if (!current_node->left && !current_node->right) {  // On est sur une feuille
             // (2) On récupère la valeur de magnitude associée
             int8_t magnitude_DC = current_node->symbol;
+            getHighlyVerbose() ? fprintf(stderr, "magnitude_DC :%d\n", magnitude_DC):0;
 
             if (magnitude_DC < 0) {
                 fprintf(stderr, "Error: invalid DC magnitude - negative value\n");
@@ -211,7 +215,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
             }
 
             // (4) On récupère finalement la valeur du coefficient DC à partir de la magnitude et de l'indice dans la classe de magnitude
-            int16_t DC_value = recover_DC_coeff_value(magnitude_DC, indice_dans_classe_magnitude_DC);
+            int16_t DC_value = recover_DC_coeff_value(magnitude_DC, indice_dans_classe_magnitude_DC) - *previous_DC_value;
             set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, DC_value);
             *previous_DC_value = get_MCUs(component)[MCU_number][0];
             getHighlyVerbose() ? fprintf(stderr, "\t\t| %x-%d | \n", DC_value, nombre_de_valeurs_decodees):0;
@@ -284,7 +288,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
 
                     // (4) Puis on récupère la magnitude du coefficient AC
                     uint8_t magnitude_AC = run_and_size & 0x0F; // on récupère les 4 LSB en appliquant un masque
-                    if (magnitude_AC > 10){
+                    if (magnitude_AC > 16){
                         fprintf(stderr, "Error: invalid magnitude_AC value - value over 10\n");
                         return EXIT_FAILURE;
                     }
