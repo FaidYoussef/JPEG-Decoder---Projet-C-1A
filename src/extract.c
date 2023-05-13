@@ -5,7 +5,7 @@
 //**********************************************************************************************************************
 // Quantization tables
 struct QuantizationTable{
-    unsigned char id;
+    int8_t id;
     size_t length;
     unsigned char *data;
 };
@@ -33,55 +33,38 @@ unsigned char * get_qt_data(struct QuantizationTable *qt){
 // Start of Frame
 struct ComponentSOF {
     int8_t id;
-    int8_t DC_huffman_table_id;
-    int8_t AC_huffman_table_id;
-    unsigned char sampling_factor_x;
-    unsigned char sampling_factor_y;
-    unsigned char num_quantization_table;
-    int16_t *MCUs[64];
+    int8_t sampling_factor_x;
+    int8_t sampling_factor_y;
+    int8_t num_quantization_table;
 };
 
-void initialize_component_sof(struct ComponentSOF *component){
-    component->id = -1;
-    component->DC_huffman_table_id = -1;
-    component->AC_huffman_table_id = -1;
-    component->sampling_factor_x = -1;
-    component->sampling_factor_y = -1;
-    component->num_quantization_table = 0;
+void initialize_component_sof(struct ComponentSOF *component, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table){
+    component->id = id;
+    component->sampling_factor_x = sampling_factor_x;
+    component->sampling_factor_y = sampling_factor_y;
+    component->num_quantization_table = num_quantization_table;
 }
 
 int8_t get_id(struct ComponentSOF *component){
     return component->id;
 }
 
-int8_t get_DC_huffman_table_id(struct ComponentSOF *component){
-    return component->DC_huffman_table_id;
-}
-
-int8_t get_AC_huffman_table_id(struct ComponentSOF *component){
-    return component->AC_huffman_table_id;
-}
-
-int16_t **get_MCUs(struct ComponentSOF *component){
-    return component->MCUs;
-}
-
-// int16_t *get_MCU(struct ComponentSOF *component, int index_of_mcu){
-//     return component->MCUs[index_of_mcu];
-// }
-
-void set_value_in_MCU(struct ComponentSOF *component, int index_of_mcu, int index_of_pixel_in_mcu, int16_t value){
-        component->MCUs[index_of_mcu][index_of_pixel_in_mcu] = value;
-}
 
 struct StartOfFrame {
-    unsigned int nb_components;
+    int8_t nb_components;
     struct ComponentSOF *components;
 };
 
-void initialize_sof(struct StartOfFrame *sof){
-    sof->nb_components = 0;
-    sof->components = NULL;
+void initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table){
+    sof->nb_components = 0; // 1 = greyscale, 3 = YCbCr or YIQ
+    if (nb_components == 0) {
+        sof->components = NULL;
+    } else {
+        sof->components = (struct ComponentSOF *) malloc(nb_components * sizeof(struct ComponentSOF));
+        for(int i=0; i<nb_components; i++){
+            initialize_component_sof(&(sof->components[i]), id, sampling_factor_x, sampling_factor_y, num_quantization_table);
+        }
+    }
 }
 
 unsigned char get_sof_nb_components(struct StartOfFrame *sof){
@@ -96,8 +79,8 @@ struct ComponentSOF ** get_sof_components(struct StartOfFrame *sof){
 //**********************************************************************************************************************
 // DHT (Tables de Huffman)
 struct HuffmanTable {
-    unsigned char class;
-    unsigned char destination;
+    int8_t class;   // 0 = DC or lossless, 1 = AC
+    int8_t destination;
     size_t length;
     unsigned char *data;
     struct node * huffman_tree;
@@ -131,7 +114,6 @@ struct node * get_ht_tree(struct HuffmanTable *ht){
     return ht->huffman_tree;
 }
 
-
 bool get_ht_set(struct HuffmanTable *ht){
     return ht->set;
 }
@@ -140,19 +122,61 @@ bool get_ht_set(struct HuffmanTable *ht){
 //**********************************************************************************************************************
 // Start of Scan
 struct ComponentSOS {
-    unsigned char id_table;
-    unsigned char class;
-    unsigned char destination;
+    int8_t id_table;
+    int8_t DC_huffman_table_id;
+    int8_t AC_huffman_table_id;
+    int16_t **MCUs;
 };
+
+void initialize_component_sos(struct ComponentSOS *component, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCUs, struct JPEG *jpeg){
+    component->id_table = id_table;
+    component->DC_huffman_table_id = DC_huffman_table_id;
+    component->AC_huffman_table_id = AC_huffman_table_id;
+    component->MCUs = (int16_t **) malloc(nb_of_MCUs * sizeof(int16_t *));
+    check_memory_allocation((void *) component->MCUs);
+    for(size_t i=0; i<nb_of_MCUs; i++){
+        component->MCUs[i] = (int16_t *) malloc(64 * sizeof(int16_t));
+        check_memory_allocation((void *) component->MCUs[i]);
+    }
+}
+
+int8_t get_DC_huffman_table_id(struct ComponentSOS *component){
+    return component->DC_huffman_table_id;
+}
+
+int8_t get_AC_huffman_table_id(struct ComponentSOS *component){
+    return component->AC_huffman_table_id;
+}
+
+int16_t **get_MCUs(struct ComponentSOS *component){
+    return component->MCUs;
+}
+
+// int16_t *get_MCU(struct ComponentSOF *component, int index_of_mcu){
+//     return component->MCUs[index_of_mcu];
+// }
+
+void set_value_in_MCU(struct ComponentSOS *component, int index_of_mcu, int index_of_pixel_in_mcu, int16_t value){
+        component->MCUs[index_of_mcu][index_of_pixel_in_mcu] = value;
+}
+
 
 struct StartOfScan {
     unsigned char nb_components;
     struct ComponentSOS *components;
 };
 
-void initialize_sos(struct StartOfScan *sos){
-    sos->nb_components = 0; // 1 = greyscale, 3 = YCbCr or YIQ
-    sos->components = NULL;
+void initialize_sos(struct StartOfScan *sos, int8_t nb_components, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCU, struct JPEG *jpeg){
+    sos->nb_components = nb_components; // 1 = greyscale, 3 = YCbCr or YIQ
+
+    if (nb_components == 0) {
+        sos->components = NULL;
+    } else {
+        sos->components = (struct ComponentSOS *) malloc(nb_components * sizeof(struct ComponentSOS));
+        for(int i=0; i<nb_components; i++){
+            initialize_component_sos(&(sos->components[i]), id_table, DC_huffman_table_id, AC_huffman_table_id, nb_of_MCU, jpeg);
+        }
+    }
 }
 
 unsigned char get_sos_nb_components(struct StartOfScan *sos){
@@ -161,6 +185,10 @@ unsigned char get_sos_nb_components(struct StartOfScan *sos){
 
 struct ComponentSOS * get_sos_components(struct StartOfScan *sos){
     return sos->components;
+}
+
+struct ComponentSOS * get_sos_component(struct ComponentSOS * components, int8_t index){
+    return &components[index];
 }
 
 
@@ -172,7 +200,7 @@ struct JPEG {
     struct QuantizationTable **quantization_tables;
     struct StartOfFrame **start_of_frame;
     struct HuffmanTable **huffman_tables;
-    struct StartOfScan *start_of_scan;
+    struct StartOfScan **start_of_scan;
     unsigned char *image_data;
     size_t image_data_size_in_bits;
 };
@@ -183,31 +211,33 @@ void initialize_JPEG_struct(struct JPEG *jpeg){
     jpeg->width = 0;
 
     jpeg->quantization_tables = (struct QuantizationTable **) malloc(2 * sizeof(struct QuantizationTable *));
-    check_memory_allocation((void *) jpeg->quantization_tables, jpeg);
+    check_memory_allocation((void *) jpeg->quantization_tables);
     for (int i=0; i<2; i++){
         jpeg->quantization_tables[i] = (struct QuantizationTable *) malloc(sizeof(struct QuantizationTable));
-        check_memory_allocation((void *) jpeg->quantization_tables[i], jpeg);
+        check_memory_allocation((void *) jpeg->quantization_tables[i]);
         initialize_qt(jpeg->quantization_tables[i]);
     }
 
     jpeg->start_of_frame = (struct StartOfFrame **) malloc(1 * sizeof(struct StartOfFrame *));  // pour l'instant on a qu'un seul frame ... à modifier pour mode progressif
-    check_memory_allocation((void *) jpeg->start_of_frame, jpeg);
+    check_memory_allocation((void *) jpeg->start_of_frame);
     jpeg->start_of_frame[0] = (struct StartOfFrame *) malloc(sizeof(struct StartOfFrame));
-    initialize_sof(jpeg->start_of_frame[0]);
+    initialize_sof(jpeg->start_of_frame[0], 0, -1, -1, -1, -1);
 
     jpeg->huffman_tables = (struct HuffmanTable **) malloc(4 * sizeof(struct HuffmanTable *));
-    check_memory_allocation((void *) jpeg->huffman_tables, jpeg);
+    check_memory_allocation((void *) jpeg->huffman_tables);
     for (int i=0; i<4; i++){
         jpeg->huffman_tables[i] = (struct HuffmanTable *) malloc(sizeof(struct HuffmanTable));
-        check_memory_allocation((void *) jpeg->huffman_tables[i], jpeg);
+        check_memory_allocation((void *) jpeg->huffman_tables[i]);
         initialize_ht(jpeg->huffman_tables[i]);
     }
 
-    jpeg->start_of_scan = (struct StartOfScan *) malloc(sizeof(struct StartOfScan));
-    check_memory_allocation((void *) jpeg->start_of_scan, jpeg);
+    jpeg->start_of_scan = (struct StartOfScan **) malloc(1 * sizeof(struct StartOfScan *));  // pour l'instant on a qu'un seul frame ... à modifier pour mode progressif
+    check_memory_allocation((void *) jpeg->start_of_scan);
+    jpeg->start_of_scan[0] = (struct StartOfScan *) malloc(sizeof(struct StartOfScan));
+    initialize_sos(jpeg->start_of_scan[0], 0, -1, -1, -1, 0, jpeg);
 
     jpeg->image_data = (unsigned char *) malloc(INITIAL_DATA_SIZE * sizeof(unsigned char));
-    check_memory_allocation((void *) jpeg->image_data, jpeg);
+    check_memory_allocation((void *) jpeg->image_data);
 
     jpeg->image_data_size_in_bits = 0;
 }
@@ -232,7 +262,7 @@ struct HuffmanTable ** get_JPEG_ht(struct JPEG *jpeg){
     return jpeg->huffman_tables;
 }
 
-struct StartOfScan * get_JPEG_sos(struct JPEG *jpeg){
+struct StartOfScan ** get_JPEG_sos(struct JPEG *jpeg){
     return jpeg->start_of_scan;
 }
 
@@ -277,15 +307,16 @@ void ignore_bytes(FILE *input, int nb_bytes){
 // Récupère les données de la table de quantification
 struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     // On souhaite récupérer les tables de quantification
-    getVerbose() ? printf("\nQuantization table\n\t"):0;
+    getVerbose() ? printf("\nQuantization table\n"):0;
+    getVerbose() ? printf("\tDonnées de la table : "):0;
     short length = 0;
     length = two_bytes_to_dec(input);
     length = length - 2 - 1;
 
     struct QuantizationTable *qt = (struct QuantizationTable *) malloc(sizeof(struct QuantizationTable));
-    check_memory_allocation((void *) qt, jpeg);
+    check_memory_allocation((void *) qt);
     qt->data = (unsigned char *) malloc(length * sizeof(unsigned char *));
-    check_memory_allocation((void *) qt->data, jpeg);
+    check_memory_allocation((void *) qt->data);
     
     fread(buffer, 1, 1, input);
     if (buffer[0] == LUMINANCE_ID) {
@@ -334,7 +365,7 @@ int get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     getVerbose() ? printf("\tNombre de composantes : %d\n", nb_components):0;
 
     struct ComponentSOF *components = (struct ComponentSOF *) malloc(nb_components*sizeof(struct ComponentSOF));
-    check_memory_allocation((void *) components, jpeg);
+    check_memory_allocation((void *) components);
 
     getVerbose() ? printf("\tComposantes :\n"):0;
     for (int i=0; i<nb_components; i++){
@@ -377,7 +408,7 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer, struct JPEG *j
     short length = two_bytes_to_dec(input); // Longueur du segment
     length = length - 2 - 1; // On enlève la longueur du segment et l'octet de précision 
     
-    unsigned char id_table = read_byte(input, buffer); // ID de la table
+    int8_t id_table = read_byte(input, buffer); // ID de la table
     // Les 4 bits de poids fort indiquent la classe de la table (DC ou AC)
     // 0 : DC or lossless table,
     // 1 : AC
@@ -385,15 +416,15 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer, struct JPEG *j
     // Specifies one of four possible destinations at the decoder into which the Huffman table shall be installed
     // 0 : luminance
     // 1 : chrominance
-    unsigned char class = id_table >> 4;
-    unsigned char destination = id_table << 4;
-    destination = destination >> 4;
+    int8_t class = id_table >> 4;
+    int8_t destination = id_table & 0x0F;
     getVerbose() ? printf("\tClasse de la table : %d\n", class):0;
-    getVerbose() ? printf("\tDestination de la table : %d\n\t", destination):0;
+    getVerbose() ? printf("\tDestination de la table : %d\n", destination):0;
+    getVerbose() ? printf("\tDonnées de la table : %d", destination):0;
 
     // Contenu de la table
     unsigned char *huffman_data = (unsigned char *) malloc(length*sizeof(unsigned char));
-    check_memory_allocation((void *) huffman_data, jpeg);
+    check_memory_allocation((void *) huffman_data);
 
     fread(huffman_data, length, 1, input);
 
@@ -404,7 +435,7 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer, struct JPEG *j
     getVerbose() ? printf("\n"):0;
 
     struct HuffmanTable *huffman_table = (struct HuffmanTable *) malloc(sizeof(struct HuffmanTable));
-    check_memory_allocation((void *) huffman_table, jpeg);
+    check_memory_allocation((void *) huffman_table);
     huffman_table->class = class;
     huffman_table->destination = destination;
     huffman_table->length = length;
@@ -418,38 +449,37 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer, struct JPEG *j
 
 //**********************************************************************************************************************
 // Récupère les données du segment Start_Of_Scan
-int getSOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
+int get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
     getVerbose() ? printf("\nStart of scan + data\n"):0;
     ignore_bytes(input, 2); // Longueur du segment (ignoré)
 
-    unsigned char nb_components = read_byte(input, buffer); // Nombre de composantes
-    jpeg->start_of_scan->nb_components = nb_components;
+    int8_t nb_components = read_byte(input, buffer); // Nombre de composantes
+    jpeg->start_of_scan[0]->nb_components = nb_components;
     getVerbose() ? printf("\tNombre de composantes : %d\n", nb_components):0;
 
     struct ComponentSOS *components = (struct ComponentSOS *) malloc(nb_components*sizeof(struct ComponentSOS));
-    check_memory_allocation((void *) components, jpeg);
+    check_memory_allocation((void *) components);
 
     // Composantes
     for (int i=0; i<nb_components; i++){
-        unsigned char id_component = read_byte(input, buffer); // ID composante
+        int8_t id_component = read_byte(input, buffer); // ID composante
         
-        unsigned char id_table = read_byte(input, buffer); // ID de la table
-        unsigned char class = id_table >> 4;
-        unsigned char destination = id_table << 4;
-        destination = destination >> 4;
+        int8_t ht_ids = read_byte(input, buffer); // ID de la table
+        int8_t DC_huffman_table_id = ht_ids >> 4;
+        int8_t AC_huffman_table_id = (ht_ids & 0x0F) + 2;    // On ajoute 2 car les index des tables_AC commence à 2
         getVerbose() ? printf("\tID composante : %d\n", id_component):0;
-        getVerbose() ? printf("\tType de table : %d\n", class):0;
-        getVerbose() ? printf("\tNuméro de table : %d\n", destination):0;
+        getVerbose() ? printf("\tDC_huffman_table_id : %d\n", DC_huffman_table_id):0;
+        getVerbose() ? printf("\tAC_huffman_table_id : %d\n", AC_huffman_table_id):0;
 
         components[i].id_table = id_component;
-        components[i].class = class;
-        components[i].destination = destination;
+        components[i].DC_huffman_table_id = DC_huffman_table_id;
+        components[i].AC_huffman_table_id = AC_huffman_table_id;
     }
 
     // Paramètres ignorés
     ignore_bytes(input, 3); // Octet de début de spectre, octet de fin de spectre, approximation (ignorés)
 
-    jpeg->start_of_scan->components = components;
+    jpeg->start_of_scan[0]->components = components;
 
     return EXIT_SUCCESS;
 }
@@ -486,7 +516,7 @@ struct JPEG * extract(char *filename) {
     unsigned char id[1];        // Buffer de lecture pour déterminer le type de segments
 
     struct JPEG *jpeg = (struct JPEG *) malloc(1 * sizeof(struct JPEG));
-    check_memory_allocation((void *) jpeg, jpeg);
+    check_memory_allocation((void *) jpeg);
     initialize_JPEG_struct(jpeg);
 
     while (!feof(input)){ // On arrête la boucle si on arrive à la fin du fichier sans avoir lu de marker EOF
@@ -519,32 +549,32 @@ struct JPEG * extract(char *filename) {
             } else if (id[0] == DHT){
                 
                 // BREAKING-UPDATE : on possède au maximum 4 tables de Huffman
-                // index 0 >>> class|destination : 00 >>> luminance|DC
-                // index 1 >>> class|destination : 01 >>> chrominance|DC
-                // index 2 >>> class|destination : 10 >>> luminance|AC
-                // index 3 >>> class|destination : 11 >>> chrominance|AC
+                // index 0 >>> class|destination : 00 >>> DC|luminance
+                // index 1 >>> class|destination : 01 >>> DC|chrominance
+                // index 2 >>> class|destination : 10 >>> AC|luminance
+                // index 3 >>> class|destination : 11 >>> AC|chrominance
                 // Si une nouvelle table de Huffman redéfinie une table déjà existante, on supprime l'ancienne
                 struct HuffmanTable *huffman_table = get_DHT(input, buffer, jpeg);
                 
-                if (huffman_table->class == 0) {
-                    if (huffman_table->destination == 0) {
+                if (huffman_table->class == 0) {    // DC
+                    if (huffman_table->destination == 0) {  // Luminance
                         free(jpeg->huffman_tables[0]->data);
                         free(jpeg->huffman_tables[0]->huffman_tree);
                         free(jpeg->huffman_tables[0]);
                         jpeg->huffman_tables[0] = huffman_table;
-                    } else {
+                    } else {    // Chrominance
                         free(jpeg->huffman_tables[1]->data);
                         free(jpeg->huffman_tables[1]->huffman_tree);
                         free(jpeg->huffman_tables[1]);
                         jpeg->huffman_tables[0] = huffman_table;
                     }
-                } else {
-                    if (huffman_table->destination == 0) {
+                } else {    // AC
+                    if (huffman_table->destination == 0) {  // Luminance
                         free(jpeg->huffman_tables[2]->data);
                         free(jpeg->huffman_tables[2]->huffman_tree);
                         free(jpeg->huffman_tables[2]);
                         jpeg->huffman_tables[0] = huffman_table;
-                    } else {
+                    } else {    // Chrominance
                         free(jpeg->huffman_tables[3]->data);
                         free(jpeg->huffman_tables[3]->huffman_tree);
                         free(jpeg->huffman_tables[3]);
@@ -555,7 +585,7 @@ struct JPEG * extract(char *filename) {
             //**********************************************************************************************************************
             } else if (id[0] == SOS){
                 
-                getSOS(input, buffer, jpeg);
+                get_SOS(input, buffer, jpeg);
 
                 // On lit la data en enlevant les 0 (à cause du byte stuffing)
                 int data_size = INITIAL_DATA_SIZE; // On donne une estimation de la taille des données à récupérer
@@ -569,7 +599,7 @@ struct JPEG * extract(char *filename) {
                     if(nb_data >= data_size -1){
                         data_size *= 2;
                         jpeg->image_data = realloc(jpeg->image_data, data_size * sizeof(unsigned char *));
-                        check_memory_allocation((void *) jpeg->image_data, jpeg);
+                        check_memory_allocation((void *) jpeg->image_data);
                     }
 
                     if (buffer[0] == SEGMENT_START){
@@ -579,11 +609,10 @@ struct JPEG * extract(char *filename) {
                             jpeg->image_data[nb_data] = SEGMENT_START;
                             nb_data++;
 
-                        } else if (buffer[0] == EOI){   // On supprimer le dernier 0xff du marker EOI
-                            jpeg->image_data[nb_data -1] = 0x0;
+                        } else if (buffer[0] == EOI){   // On ne prend pas en compte le dernier 0xff du marker EOI
                             jpeg->image_data_size_in_bits = 8 * nb_data;
                             // On a fini la lecture des données
-                            getVerbose() ? printf("\tTaille de la data : %d\n", nb_data):0;
+                            getVerbose() ? printf("\tLongueur du bitstream_image_data (bits) : %d\n", 8 * nb_data):0;
                             getVerbose() ? printf("Fin du fichier\n\n"):0;
                             fclose(input);
                             return jpeg;

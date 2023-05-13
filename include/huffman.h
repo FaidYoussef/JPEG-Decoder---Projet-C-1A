@@ -15,7 +15,7 @@
 struct node;
 
 // Crée un nouveau noeud
-struct node * create_node(unsigned char symbol, struct node *left, struct node *right, struct JPEG *jpeg);
+struct node * create_node(int8_t symbol, struct node *left, struct node *right, struct JPEG *jpeg);
 
 //**********************************************************************************************************************
 // Construit l'arbre de huffman à partir de la table de huffman
@@ -28,7 +28,7 @@ void free_huffman_tree(struct node *root);
 void print_binary(uint16_t value, int length);
 
 // Affiche la représentation binaire d'un code de huffman
-void print_huffman_codes(int *bit_lengths, unsigned char *symbols, int n);
+void print_huffman_codes(int *bit_lengths, int8_t *symbols, int n);
 
 //**********************************************************************************************************************
 // Renvoie la valeur du coefficient DC à partir de sa magnitude et de son indice dans la classe de magnitude

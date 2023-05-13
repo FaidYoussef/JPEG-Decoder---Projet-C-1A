@@ -10,6 +10,6 @@
 #define NB_VALUES_IN_8x8_BLOCK 64
 
 
-int check_memory_allocation(void *allocated_data, struct JPEG *jpeg);
+int check_memory_allocation(void *allocated_data);
 
 #endif

@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 #include <huffman.h>
-#include <utils.h>
 
 #define ONE 0x1
 #define EOB 0x00
@@ -15,16 +14,16 @@
 //**********************************************************************************************************************
 // Structure représentant un noeud de l'arbre de Huffman
 struct node {
-    unsigned char symbol;
+    int8_t symbol;
     struct node *left;
     struct node *right;
 };
 
 
 // Crée un nouveau noeud
-struct node *create_node(unsigned char symbol, struct node *left, struct node *right, struct JPEG *jpeg) {
+struct node *create_node(int8_t symbol, struct node *left, struct node *right, struct JPEG *jpeg) {
     struct node *new_node = (struct node *) malloc(sizeof(struct node));
-    check_memory_allocation((void *) new_node, jpeg);
+    check_memory_allocation((void *) new_node);
 
     new_node->symbol = symbol;
     new_node->left = left;
@@ -41,15 +40,17 @@ struct node * build_huffman_tree(unsigned char *ht_data, struct JPEG *jpeg) {
     // On vérifie que la table de Huffman est valide
     if (ht_data == NULL) {
         fprintf(stderr, "Error: invalid Huffman table\n");
+        // Il faut free toute la mémoire via jpeg
         exit(EXIT_FAILURE);
     }
     // Il faut également vérifier que le nombre de code pour chaque longueur est valide
     for (uint16_t i = 0; i < 16; i++) {
         uint16_t nb_max_symbols_per_level = (ONE << (i+1)) - 1;
         getHighlyVerbose() ? fprintf(stderr, "\t\tnb_max_symbols_per_level: %d\n", nb_max_symbols_per_level):0;
-        getHighlyVerbose() ? fprintf(stderr, "\t\tht_data[%d]: %d\n", i, ht_data[i]):0;
+        getHighlyVerbose() ? fprintf(stderr, "\t\tNombre de codes: %d\n", ht_data[i]):0;
         if (ht_data[i] > nb_max_symbols_per_level) {
             fprintf(stderr, "Error: invalid Huffman table - too much symbols per level\n");
+            // Il faut free toute la mémoire via jpeg
             exit(EXIT_FAILURE);
         }
     }
@@ -59,6 +60,7 @@ struct node * build_huffman_tree(unsigned char *ht_data, struct JPEG *jpeg) {
     int pos = 16;
     uint16_t code = 0;
 
+    getHighlyVerbose() ? fprintf(stderr, "\t\tSymbol(s): "):0;
     for (int i = 1; i <= 16; i++) {
         for (int j = 0; j < ht_data[i - 1]; j++) {
             current_node = root;
@@ -84,6 +86,7 @@ struct node * build_huffman_tree(unsigned char *ht_data, struct JPEG *jpeg) {
             // }
 
             current_node->symbol = ht_data[pos++];
+            getHighlyVerbose() ? fprintf(stderr, " '%x' ", current_node->symbol):0;
             code++;
         }
         code <<= 1;
@@ -112,7 +115,7 @@ void print_binary(uint16_t value, int length) {
 
 
 // Affiche la représentation binaire d'un code de huffman
-void print_huffman_codes(int *bit_lengths, unsigned char *symbols, int n) {
+void print_huffman_codes(int *bit_lengths, int8_t *symbols, int n) {
     uint16_t code = 0;
     int symbol_index = 0;
 
@@ -120,7 +123,7 @@ void print_huffman_codes(int *bit_lengths, unsigned char *symbols, int n) {
         int bit_length = bit_lengths[i];
 
         for (int j = 0; j < bit_length; j++) {
-            getHighlyVerbose() ? printf("Symbol: %c, Code: ", symbols[symbol_index]):0;
+            getHighlyVerbose() ? printf("Symbol: %d, Code: ", symbols[symbol_index]):0;
             getHighlyVerbose() ? print_binary(code, i):0;
             getHighlyVerbose() ? printf("\n"):0;
             code++;
@@ -165,17 +168,23 @@ int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magn
 // puis récupère les valeurs à encoder via RLE et encodage via magnitude
 int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int* previous_DC_value) {
     // On récupère les 64 valeurs du bloc 8x8
-    getHighlyVerbose() ? fprintf(stderr, "Decoding MCU:\n"):0;
-
-    struct ComponentSOF *component = get_sof_components(get_JPEG_sof(jpeg)[0])[component_index];
+    struct ComponentSOS *component = get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), component_index);
     unsigned char *bitstream = get_JPEG_image_data(jpeg);
     size_t bitstream_size_in_bits = get_JPEG_image_data_size_in_bits(jpeg);
-    
+
+    for (size_t i =0; i < bitstream_size_in_bits/8; i++) {
+        getHighlyVerbose() ? printf("%x", (bitstream[i])):0;
+    }
+    getHighlyVerbose() ? printf("\n"):0;
     struct node *current_node = get_ht_tree(get_JPEG_ht(jpeg)[get_DC_huffman_table_id(component)]);
     int8_t nombre_de_valeurs_decodees = 0;
     size_t current_pos = 0;
 
-    getHighlyVerbose() ? fprintf(stderr, "\tMCU#%ld:", MCU_number):0;
+    getHighlyVerbose() ? fprintf(stderr, "Decoding MCUs:\n"):0;
+    getHighlyVerbose() ? fprintf(stderr, "\tMCU#%ld:\n", MCU_number):0;
+    getHighlyVerbose() ? fprintf(stderr, "\t\tComponent#%d\n", component_index):0;
+    getHighlyVerbose() ? fprintf(stderr, "\t\t\tDC huffman table id: %d\n", get_DC_huffman_table_id(component)):0;
+    getHighlyVerbose() ? fprintf(stderr, "\t\t\tAC huffman table id: %d\n", get_AC_huffman_table_id(component)):0;
 
     // On décode pour trouver la valeur du coefficient DC
     for (size_t i = current_pos; i < bitstream_size_in_bits; i++) {
@@ -196,7 +205,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
         if (!current_node->left && !current_node->right) {  // On est sur une feuille
             // (2) On récupère la valeur de magnitude associée
             int8_t magnitude_DC = current_node->symbol;
-            getHighlyVerbose() ? fprintf(stderr, "magnitude_DC :%d\n", magnitude_DC):0;
+            getHighlyVerbose() ? fprintf(stderr, "\t\t\tmagnitude_DC :%x\n", magnitude_DC):0;
 
             if (magnitude_DC < 0) {
                 fprintf(stderr, "Error: invalid DC magnitude - negative value\n");
@@ -341,7 +350,7 @@ int decode_bitstream(struct JPEG * jpeg){
         // plusieurs scans/frames ---> mode progressif
         
         // On parcours toutes les composantes
-        for (unsigned int j = 0; j < get_sof_nb_components(get_JPEG_sof(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
+        for (unsigned int j = 0; j < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
             if (!decode_MCU(jpeg, i, j, &previous_DC_values[j])) {
                 // free_memory(jpeg);
                 return EXIT_FAILURE;
