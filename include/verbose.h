@@ -6,4 +6,8 @@ void setVerbose(bool value);
 
 bool getVerbose();
 
+void setHighlyVerbose(bool value);
+
+bool getHighlyVerbose();
+
 #endif
