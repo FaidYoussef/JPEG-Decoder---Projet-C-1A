@@ -66,6 +66,10 @@ int16_t **get_MCUs(struct ComponentSOF *component){
     return component->MCUs;
 }
 
+// int16_t *get_MCU(struct ComponentSOF *component, int index_of_mcu){
+//     return component->MCUs[index_of_mcu];
+// }
+
 void set_value_in_MCU(struct ComponentSOF *component, int index_of_mcu, int index_of_pixel_in_mcu, int16_t value){
         component->MCUs[index_of_mcu][index_of_pixel_in_mcu] = value;
 }
@@ -147,7 +151,7 @@ struct StartOfScan {
 };
 
 void initialize_sos(struct StartOfScan *sos){
-    sos->nb_components = 0;
+    sos->nb_components = 0; // 1 = greyscale, 3 = YCbCr or YIQ
     sos->components = NULL;
 }
 
@@ -166,7 +170,7 @@ struct JPEG {
     unsigned short height;
     unsigned short width;
     struct QuantizationTable **quantization_tables;
-    struct StartOfFrame *start_of_frame;
+    struct StartOfFrame **start_of_frame;
     struct HuffmanTable **huffman_tables;
     struct StartOfScan *start_of_scan;
     unsigned char *image_data;
@@ -186,9 +190,9 @@ void initialize_JPEG_struct(struct JPEG *jpeg){
         initialize_qt(jpeg->quantization_tables[i]);
     }
 
-    jpeg->start_of_frame = (struct StartOfFrame *) malloc(sizeof(struct StartOfFrame));
+    jpeg->start_of_frame = (struct StartOfFrame **) malloc(1 * sizeof(struct StartOfFrame *));
     check_memory_allocation((void *) jpeg->start_of_frame);
-    initialize_sof(jpeg->start_of_frame);
+    initialize_sof(jpeg->start_of_frame[0]);
 
     jpeg->huffman_tables = (struct HuffmanTable **) malloc(4 * sizeof(struct HuffmanTable *));
     check_memory_allocation((void *) jpeg->huffman_tables);
@@ -219,7 +223,7 @@ struct QuantizationTable ** get_JPEG_qt(struct JPEG *jpeg){
     return jpeg->quantization_tables;
 }
 
-struct StartOfFrame * get_JPEG_sof(struct JPEG *jpeg){
+struct StartOfFrame ** get_JPEG_sof(struct JPEG *jpeg){
     return jpeg->start_of_frame;
 }
 
@@ -355,11 +359,11 @@ int get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     }
 
     // On supprime les données précédentes
-    free(jpeg->start_of_frame->components);
+    free(jpeg->start_of_frame[0]->components);
 
     // Et on met à jour les données
-    jpeg->start_of_frame->nb_components = nb_components;
-    jpeg->start_of_frame->components = components;
+    jpeg->start_of_frame[0]->nb_components = nb_components;
+    jpeg->start_of_frame[0]->components = components;
 
     return EXIT_SUCCESS;
 }

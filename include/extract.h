@@ -41,6 +41,7 @@ int8_t get_id(struct ComponentSOF *component);
 int8_t get_DC_huffman_table_id(struct ComponentSOF *component);
 int8_t get_AC_huffman_table_id(struct ComponentSOF *component);
 int16_t **get_MCUs(struct ComponentSOF *component);
+// int16_t *get_MCU(struct ComponentSOF *component, int index_of_mcu);
 void set_value_in_MCU(struct ComponentSOF *component, int index_of_mcu, int index_of_pixel_in_mcu, int16_t value);
 
 struct StartOfFrame;
@@ -71,11 +72,11 @@ void initialize_JPEG_struct(struct JPEG *jpeg);
 unsigned short get_JPEG_height(struct JPEG *jpeg);
 unsigned short get_JPEG_width(struct JPEG *jpeg);
 struct QuantizationTable ** get_JPEG_qt(struct JPEG *jpeg);
-struct StartOfFrame * get_JPEG_sof(struct JPEG *jpeg);
+struct StartOfFrame ** get_JPEG_sof(struct JPEG *jpeg);
 struct HuffmanTable ** get_JPEG_ht(struct JPEG *jpeg);
 struct StartOfScan * get_JPEG_sos(struct JPEG *jpeg);
 unsigned char * get_JPEG_image_data(struct JPEG* jpeg);
-size_t get_JPEG_image_data_size_in_bytes(struct JPEG* jpeg);
+size_t get_JPEG_image_data_size_in_bits(struct JPEG* jpeg);
 
 //**********************************************************************************************************************
 short two_bytes_to_dec(FILE *input);

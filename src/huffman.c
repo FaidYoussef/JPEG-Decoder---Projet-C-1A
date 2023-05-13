@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 #include <huffman.h>
-#include <extract.h>
 #include <utils.h>
 
 #define ONE 0x1
@@ -165,7 +164,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
     // On récupère les 64 valeurs du bloc 8x8
     getHighlyVerbose() ? fprintf(stderr, "Decoding MCU:\n"):0;
 
-    struct ComponentSOF *component = get_JPEG_sof(jpeg)[component_index];
+    struct ComponentSOF *component = get_sof_components(get_JPEG_sof(jpeg)[0])[component_index];
     unsigned char *bitstream = get_JPEG_image_data(jpeg);
     size_t bitstream_size_in_bits = get_JPEG_image_data_size_in_bits(jpeg);
     
@@ -338,7 +337,7 @@ int decode_bitstream(struct JPEG * jpeg){
         // plusieurs scans/frames ---> mode progressif
         
         // On parcours toutes les composantes
-        for (unsigned int j = 0; j < get_sof_nb_components(get_JPEG_sof(jpeg)); ++j) {
+        for (unsigned int j = 0; j < get_sof_nb_components(get_JPEG_sof(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
             if (!decode_MCU(jpeg, i, j, &previous_DC_values[j])) {
                 // free_memory(jpeg);
                 return EXIT_FAILURE;
