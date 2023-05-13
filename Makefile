@@ -7,7 +7,7 @@ LD = gcc
 # C'est utile pour débugger, par contre en "production"
 # on active au moins les optimisations de niveau 2 (-O2).
 # -lm on lie la bibliothèque mathématique (sqrt, cos, etc.)
-CFLAGS = -Wall -Wextra -std=c99 -Iinclude -O0 -g -lm
+CFLAGS = -Wall -Wextra -std=c99 -Iinclude -O0 -mavx -g -lm
 LDFLAGS =
 
 # Par défaut, on compile tous les fichiers source (.c) qui se trouvent dans le
@@ -40,13 +40,10 @@ test-ppm: obj/ppm.o
 test-quant_zigzag: obj/quant_zigzag.o
 	make -C tests/ quant_zigzag-test
 
-test-RLE_decode: obj/RLE_decode.o
-	make -C tests/ RLE_decode-test
-
 test-ycbcr2rgb: obj/ycbcr2rgb.o
 	make -C tests/ ycbcr2rgb-test 
 
 .PHONY: clean
 
 clean:
-	rm -rf jpeg2ppm tests/huffman-test tests/IDCT-test tests/ppm tests/quant_zigzag-test tests/RLE_decode tests/ycbcr2rgb $(OBJ_FILES)
+	rm -rf jpeg2ppm tests/huffman-test tests/IDCT-test tests/ppm tests/quant_zigzag-test tests/ycbcr2rgb $(OBJ_FILES)
