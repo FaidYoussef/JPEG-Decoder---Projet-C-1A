@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define NB_VALUES_IN_8x8_BLOCK 64
 
-void check_memory_allocation(void *allocated_data);
+
+int check_memory_allocation(void *allocated_data);
 
 #endif

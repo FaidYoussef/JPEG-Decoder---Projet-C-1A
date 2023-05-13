@@ -5,32 +5,45 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <extract.h>
 #include <utils.h>
 #include <verbose.h>
 
-struct node ;
+
+//**********************************************************************************************************************
+// Structure représentant un noeud de l'arbre de huffman
+struct node;
 
 // Crée un nouveau noeud
-struct node *create_node(unsigned char symbol, struct node *left, struct node *right);
+struct node * create_node(unsigned char symbol, struct node *left, struct node *right);
 
-// Renvoie la valeur du coefficient à partir de sa magnitude et de son indice dans la classe de magnitude
-int recover_coeff_value(int8_t magnitude, int indice_dans_classe_magnitude);
+//**********************************************************************************************************************
+// Construit l'arbre de huffman à partir de la table de huffman
+struct node * build_huffman_tree(unsigned char *huff_table);
+
+// Fonction qui free l'arbre de Huffman
+void free_huffman_tree(struct node *root);
+
+// Affiche la représentation binaire d'un entier
+void print_binary(uint16_t value, int length);
 
 // Affiche la représentation binaire d'un code de huffman
 void print_huffman_codes(int *bit_lengths, unsigned char *symbols, int n);
 
-// Conversion decimal vers hexadecimal
-int dec2hex(int decimal);
+//**********************************************************************************************************************
+// Renvoie la valeur du coefficient DC à partir de sa magnitude et de son indice dans la classe de magnitude
+int16_t recover_DC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude);
 
-// Construit l'arbre de huffman à partir de la table de huffman
-struct node * build_huffman_tree(unsigned char *huff_table) ;
+// Renvoie la valeur du coefficient AC à partir de sa magnitude et de son indice dans la classe de magnitude
+int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude);
 
-// Décode un bitstream
-// utilise les tables de Huffman
-// puis récupère les valeurs à encoder via Run/Size data
-unsigned char * decode_bitstream(unsigned char *ht_DC, unsigned char *ht_AC, unsigned char *bitstream, size_t bitstream_size_in_bits);
+//**********************************************************************************************************************
+// Décode un MCU
+// utilise les tables de Huffman de la composante
+// puis récupère les valeurs à encoder via RLE et encodage via magnitude
+int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int* previous_DC_value);
 
-// Teste la fonction decode_bitstream
-void test_decode_bitstream(unsigned char *bitstream, size_t bitstream_size_in_bits, unsigned char *expected_output);
+// Décode le bitstream et récupère les MCU de chacune des composantes
+int decode_bitstream(struct JPEG * jpeg);
 
 #endif

@@ -46,7 +46,7 @@ void load() {
 }
 
 int * idct(int input[NN]) {
-    int *output = malloc(NN * sizeof(int));
+    int *output = (int *) malloc(NN * sizeof(int));
     for (int x = 0; x < N; x++) {
         for (int y = 0; y < N; y++) { 
             double sum = 0.0;
