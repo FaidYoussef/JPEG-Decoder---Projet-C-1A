@@ -257,7 +257,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
                 // (3) On récupère la valeur du coefficient AC à partir du Run/Size
                 if (run_and_size == EOB){   // (3a) On gère le cas spécial EOB
                     for (int8_t j = 0; j < (64 - nombre_de_valeurs_decodees); j++){
-                        set_value_in_MCU(get_MCUs(component), MCU_number, nombre_de_valeurs_decodees++, 0);
+                        set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
                         getHighlyVerbose() ? fprintf(stderr, "%x-%d | ", 0x0, nombre_de_valeurs_decodees):0;
 
                         // On réaffecte la position courante dans le bitstream pour la suite
@@ -265,7 +265,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
                     }
                 } else if (run_and_size == ZRL){   // (3b) On gère le cas spécial ZRL
                     for (int j = 0; j < 16; j++){
-                        set_value_in_MCU(get_MCUs(component), MCU_number, nombre_de_valeurs_decodees++, 0);
+                        set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
                         getHighlyVerbose() ? fprintf(stderr, "%x-%d | ", 0x0, nombre_de_valeurs_decodees):0;
 
                         if (nombre_de_valeurs_decodees > 64){
@@ -279,7 +279,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
                 } else {    // (3c) Sinon On ajoute le bon nombre de coefficients nuls avant le coefficient AC
                     uint8_t nb_de_coeff_nuls_a_ajouter_avant = run_and_size >> 4;
                     for (int8_t j = 0; j < nb_de_coeff_nuls_a_ajouter_avant; j++){
-                        set_value_in_MCU(get_MCUs(component), MCU_number, nombre_de_valeurs_decodees++, 0);
+                        set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
                         getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %x-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
                     }
 
