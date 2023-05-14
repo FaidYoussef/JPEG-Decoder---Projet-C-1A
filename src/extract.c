@@ -221,8 +221,8 @@ struct ComponentSOS * get_sos_component(struct ComponentSOS * components, int8_t
 //**********************************************************************************************************************
 // Structure JPEG
 struct JPEG {
-    int16_t height;
     int16_t width;
+    int16_t height;
     struct QuantizationTable **quantization_tables;
     struct StartOfFrame **start_of_frame;
     struct HuffmanTable **huffman_tables;
@@ -370,8 +370,8 @@ void free_JPEG_struct(struct JPEG *jpeg){
                 }
                 free(&(jpeg->start_of_scan[i]));
             }
-            free(jpeg->start_of_scan);
         }
+        free(jpeg->start_of_scan);
     }
     
     // On free les données de l'image
@@ -504,6 +504,34 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     int8_t nb_components = read_byte(input, buffer);
     getVerbose() ? printf("\tNombre de composantes : %d\n", nb_components):0;
 
+    // On met à jour le nombre de mcus dans le Start Of Scan s'il existe
+    if (jpeg->start_of_scan[0]->nb_components == nb_components) {
+        size_t nb_mcu_width = 0;
+        size_t nb_mcu_height = 0;
+        if (width  % 8 == 0) {
+            nb_mcu_width =  width / 8;
+        } else {
+            nb_mcu_width = (width / 8) + 1;
+        }
+        if (height % 8 == 0) {
+            nb_mcu_height =  height / 8;
+        } else {
+            nb_mcu_height = (height / 8) + 1;
+        }
+
+        for (int8_t i=0; i < nb_components; i++) {
+            (&(jpeg->start_of_scan[0]->components[i]))->nb_of_MCUs = nb_mcu_width * nb_mcu_height;
+
+            (&(jpeg->start_of_scan[0]->components[i]))->MCUs = (int16_t **) malloc(nb_mcu_width * nb_mcu_height * sizeof(int16_t *));
+            if (check_memory_allocation((void *) (&(jpeg->start_of_scan[0]->components[i]))->MCUs)) return EXIT_FAILURE;
+
+            for (size_t j=0; j < nb_mcu_width * nb_mcu_height; i++) {
+                (&(jpeg->start_of_scan[0]->components[i]))->MCUs[j] = (int16_t *) malloc(64 * sizeof(int16_t));
+                if (check_memory_allocation((void *) (&(jpeg->start_of_scan[0]->components[i]))->MCUs[j])) return EXIT_FAILURE;
+            }
+        }
+    }
+
     struct ComponentSOF *components = (struct ComponentSOF *) malloc(nb_components*sizeof(struct ComponentSOF));
     if (check_memory_allocation((void *) components)) return EXIT_FAILURE;
 
@@ -515,8 +543,7 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
         int8_t sampling_factor = read_byte(input, buffer); // Il faut faire une conversion car c'est un octet et on veut deux bits
 
         int8_t sampling_factor_x = sampling_factor >> 4;
-        int8_t sampling_factor_y = sampling_factor << 4;
-        sampling_factor_y = sampling_factor_y >> 4;
+        int8_t sampling_factor_y = sampling_factor & 0x0F;
 
         int8_t num_quantization_table = read_byte(input, buffer); // Tables de quantification
         getVerbose() ? printf("\t\tID composante : %d\n", id_component):0;
@@ -531,7 +558,7 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     }
 
     // On supprime les données précédentes
-    free(jpeg->start_of_frame[0]->components);
+    free(jpeg->start_of_frame[0]->components);  // attention il faudra modifier lorsque l'on aura plusieurs SOF -> mode progessif
 
     // Et on met à jour les données
     jpeg->start_of_frame[0]->nb_components = nb_components;
@@ -609,23 +636,54 @@ int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
     jpeg->start_of_scan[0]->nb_components = nb_components;
     getVerbose() ? printf("\tNombre de composantes : %d\n", nb_components):0;
 
-    struct ComponentSOS *components = (struct ComponentSOS *) malloc(nb_components*sizeof(struct ComponentSOS));
+    struct ComponentSOS *components = (struct ComponentSOS *) malloc(nb_components * sizeof(struct ComponentSOS));
     if (check_memory_allocation((void *) components)) return EXIT_FAILURE;
 
     // Composantes
-    for (int i=0; i<nb_components; i++){
+    for (int8_t i=0; i < nb_components; i++){
         int8_t id_component = read_byte(input, buffer); // ID composante
         
         int8_t ht_ids = read_byte(input, buffer); // ID des tables de Huffman utilisées pour cette composante
         int8_t DC_huffman_table_id = ht_ids >> 4;
         int8_t AC_huffman_table_id = (ht_ids & 0x0F) + 2;    // On ajoute 2 car les index des tables_AC commencent à 2
-        getVerbose() ? printf("\tID composante : %d\n", id_component):0;
-        getVerbose() ? printf("\tDC_huffman_table_id : %d\n", DC_huffman_table_id):0;
-        getVerbose() ? printf("\tAC_huffman_table_id : %d\n", AC_huffman_table_id):0;
 
         components[i].id_table = id_component;
         components[i].DC_huffman_table_id = DC_huffman_table_id;
         components[i].AC_huffman_table_id = AC_huffman_table_id;
+
+        getVerbose() ? printf("\tID composante : %d\n", id_component):0;
+        getVerbose() ? printf("\tDC_huffman_table_id : %d\n", DC_huffman_table_id):0;
+        getVerbose() ? printf("\tAC_huffman_table_id : %d\n", AC_huffman_table_id):0;
+
+        // On met à jour le nombre de mcus à partir des informations du Start Of Frame s'il existe
+        // (si oui, la donnée de hauteur et largeur de l'image a été mise à jour dans la structure jpeg)
+        if (jpeg->start_of_frame[0]->nb_components == nb_components) {
+            size_t nb_mcu_width = 0;
+            size_t nb_mcu_height = 0;
+            if (jpeg->width % 8 == 0) {
+                nb_mcu_width =  jpeg->width / 8;
+            } else {
+                nb_mcu_width = (jpeg->width / 8) + 1;
+            }
+            if (jpeg->height % 8 == 0) {
+                nb_mcu_height =  jpeg->height / 8;
+            } else {
+                nb_mcu_height = (jpeg->height / 8) + 1;
+            }
+            components[i].nb_of_MCUs = nb_mcu_width * nb_mcu_height;
+            components[i].MCUs = (int16_t **) malloc(nb_mcu_width * nb_mcu_height * sizeof(int16_t *));
+            if (check_memory_allocation((void *) components[i].MCUs)) {
+                free(components);
+                return EXIT_FAILURE;
+            }
+            for (size_t j=0; j < nb_mcu_width * nb_mcu_height; j++) {
+                (components[i].MCUs)[j] = (int16_t *) malloc(64 * sizeof(int16_t));
+                if (check_memory_allocation((void *) components[i].MCUs[j])) {
+                    free(components);
+                    return EXIT_FAILURE;
+                }
+            }
+        }
     }
 
     // Paramètres ignorés

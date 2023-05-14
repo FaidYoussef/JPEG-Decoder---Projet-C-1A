@@ -228,7 +228,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             int16_t DC_value = recover_DC_coeff_value(magnitude_DC, indice_dans_classe_magnitude_DC) - *previous_DC_value;
             set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, DC_value);
             *previous_DC_value = get_MCUs(component)[MCU_number][DC_VALUE_INDEX];
-            getHighlyVerbose() ? fprintf(stderr, "\t\t| %x-%d | \n", DC_value, nombre_de_valeurs_decodees):0;
+            getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %x-%d |\n", DC_value, nombre_de_valeurs_decodees):0;
 
             // On prépare la suite en repositionnant le current_node sur la racine de l'arbre des coefficients AC
             current_node = get_ht_tree(get_JPEG_ht(jpeg, get_AC_huffman_table_id(component)));
@@ -249,7 +249,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
     // On décode pour trouver les 63 valeurs des coefficients AC
     while(nombre_de_valeurs_decodees < 64){
         for (size_t i = current_pos; i < bitstream_size_in_bits; i++) {
-            getHighlyVerbose() ? fprintf(stderr, "current_pos = %ld\n", current_pos):0;
+            getHighlyVerbose() ? fprintf(stderr, "\t\t\t\tcurrent_pos = %ld\n", current_pos):0;
             // (1) On lit le code de Huffman
             // On détermine le bit actuel en inspectant l'octet approprié dans bitstream
             // puis en décalant et en masquant le bit approprié
@@ -270,22 +270,23 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                 // >>> 4 MSB : combien de coefficients nuls précèdent ce coefficient AC
                 // >>> 4 LSB : la magnitude du coefficient AC (Note: valeur comprise entre 0 et A >>> prévoir vérification de la conformité de la valeur lue)
                 uint8_t run_and_size = current_node->symbol;
-                getHighlyVerbose() ? fprintf(stderr, ">>> run_and_size = %x\n", run_and_size):0;
+                getHighlyVerbose() ? fprintf(stderr, "\t\t\t\t>>> run_and_size = %x\n", run_and_size):0;
 
                 
                 // (3) On récupère la valeur du coefficient AC à partir du Run/Size
                 if (run_and_size == EOB){   // (3a) On gère le cas spécial EOB
                     for (int8_t j = 0; j < (64 - nombre_de_valeurs_decodees); j++){
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
-                        getHighlyVerbose() ? fprintf(stderr, "%x-%d | ", 0x0, nombre_de_valeurs_decodees):0;
+                        getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %x-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
 
                         // On réaffecte la position courante dans le bitstream pour la suite
                         current_pos++;
                     }
+                    break;  // On a fini de récupérer les valeurs des coefficients AC, on peut passer à la suite
                 } else if (run_and_size == ZRL){   // (3b) On gère le cas spécial ZRL
                     for (int j = 0; j < 16; j++){
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
-                        getHighlyVerbose() ? fprintf(stderr, "%x-%d | ", 0x0, nombre_de_valeurs_decodees):0;
+                        getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %x-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
 
                         if (nombre_de_valeurs_decodees > 64){
                             fprintf(stderr, "Error: invalid number of decoded values - RLE exeeded MCU size\n");
@@ -308,18 +309,19 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                         fprintf(stderr, "Error: invalid magnitude_AC value - value over 10\n");
                         return EXIT_FAILURE;
                     }
-                    getHighlyVerbose() ? fprintf(stderr, "magnitude_AC = %x - ", magnitude_AC):0;
+                    getHighlyVerbose() ? fprintf(stderr, "\t\t\tmagnitude_AC = %x - indice_dans_la_classe_de_magnitude : ", magnitude_AC):0;
                     int16_t indice_dans_classe_magnitude_AC = 0;
                     for (uint8_t j = 0; j < magnitude_AC; j++){
                         indice_dans_classe_magnitude_AC <<= 1;
                         indice_dans_classe_magnitude_AC = (bitstream[(int)((current_pos + 1 + j) / 8)] >> (7 - ((current_pos + 1 + j) % 8))) & 1;
                         getHighlyVerbose() ? fprintf(stderr, "%x", indice_dans_classe_magnitude_AC):0;
                     }
+                    getHighlyVerbose() ? fprintf(stderr, "\n"):0;
 
                     // (5) On récupère finalement la valeur du coefficient AC à partir de la magnitude et de l'indice dans la classe de magnitude
                     int16_t AC_value = recover_AC_coeff_value(magnitude_AC, indice_dans_classe_magnitude_AC);
                     set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, AC_value);
-                    getHighlyVerbose() ? fprintf(stderr, "\t\t%x-%d | \n", AC_value, nombre_de_valeurs_decodees):0;
+                    getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %x-%d | \n", AC_value, nombre_de_valeurs_decodees):0;
 
                     // On réaffecte la position courante dans le bitstream pour la suite
                     current_pos = i + magnitude_AC;
@@ -338,8 +340,6 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                 exit(EXIT_FAILURE);
             }
         }
-
-        
     }
     return EXIT_SUCCESS;
 }
@@ -348,19 +348,29 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 //**********************************************************************************************************************
 // Décode le bitstream et récupère les MCU de chacune des composantes
 int8_t decode_bitstream(struct JPEG * jpeg){
-    unsigned int nb_mcu_width = (get_JPEG_width(jpeg) + 7) / 8;
-    unsigned int nb_mcu_heigth = (get_JPEG_height(jpeg) + 7) / 8;
+    size_t nb_mcu_width = 0;
+    size_t nb_mcu_height = 0;
+    if (get_JPEG_width(jpeg) % 8 == 0) {
+        nb_mcu_width =  get_JPEG_width(jpeg) / 8;
+    } else {
+        nb_mcu_width = (get_JPEG_width(jpeg) / 8) + 1;
+    }
+    if (get_JPEG_width(jpeg) % 8 == 0) {
+        nb_mcu_height =  get_JPEG_width(jpeg) / 8;
+    } else {
+        nb_mcu_height = (get_JPEG_width(jpeg) / 8) + 1;
+    }
 
     int previous_DC_values[3] = {0};
 
     // On parcours tous les MCUs de l'image
-    for (unsigned int i = 0; i < nb_mcu_width * nb_mcu_heigth; i++){
+    for (size_t i = 0; i < nb_mcu_width * nb_mcu_height; i++){
         // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a
         // plusieurs scans/frames ---> mode progressif
         
         // On parcours toutes les composantes
-        for (unsigned int j = 0; j < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
-            if (!decode_MCU(jpeg, i, j, &previous_DC_values[j])) {
+        for (int8_t j = 0; j < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
+            if (decode_MCU(jpeg, i, j, &previous_DC_values[j])) {
                 // free_memory(jpeg);
                 return EXIT_FAILURE;
             }

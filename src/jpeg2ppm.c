@@ -64,11 +64,11 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     };
 
+    fprintf(stderr, "Image %s décodée avec succès !\n", filename);
+
     // int *dequantized_values = inv_quantize(rle_decoded_bitstream, get_qt_data(get_JPEG_qt(jpeg)[0]), get_qt_data(get_JPEG_qt(jpeg)[1]));
     // int* idct_ed_values = idct(dequantized_values);
 
-
-    // On libère la mémoire
 
 
     // Note -6 : vérifier App0 = JFIF
@@ -81,7 +81,10 @@ int main(int argc, char **argv) {
     // Note 1 : prévoir de repasser toutes les structures en [8][8] ou [64] pour optimiser l'utilisation mémoire et accélérer l'exécution du programme !!!
     // Note 2 : prévoir de reformater nos sorties du mode verbose pour rendre la lecture plus facile&jolie ... s'inspirer de jpeg2blabla ?
     // Note 3 : prévoir de refaire des vrais tests avec toutes ces fonctions modifiées depuis début de semaine !!!
-
+    
+    
+    // On libère la mémoire
+    free_JPEG_struct(jpeg);
 
     return EXIT_SUCCESS;
 }
