@@ -798,7 +798,7 @@ struct JPEG * extract(char *filename) {
                         free(jpeg->huffman_tables[0]);
                         jpeg->huffman_tables[0] = huffman_table;
                     } else {    // Chrominance
-                        getHighlyVerbose() ? fprintf(stderr, "\t\tTable de Huffman -  Chrominance >>> mise à jour !\n") : 0;
+                        getHighlyVerbose() ? fprintf(stderr, "\t\tTable de Huffman - DC Chrominance >>> mise à jour !\n") : 0;
                         free(jpeg->huffman_tables[1]->data);
                         free(jpeg->huffman_tables[1]->huffman_tree);
                         free(jpeg->huffman_tables[1]);

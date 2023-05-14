@@ -275,7 +275,8 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                 
                 // (3) On récupère la valeur du coefficient AC à partir du Run/Size
                 if (run_and_size == EOB){   // (3a) On gère le cas spécial EOB
-                    for (int8_t j = 0; j < (64 - nombre_de_valeurs_decodees); j++){
+                    int8_t nombre_de_zero_a_ajouter = 64 - nombre_de_valeurs_decodees;
+                    for (int8_t j = 0; j < nombre_de_zero_a_ajouter; j++){
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
                         getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %x-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
 
