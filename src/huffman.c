@@ -91,6 +91,7 @@ struct node * build_huffman_tree(unsigned char *ht_data, struct JPEG *jpeg) {
         }
         code <<= 1;
     }
+    getHighlyVerbose() ? fprintf(stderr, "\n"):0;
     return root;
 }
 
@@ -172,11 +173,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
     unsigned char *bitstream = get_JPEG_image_data(jpeg);
     size_t bitstream_size_in_bits = get_JPEG_image_data_size_in_bits(jpeg);
 
-    for (size_t i =0; i < bitstream_size_in_bits/8; i++) {
-        getHighlyVerbose() ? printf("%x", (bitstream[i])):0;
-    }
-    getHighlyVerbose() ? printf("\n"):0;
-    struct node *current_node = get_ht_tree(get_JPEG_ht(jpeg)[get_DC_huffman_table_id(component)]);
+    struct node *current_node = get_ht_tree(get_JPEG_ht(jpeg, get_DC_huffman_table_id(component)));
     int8_t nombre_de_valeurs_decodees = 0;
     size_t current_pos = 0;
 
@@ -230,7 +227,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
             getHighlyVerbose() ? fprintf(stderr, "\t\t| %x-%d | \n", DC_value, nombre_de_valeurs_decodees):0;
 
             // On prépare la suite en repositionnant le current_node sur la racine de l'arbre des coefficients AC
-            current_node = get_ht_tree(get_JPEG_ht(jpeg)[get_AC_huffman_table_id(component)]);
+            current_node = get_ht_tree(get_JPEG_ht(jpeg, get_AC_huffman_table_id(component)));
 
             // Et on réaffecte la position courante dans le bitstream pour la suite
             current_pos = i + magnitude_DC + 1;
@@ -321,7 +318,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
                 }
 
                 // On prépare la suite en repositionnant le current_node sur la racine de l'arbre des AC
-                current_node = get_ht_tree(get_JPEG_ht(jpeg)[get_AC_huffman_table_id(component)]);
+                current_node = get_ht_tree(get_JPEG_ht(jpeg, get_AC_huffman_table_id(component)));
             }
             current_pos++;
         }

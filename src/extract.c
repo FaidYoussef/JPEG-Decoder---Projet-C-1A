@@ -258,8 +258,8 @@ struct StartOfFrame ** get_JPEG_sof(struct JPEG *jpeg){
     return jpeg->start_of_frame;
 }
 
-struct HuffmanTable ** get_JPEG_ht(struct JPEG *jpeg){
-    return jpeg->huffman_tables;
+struct HuffmanTable * get_JPEG_ht(struct JPEG *jpeg, int8_t index){
+    return jpeg->huffman_tables[index];
 }
 
 struct StartOfScan ** get_JPEG_sos(struct JPEG *jpeg){
@@ -464,9 +464,9 @@ int get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
     for (int i=0; i<nb_components; i++){
         int8_t id_component = read_byte(input, buffer); // ID composante
         
-        int8_t ht_ids = read_byte(input, buffer); // ID de la table
+        int8_t ht_ids = read_byte(input, buffer); // ID des tables de Huffman utilisées pour cette composante
         int8_t DC_huffman_table_id = ht_ids >> 4;
-        int8_t AC_huffman_table_id = (ht_ids & 0x0F) + 2;    // On ajoute 2 car les index des tables_AC commence à 2
+        int8_t AC_huffman_table_id = (ht_ids & 0x0F) + 2;    // On ajoute 2 car les index des tables_AC commencent à 2
         getVerbose() ? printf("\tID composante : %d\n", id_component):0;
         getVerbose() ? printf("\tDC_huffman_table_id : %d\n", DC_huffman_table_id):0;
         getVerbose() ? printf("\tAC_huffman_table_id : %d\n", AC_huffman_table_id):0;
@@ -558,29 +558,39 @@ struct JPEG * extract(char *filename) {
                 
                 if (huffman_table->class == 0) {    // DC
                     if (huffman_table->destination == 0) {  // Luminance
+                        getHighlyVerbose() ? fprintf(stderr, "\t\tTable de Huffman - DC Luminance >>> mise à jour !\n") : 0;
                         free(jpeg->huffman_tables[0]->data);
                         free(jpeg->huffman_tables[0]->huffman_tree);
                         free(jpeg->huffman_tables[0]);
                         jpeg->huffman_tables[0] = huffman_table;
                     } else {    // Chrominance
+                        getHighlyVerbose() ? fprintf(stderr, "\t\tTable de Huffman -  Chrominance >>> mise à jour !\n") : 0;
                         free(jpeg->huffman_tables[1]->data);
                         free(jpeg->huffman_tables[1]->huffman_tree);
                         free(jpeg->huffman_tables[1]);
-                        jpeg->huffman_tables[0] = huffman_table;
+                        jpeg->huffman_tables[1] = huffman_table;
                     }
                 } else {    // AC
                     if (huffman_table->destination == 0) {  // Luminance
+                        getHighlyVerbose() ? fprintf(stderr, "\t\tTable de Huffman - AC Luminance >>> mise à jour !\n") : 0;
                         free(jpeg->huffman_tables[2]->data);
                         free(jpeg->huffman_tables[2]->huffman_tree);
                         free(jpeg->huffman_tables[2]);
-                        jpeg->huffman_tables[0] = huffman_table;
+                        jpeg->huffman_tables[2] = huffman_table;
                     } else {    // Chrominance
+                        getHighlyVerbose() ? fprintf(stderr, "\t\tTable de Huffman - AC Chrominance >>> mise à jour !\n") : 0;
                         free(jpeg->huffman_tables[3]->data);
                         free(jpeg->huffman_tables[3]->huffman_tree);
                         free(jpeg->huffman_tables[3]);
-                        jpeg->huffman_tables[0] = huffman_table;
+                        jpeg->huffman_tables[3] = huffman_table;
                     }
                 }
+
+                getHighlyVerbose() ? fprintf(stderr, "\t\tTables de Huffman:\n") : 0;
+                getHighlyVerbose() ? fprintf(stderr, "\t\t\tDC Luminance   : %p\n", jpeg->huffman_tables[0]) : 0;
+                getHighlyVerbose() ? fprintf(stderr, "\t\t\tDC Chrominance : %p\n", jpeg->huffman_tables[1]) : 0;
+                getHighlyVerbose() ? fprintf(stderr, "\t\t\tAC Luminance   : %p\n", jpeg->huffman_tables[2]) : 0;
+                getHighlyVerbose() ? fprintf(stderr, "\t\t\tAC Chrominance : %p\n", jpeg->huffman_tables[3]) : 0;
 
             //**********************************************************************************************************************
             } else if (id[0] == SOS){
@@ -588,9 +598,9 @@ struct JPEG * extract(char *filename) {
                 get_SOS(input, buffer, jpeg);
 
                 // On lit la data en enlevant les 0 (à cause du byte stuffing)
-                int data_size = INITIAL_DATA_SIZE; // On donne une estimation de la taille des données à récupérer
+                size_t data_size = INITIAL_DATA_SIZE; // On donne une estimation de la taille des données à récupérer
 
-                int nb_data = 0;
+                size_t nb_data = 0;
 
                 while (!feof(input)){ // On arrête la boucle si on arrive à la fin du fichier sans avoir lu de marker EOF
                     fread(buffer, 1, 1, input);
@@ -612,8 +622,12 @@ struct JPEG * extract(char *filename) {
                         } else if (buffer[0] == EOI){   // On ne prend pas en compte le dernier 0xff du marker EOI
                             jpeg->image_data_size_in_bits = 8 * nb_data;
                             // On a fini la lecture des données
-                            getVerbose() ? printf("\tLongueur du bitstream_image_data (bits) : %d\n", 8 * nb_data):0;
-                            getVerbose() ? printf("Fin du fichier\n\n"):0;
+                            getVerbose() ? printf("\tLongueur du bitstream_image_data (bits) : %ld\n", 8 * nb_data):0;
+                            getVerbose() ? printf("\tBitstream : "):0;
+                            for (size_t i =0; i < nb_data; i++) {
+                                getVerbose() ? printf("%x", (jpeg->image_data[i])):0;
+                            }
+                            getVerbose() ? printf("\nFin du fichier\n\n"):0;
                             fclose(input);
                             return jpeg;
 

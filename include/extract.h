@@ -78,7 +78,7 @@ unsigned short get_JPEG_height(struct JPEG *jpeg);
 unsigned short get_JPEG_width(struct JPEG *jpeg);
 struct QuantizationTable ** get_JPEG_qt(struct JPEG *jpeg);
 struct StartOfFrame ** get_JPEG_sof(struct JPEG *jpeg);
-struct HuffmanTable ** get_JPEG_ht(struct JPEG *jpeg);
+struct HuffmanTable * get_JPEG_ht(struct JPEG *jpeg, int8_t index);
 struct StartOfScan ** get_JPEG_sos(struct JPEG *jpeg);
 unsigned char * get_JPEG_image_data(struct JPEG* jpeg);
 size_t get_JPEG_image_data_size_in_bits(struct JPEG* jpeg);
