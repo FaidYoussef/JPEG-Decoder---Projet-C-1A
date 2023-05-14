@@ -9,17 +9,19 @@
 #include <utils.h>
 #include <verbose.h>
 
+#define DC_VALUE_INDEX 0
+
 
 //**********************************************************************************************************************
 // Structure représentant un noeud de l'arbre de huffman
 struct node;
 
-// Crée un nouveau noeud
-struct node * create_node(int8_t symbol, struct node *left, struct node *right, struct JPEG *jpeg);
+// Crée un nouveau noeud de l'arbre de Huffman
+struct node * create_node(int8_t symbol, struct node *left, struct node *right);
 
 //**********************************************************************************************************************
 // Construit l'arbre de huffman à partir de la table de huffman
-struct node * build_huffman_tree(unsigned char *ht_data, struct JPEG *jpeg);
+struct node * build_huffman_tree(unsigned char *ht_data);
 
 // Fonction qui free l'arbre de Huffman
 void free_huffman_tree(struct node *root);
@@ -41,9 +43,9 @@ int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magn
 // Décode un MCU
 // utilise les tables de Huffman de la composante
 // puis récupère les valeurs à encoder via RLE et encodage via magnitude
-int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int* previous_DC_value);
+int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int* previous_DC_value);
 
 // Décode le bitstream et récupère les MCU de chacune des composantes
-int decode_bitstream(struct JPEG * jpeg);
+int8_t decode_bitstream(struct JPEG * jpeg);
 
 #endif

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <extract.h>
@@ -10,6 +11,6 @@
 #define NB_VALUES_IN_8x8_BLOCK 64
 
 
-int check_memory_allocation(void *allocated_data);
+int8_t check_memory_allocation(void *allocated_data);
 
 #endif

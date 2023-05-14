@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <math.h>
 
+
 #include <utils.h>
 #include <verbose.h>
 
@@ -28,13 +29,14 @@
 
 #define INITIAL_DATA_SIZE 1024
 
-#define MAX_NUMBER_HUFFMAN_TABLES 4
-#define MAX_NUMBER_QUANTIZATION_TABLES 2
+#define MAX_NUMBER_OF_HUFFMAN_TABLES 4
+#define MAX_NUMBER_OF_QUANTIZATION_TABLES 2
 
 struct JPEG;
+#include <huffman.h>
 //**********************************************************************************************************************
 struct QuantizationTable;
-void initialize_qt(struct QuantizationTable *qt);
+int8_t initialize_qt(struct QuantizationTable *qt, int8_t id, size_t length, unsigned char *data);
 unsigned char get_qt_id(struct QuantizationTable *qt);
 size_t get_qt_length(struct QuantizationTable *qt);
 unsigned char * get_qt_data(struct QuantizationTable *qt);
@@ -45,13 +47,13 @@ void initialize_component_sof(struct ComponentSOF *component, int8_t id, int8_t 
 int8_t get_id(struct ComponentSOF *component);
 
 struct StartOfFrame;
-void initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table);
+int8_t initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table);
 int8_t get_sof_nb_components(struct StartOfFrame *sof);
 struct ComponentSOF ** get_sof_components(struct StartOfFrame *sof);
 
 //**********************************************************************************************************************
 struct HuffmanTable;
-void initialize_ht(struct HuffmanTable *ht);
+void initialize_ht(struct HuffmanTable *ht, int8_t class, int8_t destination, size_t length, unsigned char *data, struct node * huffman_tree, bool set);
 unsigned char get_ht_class(struct HuffmanTable *ht);
 unsigned char get_ht_destination(struct HuffmanTable *ht);
 size_t get_ht_length(struct HuffmanTable *ht);
@@ -61,7 +63,7 @@ bool get_ht_set(struct HuffmanTable *ht);
 
 //**********************************************************************************************************************
 struct ComponentSOS;
-void initialize_component_sos(struct ComponentSOS *component, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCUs, struct JPEG *jpeg);
+int8_t initialize_component_sos(struct ComponentSOS *component, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCUs);
 int8_t get_DC_huffman_table_id(struct ComponentSOS *component);
 int8_t get_AC_huffman_table_id(struct ComponentSOS *component);
 int16_t **get_MCUs(struct ComponentSOS *component);
@@ -69,14 +71,15 @@ int16_t **get_MCUs(struct ComponentSOS *component);
 void set_value_in_MCU(struct ComponentSOS *component, int index_of_mcu, int index_of_pixel_in_mcu, int16_t value);
 
 struct StartOfScan;
-void initialize_sos(struct StartOfScan *sos, int8_t nb_components, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCU, struct JPEG *jpeg);
+int8_t initialize_sos(struct StartOfScan *sos, int8_t nb_components, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCU);
 unsigned char get_sos_nb_components(struct StartOfScan *sos);
 struct ComponentSOS * get_sos_components(struct StartOfScan *sos);
 struct ComponentSOS * get_sos_component(struct ComponentSOS * components, int8_t index);
 
 //**********************************************************************************************************************
 
-void initialize_JPEG_struct(struct JPEG *jpeg);
+int8_t initialize_JPEG_struct(struct JPEG *jpeg);
+void free_JPEG_struct(struct JPEG *jpeg);
 int16_t get_JPEG_height(struct JPEG *jpeg);
 int16_t get_JPEG_width(struct JPEG *jpeg);
 struct QuantizationTable ** get_JPEG_qt(struct JPEG *jpeg);
@@ -93,13 +96,13 @@ int8_t read_byte(FILE *input, unsigned char *buffer);
 
 void ignore_bytes(FILE *input, int nb_bytes);
 
-struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer, struct JPEG *jpeg);
+struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer);
 
-int get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg);
+int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg);
 
-struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer, struct JPEG *jpeg);
+struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer);
 
-int get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg);
+int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg);
 
 struct JPEG * extract(char *filename);
 

@@ -12,11 +12,14 @@ int main() {
 
 
     unsigned char *bitstream1 = (unsigned char *) malloc(15*4 * sizeof(unsigned char));
-    check_memory_allocation((void *) bitstream1);
+    if (check_memory_allocation((void *) bitstream1)) return EXIT_FAILURE;
     bitstream1 = (unsigned char*) "111100001010101111100001010101111100001010101111100001010101";
 
     unsigned char *expected_output1 = (unsigned char *) malloc(8*4 * sizeof(unsigned char));
-    check_memory_allocation((void *) expected_output1);
+    if (check_memory_allocation((void *) expected_output1)) {
+        free(bitstream1);
+        return EXIT_FAILURE;
+    };
     expected_output1[0] = 0xb;
     expected_output1[1] = 0xa;
     expected_output1[2] = 0xd;
@@ -52,11 +55,20 @@ int main() {
     expected_output1[31] = 0x0;
 
     unsigned char *bitstream2 = (unsigned char *) malloc(15 * sizeof(unsigned char));
-    check_memory_allocation((void *) bitstream2);
+    if (check_memory_allocation((void *) bitstream2)){
+        free(bitstream1);
+        free(expected_output1);
+        return EXIT_FAILURE;
+    };
     bitstream2 = (unsigned char*) "111100001010100";
 
     unsigned char *expected_output2 = (unsigned char *) malloc(8 * sizeof(unsigned char));
-    check_memory_allocation((void *) expected_output2);
+    if (check_memory_allocation((void *) expected_output2)) {
+        free(bitstream1);
+        free(expected_output1);
+        free(bitstream2);
+        return EXIT_FAILURE;
+    };
     expected_output2[0] = 0xb;
     expected_output2[1] = 0xa;
     expected_output2[2] = 0xd;

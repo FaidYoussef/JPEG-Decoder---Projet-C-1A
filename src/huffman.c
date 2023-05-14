@@ -20,10 +20,10 @@ struct node {
 };
 
 
-// Crée un nouveau noeud
-struct node *create_node(int8_t symbol, struct node *left, struct node *right, struct JPEG *jpeg) {
+// Crée un nouveau noeud de l'arbre de Huffman
+struct node *create_node(int8_t symbol, struct node *left, struct node *right) {
     struct node *new_node = (struct node *) malloc(sizeof(struct node));
-    check_memory_allocation((void *) new_node);
+    if (check_memory_allocation((void *) new_node)) return NULL;
 
     new_node->symbol = symbol;
     new_node->left = left;
@@ -35,13 +35,12 @@ struct node *create_node(int8_t symbol, struct node *left, struct node *right, s
 
 //**********************************************************************************************************************
 // Construit l'arbre de huffman à partir de la table de huffman
-struct node * build_huffman_tree(unsigned char *ht_data, struct JPEG *jpeg) {
+struct node * build_huffman_tree(unsigned char *ht_data) {
     getHighlyVerbose() ? fprintf(stderr, "\tHuffman Tree :\n"):0;
     // On vérifie que la table de Huffman est valide
     if (ht_data == NULL) {
         fprintf(stderr, "Error: invalid Huffman table\n");
-        // Il faut free toute la mémoire via jpeg
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     // Il faut également vérifier que le nombre de code pour chaque longueur est valide
     for (uint16_t i = 0; i < 16; i++) {
@@ -50,13 +49,12 @@ struct node * build_huffman_tree(unsigned char *ht_data, struct JPEG *jpeg) {
         getHighlyVerbose() ? fprintf(stderr, "\t\tNombre de codes: %d\n", ht_data[i]):0;
         if (ht_data[i] > nb_max_symbols_per_level) {
             fprintf(stderr, "Error: invalid Huffman table - too much symbols per level\n");
-            // Il faut free toute la mémoire via jpeg
-            exit(EXIT_FAILURE);
+            return NULL;
         }
     }
 
     struct node *root, *current_node;
-    root = create_node(0, NULL, NULL, jpeg);
+    if ( (root = create_node(0, NULL, NULL)) == NULL) return NULL;
     int pos = 16;
     uint16_t code = 0;
 
@@ -67,12 +65,18 @@ struct node * build_huffman_tree(unsigned char *ht_data, struct JPEG *jpeg) {
             for (int k = i - 1; k >= 0; k--) {
                 if (code & (1 << k)) {
                     if (!current_node->right) {
-                        current_node->right = create_node(0, NULL, NULL, jpeg);
+                        if ( (current_node->right = create_node(0, NULL, NULL)) == NULL) {
+                            free_huffman_tree(root);
+                            return NULL;
+                        }
                     }
                     current_node = current_node->right;
                 } else {
                     if (!current_node->left) {
-                        current_node->left = create_node(0, NULL, NULL, jpeg);
+                        if ( (current_node->left = create_node(0, NULL, NULL)) == NULL) {
+                            free_huffman_tree(root);
+                            return NULL;
+                        }
                     }
                     current_node = current_node->left;
                 }
@@ -167,7 +171,7 @@ int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magn
 // Décode un MCU
 // utilise les tables de Huffman de la composante
 // puis récupère les valeurs à encoder via RLE et encodage via magnitude
-int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int* previous_DC_value) {
+int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int* previous_DC_value) {
     // On récupère les 64 valeurs du bloc 8x8
     struct ComponentSOS *component = get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), component_index);
     unsigned char *bitstream = get_JPEG_image_data(jpeg);
@@ -196,7 +200,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
         // On détecte une erreur éventuelle d'encodage
         if (!current_node) {
             fprintf(stderr, "Error: invalid Huffman code\n");
-            exit(EXIT_FAILURE);
+            return EXIT_FAILURE;
         }
         
         if (!current_node->left && !current_node->right) {  // On est sur une feuille
@@ -206,10 +210,10 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
 
             if (magnitude_DC < 0) {
                 fprintf(stderr, "Error: invalid DC magnitude - negative value\n");
-                exit(EXIT_FAILURE);
+                return EXIT_FAILURE;
             } else if (magnitude_DC > 11) {
                 fprintf(stderr, "Error: invalid DC magnitude - value over 11\n");
-                exit(EXIT_FAILURE);
+                return EXIT_FAILURE;
             }
             
             // (3) On récupère l'indice dans la classe de magnitude associé
@@ -223,7 +227,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
             // (4) On récupère finalement la valeur du coefficient DC à partir de la magnitude et de l'indice dans la classe de magnitude
             int16_t DC_value = recover_DC_coeff_value(magnitude_DC, indice_dans_classe_magnitude_DC) - *previous_DC_value;
             set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, DC_value);
-            *previous_DC_value = get_MCUs(component)[MCU_number][0];
+            *previous_DC_value = get_MCUs(component)[MCU_number][DC_VALUE_INDEX];
             getHighlyVerbose() ? fprintf(stderr, "\t\t| %x-%d | \n", DC_value, nombre_de_valeurs_decodees):0;
 
             // On prépare la suite en repositionnant le current_node sur la racine de l'arbre des coefficients AC
@@ -238,7 +242,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
         // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
             if (nombre_de_valeurs_decodees < 64 && current_pos == bitstream_size_in_bits - 1) {
                 fprintf(stderr, "Error: invalid bitstream - does not contain enough values for current MCU#%ld\n", MCU_number);
-                exit(EXIT_FAILURE);
+                return EXIT_FAILURE;
             }
     }
 
@@ -343,7 +347,7 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
 
 //**********************************************************************************************************************
 // Décode le bitstream et récupère les MCU de chacune des composantes
-int decode_bitstream(struct JPEG * jpeg){
+int8_t decode_bitstream(struct JPEG * jpeg){
     unsigned int nb_mcu_width = (get_JPEG_width(jpeg) + 7) / 8;
     unsigned int nb_mcu_heigth = (get_JPEG_height(jpeg) + 7) / 8;
 

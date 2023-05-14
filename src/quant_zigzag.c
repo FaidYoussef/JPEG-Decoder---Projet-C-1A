@@ -7,7 +7,7 @@
 
 
 //Quantization function using quant_table
-int* quantize(int *block, int *quant_table_DC, int *quant_table_AC, struct JPEG *jpeg) {
+int* quantize(int *block, int *quant_table_DC, int *quant_table_AC) {
     int* qblock = malloc(64 * sizeof(int));
     check_memory_allocation((void *) qblock);
 
@@ -26,7 +26,7 @@ int* quantize(int *block, int *quant_table_DC, int *quant_table_AC, struct JPEG 
 
 // Inverse quantization function using quant_table
 // qblock : les données qui sont quantifiées
-int* inv_quantize(unsigned char *qblock, unsigned char *quant_table_DC, unsigned char *quant_table_AC, struct JPEG *jpeg) {
+int* inv_quantize(unsigned char *qblock, unsigned char *quant_table_DC, unsigned char *quant_table_AC) {
     int* block = malloc(64 * sizeof(int));
     check_memory_allocation((void *) block);
 
@@ -44,7 +44,7 @@ int* inv_quantize(unsigned char *qblock, unsigned char *quant_table_DC, unsigned
 }
 
 // Inverse Zig-Zag function
-int ** inv_zig_zag(int *block, struct JPEG *jpeg) {
+int ** inv_zig_zag(int *block) {
     int **qblock = (int**) malloc(8 * sizeof(int*));
     check_memory_allocation((void *) qblock);
     for (int i = 0; i < 8; i++) {
