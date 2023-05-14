@@ -234,6 +234,12 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
 
             break;  // On a récupéré la valeur du coefficient DC, on peut passer à la suite
         }
+
+        // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
+            if (nombre_de_valeurs_decodees < 64 && current_pos == bitstream_size_in_bits - 1) {
+                fprintf(stderr, "Error: invalid bitstream - does not contain enough values for current MCU#%ld\n", MCU_number);
+                exit(EXIT_FAILURE);
+            }
     }
 
     // On décode pour trouver les 63 valeurs des coefficients AC
@@ -321,13 +327,15 @@ int decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int
                 current_node = get_ht_tree(get_JPEG_ht(jpeg, get_AC_huffman_table_id(component)));
             }
             current_pos++;
+
+            // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
+            if (nombre_de_valeurs_decodees < 64 && current_pos == bitstream_size_in_bits - 1) {
+                fprintf(stderr, "Error: invalid bitstream - does not contain enough values for current MCU#%ld\n", MCU_number);
+                exit(EXIT_FAILURE);
+            }
         }
 
-        // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
-        if (nombre_de_valeurs_decodees < 64 && current_pos == bitstream_size_in_bits - 1) {
-            fprintf(stderr, "Error: invalid bitstream - does not contain enough values for current MCU#%ld\n", MCU_number);
-            exit(EXIT_FAILURE);
-        }
+        
     }
     return EXIT_SUCCESS;
 }

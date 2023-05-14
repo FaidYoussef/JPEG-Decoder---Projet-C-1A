@@ -28,6 +28,9 @@
 
 #define INITIAL_DATA_SIZE 1024
 
+#define MAX_NUMBER_HUFFMAN_TABLES 4
+#define MAX_NUMBER_QUANTIZATION_TABLES 2
+
 struct JPEG;
 //**********************************************************************************************************************
 struct QuantizationTable;
@@ -43,7 +46,7 @@ int8_t get_id(struct ComponentSOF *component);
 
 struct StartOfFrame;
 void initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table);
-unsigned char get_sof_nb_components(struct StartOfFrame *sof);
+int8_t get_sof_nb_components(struct StartOfFrame *sof);
 struct ComponentSOF ** get_sof_components(struct StartOfFrame *sof);
 
 //**********************************************************************************************************************
@@ -74,8 +77,8 @@ struct ComponentSOS * get_sos_component(struct ComponentSOS * components, int8_t
 //**********************************************************************************************************************
 
 void initialize_JPEG_struct(struct JPEG *jpeg);
-unsigned short get_JPEG_height(struct JPEG *jpeg);
-unsigned short get_JPEG_width(struct JPEG *jpeg);
+int16_t get_JPEG_height(struct JPEG *jpeg);
+int16_t get_JPEG_width(struct JPEG *jpeg);
 struct QuantizationTable ** get_JPEG_qt(struct JPEG *jpeg);
 struct StartOfFrame ** get_JPEG_sof(struct JPEG *jpeg);
 struct HuffmanTable * get_JPEG_ht(struct JPEG *jpeg, int8_t index);
@@ -84,9 +87,9 @@ unsigned char * get_JPEG_image_data(struct JPEG* jpeg);
 size_t get_JPEG_image_data_size_in_bits(struct JPEG* jpeg);
 
 //**********************************************************************************************************************
-short two_bytes_to_dec(FILE *input);
+int16_t two_bytes_to_dec(FILE *input);
 
-unsigned char read_byte(FILE *input, unsigned char *buffer);
+int8_t read_byte(FILE *input, unsigned char *buffer);
 
 void ignore_bytes(FILE *input, int nb_bytes);
 
