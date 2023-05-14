@@ -364,11 +364,12 @@ void free_JPEG_struct(struct JPEG *jpeg){
                                     free(   (&((jpeg->start_of_scan[i])->components[j]))->MCUs[k]);
                                 }
                             }
+                            free((&((jpeg->start_of_scan[i])->components[j]))->MCUs);
                             free(&((jpeg->start_of_scan[i])->components[j]));
                         }
                     }
                 }
-                free(&(jpeg->start_of_scan[i]));
+                free(jpeg->start_of_scan[i]);
             }
         }
         free(jpeg->start_of_scan);
@@ -756,9 +757,11 @@ struct JPEG * extract(char *filename) {
                 
                 if(quantization_table->id == LUMINANCE_ID) {
                     if (jpeg->quantization_tables[0]->data != NULL) free(jpeg->quantization_tables[0]->data);
+                    if (jpeg->quantization_tables[0] != NULL) free(jpeg->quantization_tables[0]);
                     jpeg->quantization_tables[0] = quantization_table;
                 } else {
                     if (jpeg->quantization_tables[1]->data != NULL) free(jpeg->quantization_tables[1]->data);
+                    if (jpeg->quantization_tables[1] != NULL) free(jpeg->quantization_tables[1]);
                     jpeg->quantization_tables[1] = quantization_table;
                 }
 
