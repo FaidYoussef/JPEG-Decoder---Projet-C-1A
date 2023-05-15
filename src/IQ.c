@@ -1,17 +1,5 @@
 #include <IQ.h>
 
-const int8_t zigzag[]={
-    0, 1, 8, 16, 9, 2, 3, 10,
-    17, 24, 32, 25, 18, 11, 4, 5,
-    12, 19, 26, 33, 40, 48, 41, 34,
-    27, 20, 13, 6, 7, 14, 21, 28,
-    35, 42, 49, 56, 57, 50, 43, 36,
-    29, 22, 15, 23, 30, 37, 44, 51,
-    58, 59, 52, 45, 38, 31, 39, 46,
-    53, 60, 61, 54, 47, 55, 62, 63
-};
-
-
 //Quantization function using quant_table
 int* quantize(int *block, int *quant_table_DC, int *quant_table_AC) {
     int* qblock = malloc(64 * sizeof(int));
@@ -30,19 +18,38 @@ int* quantize(int *block, int *quant_table_DC, int *quant_table_AC) {
     return qblock;
 }
 
-int8_t IQ_function(struct JPEG *jpeg, int8_t component_index){
-    // On récupère la table de quantification associée à la composante
-    int8_t qt_index = get_num_quantization_table((&(get_JPEG_sof(jpeg)[0]))->components[component_index])
-    struct QuantizationTable *qt = get_JPEG_qt(jpeg)[qt_index];
+const int16_t test_qt2[64] = {
+    2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2
+};
 
-    for (int i = 0; i < 64; i++) {
-        if(i==0 ) {
-            block[0] = qblock[0] * quant_table_DC[0];
-        } else {
-            block[i] = qblock[i] * quant_table_AC[i];
-        }
-    }
-}
+const int16_t test_qt_max_value[64] = {
+    65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
+    65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
+    65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
+    65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
+    65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
+    65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
+    65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
+    65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535
+};
+
+const int16_t test_qt0[64] = {
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0
+};
 
 
 // Inverse quantization function using quant_table
@@ -61,27 +68,32 @@ int8_t inv_quantize(struct JPEG * jpeg) {
         nb_mcu_height = (get_JPEG_width(jpeg) / 8) + 1;
     }
 
-    // On parcours tous les MCUs de l'image
-    for (size_t i = 0; i < nb_mcu_width * nb_mcu_height; i++){
-        // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a
-        // plusieurs scans/frames ---> mode progressif
-        
-        // On parcours toutes les composantes
-        for (int8_t j = 0; j < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
-            if (IQ_function(jpeg, i)) {
-                return EXIT_FAILURE;
+    // On parcours toutes les composantes
+    for (int8_t i = 0; i < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); i++) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
+        // On récupère la table de quantification associée à la composante
+        int8_t qt_index = get_num_quantization_table(get_sof_components((get_JPEG_sof(jpeg)[0]))[i]);
+        fprintf(stderr, "qt_index : %d\n", qt_index);
+        struct QuantizationTable *qt = get_JPEG_qt(jpeg)[qt_index];
+        unsigned char *qt_table = get_qt_data(qt);
+        int16_t** MCUs = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), i));
+
+        // On parcours tous les MCUs de l'image
+        for (size_t j = 0; j < nb_mcu_width * nb_mcu_height; j++){
+            print_block(MCUs[j]);
+            for (int8_t k = 0; k < 64; k++) {
+                MCUs[j][k] = MCUs[j][k] * test_qt_max_value[k];
             }
+            print_block(MCUs[j]);
         }
     }
     return EXIT_SUCCESS;
 }
 
-void print_block(int block[8][8]){
-    for (int i = 0; i < 8; i++) {
-        for (int j =0; j < 8; j++) {
-            printf("%d ", block[i][j]);
-        }
-        printf("\n");
+void print_block(int16_t *block){
+    fprintf(stderr, "\nBlock :\n");
+    for (int i = 0; i < 64; i++) {
+        fprintf(stderr, "%d ", block[i]);
+        if (i % 8 == 7) fprintf(stderr, "\n");
     }
     printf("\n");
 }

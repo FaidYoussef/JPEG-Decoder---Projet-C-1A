@@ -6,6 +6,7 @@
 #include <math.h>
 #include <string.h>
 
+#include <extract.h>
 #include <utils.h>
 
 
@@ -16,6 +17,6 @@ int* quantize(int *block, int *quant_table_DC, int *quant_table_AC);
 int8_t inv_quantize(struct JPEG * jpeg);
 
 // Display block in matrix format
-void print_block(int block[8][8]);
+void print_block(int16_t *block);
 
 #endif

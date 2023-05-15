@@ -5,7 +5,8 @@
 #include <huffman.h>
 #include <IDCT.h>
 #include <ppm.h>
-#include <quant_zigzag.h>
+#include <IQ.h>
+#include <IZZ.h>
 #include <utils.h>
 #include <verbose.h>
 #include <ycbcr2rgb.h>
