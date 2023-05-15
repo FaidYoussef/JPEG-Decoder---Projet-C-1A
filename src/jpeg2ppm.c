@@ -76,7 +76,6 @@ int main(int argc, char **argv) {
     // Note -4 : rajouter le free_memory(jpeg) apres if(!check_memory) s'il y a un problème pour libérer la mémoire avant d'exit !!!
     // Note -3 : peut être réajuster width et height en size_t si on a une image hyper grande ... ???
     // Note -2 : il faut forcer la taille de nos variables avec int8_t, int16_t, int32_t, uint8_t, uint16_t, uint32_t pour éviter les problèmes de taille de variables sur différentes architectures matérielles !!!
-    // Note -1 : Il faut également vérifier que les codes de huffman ne valent pas "que des 1" ... voir si c'est pas déjà vérifié avec la vérif que j'ai implémentée sur le nombre de codes par "level"
     // Note 0 : prévoir de détecter si image N&B, couleur ou couleur avec alpha (>nb de composantes ?) pour adapter le décodage du bitstream en conséquence !!!
     // Note 1 : prévoir de repasser toutes les structures en [8][8] ou [64] pour optimiser l'utilisation mémoire et accélérer l'exécution du programme !!!
     // Note 2 : prévoir de reformater nos sorties du mode verbose pour rendre la lecture plus facile&jolie ... s'inspirer de jpeg2blabla ?

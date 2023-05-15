@@ -34,10 +34,10 @@ void print_huffman_codes(int *bit_lengths, int8_t *symbols, int n);
 
 //**********************************************************************************************************************
 // Renvoie la valeur du coefficient DC à partir de sa magnitude et de son indice dans la classe de magnitude
-int16_t recover_DC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude);
+int16_t recover_DC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude, struct JPEG *jpeg);
 
 // Renvoie la valeur du coefficient AC à partir de sa magnitude et de son indice dans la classe de magnitude
-int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude);
+int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude, struct JPEG *jpeg);
 
 //**********************************************************************************************************************
 // Décode un MCU

@@ -82,13 +82,6 @@ struct node * build_huffman_tree(unsigned char *ht_data) {
                 }
             }
 
-            // // On vérifie que le code à enregistrer ne contient pas que des '1'
-            // if (code == 1 || code == 3 || code == 7 || code == 15 || code == 31 || code == 63 || code == 127 || code == 255 || code == 511 || code == 1023 || code == 2047 || code == 4095 || code == 8191 || code == 16383 || code == 32767 || code == 65535) {
-            //     printf("Code: %d\n", code);
-            //     fprintf(stderr, "Error: invalid Huffman code\n");
-            //     exit(EXIT_FAILURE);
-            // }
-
             current_node->symbol = ht_data[pos++];
             getHighlyVerbose() ? fprintf(stderr, " '%x' ", current_node->symbol):0;
             code++;
@@ -142,9 +135,10 @@ void print_huffman_codes(int *bit_lengths, int8_t *symbols, int n) {
 
 //**********************************************************************************************************************
 // Renvoie la valeur du coefficient DC à partir de sa magnitude et de son indice dans la classe de magnitude
-int16_t recover_DC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude) {
+int16_t recover_DC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude, struct JPEG *jpeg) {
     if (indice_dans_classe_magnitude < 0){
         fprintf(stderr, "Error: invalid DC coefficient\n");
+        free_JPEG_struct(jpeg);
         exit(EXIT_FAILURE);
     }
     if (magnitude != 0 && indice_dans_classe_magnitude < (1 << (magnitude - 1))){
@@ -155,9 +149,10 @@ int16_t recover_DC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magn
 
 
 // Renvoie la valeur du coefficient AC à partir de sa magnitude et de son indice dans la classe de magnitude
-int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude) {
+int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude, struct JPEG *jpeg) {
     if (indice_dans_classe_magnitude == -1){
         fprintf(stderr, "Error: invalid AC coefficient\n");
+        free_JPEG_struct(jpeg);
         exit(EXIT_FAILURE);
     }
     if (magnitude != 0 && indice_dans_classe_magnitude < (1 << (magnitude - 1))){
@@ -225,10 +220,10 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             }
 
             // (4) On récupère finalement la valeur du coefficient DC à partir de la magnitude et de l'indice dans la classe de magnitude
-            int16_t DC_value = recover_DC_coeff_value(magnitude_DC, indice_dans_classe_magnitude_DC) - *previous_DC_value;
+            int16_t DC_value = recover_DC_coeff_value(magnitude_DC, indice_dans_classe_magnitude_DC, jpeg) - *previous_DC_value;
             set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, DC_value);
             *previous_DC_value = get_MCUs(component)[MCU_number][DC_VALUE_INDEX];
-            getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %x-%d |\n", DC_value, nombre_de_valeurs_decodees):0;
+            getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", DC_value, nombre_de_valeurs_decodees):0;
 
             // On prépare la suite en repositionnant le current_node sur la racine de l'arbre des coefficients AC
             current_node = get_ht_tree(get_JPEG_ht(jpeg, get_AC_huffman_table_id(component)));
@@ -278,7 +273,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     int8_t nombre_de_zero_a_ajouter = 64 - nombre_de_valeurs_decodees;
                     for (int8_t j = 0; j < nombre_de_zero_a_ajouter; j++){
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
-                        getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %x-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
+                        getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
 
                         // On réaffecte la position courante dans le bitstream pour la suite
                         current_pos++;
@@ -287,7 +282,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                 } else if (run_and_size == ZRL){   // (3b) On gère le cas spécial ZRL
                     for (int j = 0; j < 16; j++){
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
-                        getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %x-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
+                        getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
 
                         if (nombre_de_valeurs_decodees > 64){
                             fprintf(stderr, "Error: invalid number of decoded values - RLE exeeded MCU size\n");
@@ -301,7 +296,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     uint8_t nb_de_coeff_nuls_a_ajouter_avant = run_and_size >> 4;
                     for (int8_t j = 0; j < nb_de_coeff_nuls_a_ajouter_avant; j++){
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
-                        getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %x-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
+                        getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
                     }
 
                     // (4) Puis on récupère la magnitude du coefficient AC
@@ -320,9 +315,9 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     getHighlyVerbose() ? fprintf(stderr, "\n"):0;
 
                     // (5) On récupère finalement la valeur du coefficient AC à partir de la magnitude et de l'indice dans la classe de magnitude
-                    int16_t AC_value = recover_AC_coeff_value(magnitude_AC, indice_dans_classe_magnitude_AC);
+                    int16_t AC_value = recover_AC_coeff_value(magnitude_AC, indice_dans_classe_magnitude_AC, jpeg);
                     set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, AC_value);
-                    getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %x-%d | \n", AC_value, nombre_de_valeurs_decodees):0;
+                    getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d | \n", AC_value, nombre_de_valeurs_decodees):0;
 
                     // On réaffecte la position courante dans le bitstream pour la suite
                     current_pos = i + magnitude_AC;
