@@ -21,7 +21,7 @@ void initialize() {
         for (int y = 0; y < N; y++) {
             for (int u = 0; u < N; u++) {
                 for (int v = 0; v < N; v++) {
-                    C_cos_values[x][y][u][v] = C[u] * C[v] cos(((2 * x + 1) * u * PI) / (2 * N)) * cos(((2 * y + 1) * v * PI) / (2 * N));
+                    C_cos_values[x][y][u][v] = C[u] * C[v] * cos(((2 * x + 1) * u * PI) / (2 * N)) * cos(((2 * y + 1) * v * PI) / (2 * N));
                 }
             }
         }
