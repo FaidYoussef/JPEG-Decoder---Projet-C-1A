@@ -4,9 +4,11 @@
 #include <math.h>
 #include <string.h>
 
+#include <IQ.h>
 #include <utils.h>
 
 
+// Fonction qui permet de dé-zigzaguer un bloc
+int8_t IZZ_function(struct JPEG *jpeg,size_t MCU_number, int8_t component_index);
 
-// Inverse Zig-Zag function
-int ** inv_zig_zag(int *block);
+int8_t IZZ(struct JPEG * jpeg);

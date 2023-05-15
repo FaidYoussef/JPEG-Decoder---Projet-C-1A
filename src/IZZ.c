@@ -1,6 +1,6 @@
 #include <IZZ.h>
 
-const int8_t zigzag[]={
+const uint8_t zigzag[]={
     0, 1, 8, 16, 9, 2, 3, 10,
     17, 24, 32, 25, 18, 11, 4, 5,
     12, 19, 26, 33, 40, 48, 41, 34,
@@ -12,44 +12,52 @@ const int8_t zigzag[]={
 };
 
 
-// Inverse Zig-Zag function
-int ** inv_zig_zag(int *block) {
-    int **qblock = (int**) malloc(8 * sizeof(int*));
-    check_memory_allocation((void *) qblock);
-    for (int i = 0; i < 8; i++) {
-        qblock[i] = (int*) malloc(8 * sizeof(int));
-        check_memory_allocation((void *) qblock[i]);
-    }
-    int x = 0;
-    int y = 0;
-    int dir = 1;
+// Fonction qui permet de dé-zigzaguer un bloc
+int8_t IZZ_function(struct JPEG *jpeg,size_t MCU_number, int8_t component_index){
+    // On récupère la table de quantification associée à la composante
+    int16_t * block = (int16_t *) malloc(64 * sizeof(int16_t));
+    if (check_memory_allocation(block)) return EXIT_FAILURE;
+
+
+    int16_t** MCUs = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), component_index));
 
     for (int i = 0; i < 64; i++) {
-        qblock[y][x] = block[i];
-        if (dir == 1) {
-            if (x == 7) {
-                y++;
-                dir = -1;
-            } else if (y == 0) {
-                x++;
-                dir = -1;
-            } else {
-                x++;
-                y--;
-            }
-        } else {
-            if (y == 7) {
-                x++;
-                dir = 1;
-            } else if (x == 0) {
-                y++;
-                dir = 1;
-            } else {
-                x--;
-                y++;
-            }
-        }
+        block[zigzag[i]] = MCUs[MCU_number][i];    
     }
 
-    return qblock;
+    print_block(MCUs[MCU_number]);
+
+    free(MCUs[MCU_number]);
+
+    MCUs[MCU_number] = block;
+    print_block(MCUs[MCU_number]);
+    return EXIT_SUCCESS;
+}
+
+
+int8_t IZZ(struct JPEG * jpeg) {
+    size_t nb_mcu_width = 0;
+    size_t nb_mcu_height = 0;
+    if (get_JPEG_width(jpeg) % 8 == 0) {
+        nb_mcu_width =  get_JPEG_width(jpeg) / 8;
+    } else {
+        nb_mcu_width = (get_JPEG_width(jpeg) / 8) + 1;
+    }
+    if (get_JPEG_width(jpeg) % 8 == 0) {
+        nb_mcu_height =  get_JPEG_width(jpeg) / 8;
+    } else {
+        nb_mcu_height = (get_JPEG_width(jpeg) / 8) + 1;
+    }
+
+    // On parcours tous les MCUs de l'image
+    for (size_t i = 0; i < nb_mcu_width * nb_mcu_height; i++){
+        // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a
+        // plusieurs scans/frames ---> mode progressif
+        
+        // On parcours toutes les composantes
+        for (int8_t j = 0; j < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
+            if (IZZ_function(jpeg, i, j) ) return EXIT_FAILURE;
+        }
+    }
+    return EXIT_SUCCESS;
 }
