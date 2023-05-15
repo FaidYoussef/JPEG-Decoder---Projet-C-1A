@@ -64,6 +64,11 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     };
 
+    if (inv_quantize(jpeg)) {
+        free_JPEG_struct(jpeg);
+        return EXIT_FAILURE;
+    };
+
     fprintf(stderr, "Image %s décodée avec succès !\n", filename);
 
     // int *dequantized_values = inv_quantize(rle_decoded_bitstream, get_qt_data(get_JPEG_qt(jpeg)[0]), get_qt_data(get_JPEG_qt(jpeg)[1]));

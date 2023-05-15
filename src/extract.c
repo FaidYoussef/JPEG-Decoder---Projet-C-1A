@@ -49,6 +49,18 @@ int8_t get_id(struct ComponentSOF *component){
     return component->id;
 }
 
+int8_t get_sampling_factor_x(struct ComponentSOF *component){
+    return component->sampling_factor_x;
+}
+
+int8_t get_sampling_factor_y(struct ComponentSOF *component){
+    return component->sampling_factor_y;
+}
+
+int8_t get_num_quantization_table(struct ComponentSOF *component){
+    return component->num_quantization_table;
+}
+
 
 struct StartOfFrame {
     int8_t nb_components;

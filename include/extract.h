@@ -45,6 +45,9 @@ unsigned char * get_qt_data(struct QuantizationTable *qt);
 struct ComponentSOF;
 void initialize_component_sof(struct ComponentSOF *component, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table);
 int8_t get_id(struct ComponentSOF *component);
+int8_t get_sampling_factor_x(struct ComponentSOF *component);
+int8_t get_sampling_factor_y(struct ComponentSOF *component);
+int8_t get_num_quantization_table(struct ComponentSOF *component);
 
 struct StartOfFrame;
 int8_t initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table);

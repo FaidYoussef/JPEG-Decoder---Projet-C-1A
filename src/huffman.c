@@ -367,7 +367,6 @@ int8_t decode_bitstream(struct JPEG * jpeg){
         // On parcours toutes les composantes
         for (int8_t j = 0; j < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
             if (decode_MCU(jpeg, i, j, &previous_DC_values[j])) {
-                // free_memory(jpeg);
                 return EXIT_FAILURE;
             }
         }

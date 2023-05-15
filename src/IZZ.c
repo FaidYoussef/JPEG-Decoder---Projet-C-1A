@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-
-#include <quant_zigzag.h>
+#include <IZZ.h>
 
 const int8_t zigzag[]={
     0, 1, 8, 16, 9, 2, 3, 10,
@@ -16,43 +11,6 @@ const int8_t zigzag[]={
     53, 60, 61, 54, 47, 55, 62, 63
 };
 
-
-//Quantization function using quant_table
-int* quantize(int *block, int *quant_table_DC, int *quant_table_AC) {
-    int* qblock = malloc(64 * sizeof(int));
-    check_memory_allocation((void *) qblock);
-
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            if(i==0 && j==0) {
-                block[0] = qblock[0] * quant_table_DC[0];
-            } else {
-                qblock[i * 8 + j] = (block[i * 8 + j] / quant_table_AC[i * 8 + j]);
-            }
-        }
-    }
-
-    return qblock;
-}
-
-// Inverse quantization function using quant_table
-// qblock : les données qui sont quantifiées
-int* inv_quantize(unsigned char *qblock, unsigned char *quant_table_DC, unsigned char *quant_table_AC) {
-    int* block = malloc(64 * sizeof(int));
-    check_memory_allocation((void *) block);
-
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            if(i==0 && j==0) {
-                block[0] = qblock[0] * quant_table_DC[0];
-            } else {
-                block[i * 8 + j] = qblock[i * 8 + j] * quant_table_AC[i * 8 + j];
-            }
-        }
-    }
-
-    return block;
-}
 
 // Inverse Zig-Zag function
 int ** inv_zig_zag(int *block) {
