@@ -30,14 +30,14 @@
 #define INITIAL_DATA_SIZE 1024
 
 #define MAX_NUMBER_OF_HUFFMAN_TABLES 4
-#define MAX_NUMBER_OF_QUANTIZATION_TABLES 2
+#define MAX_NUMBER_OF_QUANTIZATION_TABLES 3
 
 struct JPEG;
 #include <huffman.h>
 //**********************************************************************************************************************
 struct QuantizationTable;
 int8_t initialize_qt(struct QuantizationTable *qt, int8_t id, size_t length, unsigned char *data);
-unsigned char get_qt_id(struct QuantizationTable *qt);
+int8_t get_qt_id(struct QuantizationTable *qt);
 size_t get_qt_length(struct QuantizationTable *qt);
 unsigned char * get_qt_data(struct QuantizationTable *qt);
 

@@ -14,23 +14,22 @@ const uint8_t zigzag[]={
 
 // Fonction qui permet de dé-zigzaguer un bloc
 int8_t IZZ_function(struct JPEG *jpeg,size_t MCU_number, int8_t component_index){
-    // On récupère la table de quantification associée à la composante
-    int16_t * block = (int16_t *) malloc(64 * sizeof(int16_t));
+    int16_t *block = (int16_t *) malloc(64 * sizeof(int16_t));
     if (check_memory_allocation(block)) return EXIT_FAILURE;
 
 
-    int16_t** MCUs = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), component_index));
+    int16_t **MCUs = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), component_index));
 
-    for (int i = 0; i < 64; i++) {
+    for (int8_t i = 0; i < 64; i++) {
         block[zigzag[i]] = MCUs[MCU_number][i];    
     }
-
+    fprintf(stderr, "Block après IQ\n");
     print_block(MCUs[MCU_number]);
-
     free(MCUs[MCU_number]);
-
     MCUs[MCU_number] = block;
+    fprintf(stderr, "Block après IZZ\n");
     print_block(MCUs[MCU_number]);
+
     return EXIT_SUCCESS;
 }
 

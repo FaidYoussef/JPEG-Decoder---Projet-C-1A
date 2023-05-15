@@ -16,6 +16,7 @@ uint8_t saturer(int valeur) {
 }
 
 // Fonction pour convertir un pixel YCbCr en pixel RGB
+// Si une seule composan (Y) >>> donner en entrée la même valeur '128' pour Cb et Cr
 void ycbcr_vers_rgb(uint8_t Y, uint8_t Cb, uint8_t Cr, uint8_t *R, uint8_t *G, uint8_t *B) {
     int r = Y + 1.402 * (Cr - 128);
     int g = Y - 0.34414 * (Cb - 128) - 0.71414 * (Cr - 128);

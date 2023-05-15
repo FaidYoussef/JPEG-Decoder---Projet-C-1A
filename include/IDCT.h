@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 #include <extract.h>
-#include <IQ.h>
 #include <utils.h>
 
 #define PI 3.14159265358979323846

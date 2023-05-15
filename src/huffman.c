@@ -155,7 +155,8 @@ int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magn
         free_JPEG_struct(jpeg);
         exit(EXIT_FAILURE);
     }
-    if (magnitude != 0 && indice_dans_classe_magnitude < (1 << (magnitude - 1))){
+    
+    if (indice_dans_classe_magnitude < (1 << (magnitude - 1))){
         indice_dans_classe_magnitude -= (1 << magnitude) - 1;
     }
     return indice_dans_classe_magnitude;
@@ -309,7 +310,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     int16_t indice_dans_classe_magnitude_AC = 0;
                     for (uint8_t j = 0; j < magnitude_AC; j++){
                         indice_dans_classe_magnitude_AC <<= 1;
-                        indice_dans_classe_magnitude_AC = (bitstream[(int)((current_pos + 1 + j) / 8)] >> (7 - ((current_pos + 1 + j) % 8))) & 1;
+                        indice_dans_classe_magnitude_AC += (bitstream[(int)((current_pos + 1 + j) / 8)] >> (7 - ((current_pos + 1 + j) % 8))) & 1;
                         getHighlyVerbose() ? fprintf(stderr, "%x", indice_dans_classe_magnitude_AC):0;
                     }
                     getHighlyVerbose() ? fprintf(stderr, "\n"):0;

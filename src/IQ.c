@@ -61,21 +61,16 @@ int8_t inv_quantize(struct JPEG * jpeg) {
 
         // On parcours tous les MCUs de l'image
         for (size_t j = 0; j < nb_mcu_width * nb_mcu_height; j++){
+            fprintf(stderr, "Block avant IQ\n");
             print_block(MCUs[j]);
             for (int8_t k = 0; k < 64; k++) {
-                MCUs[j][k] = MCUs[j][k] * test_qt_max_value[k];
+                MCUs[j][k] = MCUs[j][k] * qt_table[k];
             }
+            fprintf(stderr, "Block après IQ\n");
             print_block(MCUs[j]);
         }
     }
     return EXIT_SUCCESS;
 }
 
-void print_block(int16_t *block){
-    fprintf(stderr, "\nBlock :\n");
-    for (int i = 0; i < 64; i++) {
-        fprintf(stderr, "%d ", block[i]);
-        if (i % 8 == 7) fprintf(stderr, "\n");
-    }
-    printf("\n");
-}
+

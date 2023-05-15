@@ -48,7 +48,7 @@ int8_t IDCT_function(struct JPEG *jpeg, size_t MCU_number, int8_t component_inde
 
     initialize();
     load();
-    
+
     int16_t *output = (int16_t *) malloc(NN * sizeof(int16_t));
     if (check_memory_allocation(output)) return EXIT_FAILURE;
 
@@ -72,10 +72,11 @@ int8_t IDCT_function(struct JPEG *jpeg, size_t MCU_number, int8_t component_inde
             }
         }
     }
-
+    fprintf(stderr, "Block après IZZ\n");
     print_block(MCUs[MCU_number]);
     free(MCUs[MCU_number]);
     MCUs[MCU_number] = output;
+    fprintf(stderr, "Block après IDCT\n");
     print_block(MCUs[MCU_number]);
 
     return EXIT_SUCCESS;

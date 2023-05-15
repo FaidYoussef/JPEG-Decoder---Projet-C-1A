@@ -16,7 +16,7 @@ int8_t initialize_qt(struct QuantizationTable *qt, int8_t id, size_t length, uns
     return EXIT_SUCCESS;
 }
 
-unsigned char get_qt_id(struct QuantizationTable *qt){
+int8_t get_qt_id(struct QuantizationTable *qt){
     return qt->id;
 }
 
