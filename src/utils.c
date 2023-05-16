@@ -9,10 +9,10 @@ int8_t check_memory_allocation(void *allocated_data){
 }
 
 void print_block(int16_t *block){
-    fprintf(stderr, "\nBlock :\n");
+    getHighlyVerbose() ? fprintf(stderr, "\nBlock :\n"):0;
     for (int i = 0; i < 64; i++) {
-        fprintf(stderr, "%hx ", block[i]);
+        getHighlyVerbose() ? fprintf(stderr, "%4hx ", block[i]):0;
         if (i % 8 == 7) fprintf(stderr, "\n");
     }
-    printf("\n");
+    getHighlyVerbose() ? printf("\n"):0;
 }

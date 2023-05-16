@@ -43,7 +43,7 @@ int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magn
 // Décode un MCU
 // utilise les tables de Huffman de la composante
 // puis récupère les valeurs à encoder via RLE et encodage via magnitude
-int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int* previous_DC_value);
+int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int* previous_DC_value, size_t *current_pos);
 
 // Décode le bitstream et récupère les MCU de chacune des composantes
 int8_t decode_bitstream(struct JPEG * jpeg);

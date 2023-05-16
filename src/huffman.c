@@ -167,7 +167,7 @@ int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magn
 // Décode un MCU
 // utilise les tables de Huffman de la composante
 // puis récupère les valeurs à encoder via RLE et encodage via magnitude
-int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int* previous_DC_value) {
+int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int* previous_DC_value, size_t *current_pos) {
     // On récupère les 64 valeurs du bloc 8x8
     struct ComponentSOS *component = get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), component_index);
     unsigned char *bitstream = get_JPEG_image_data(jpeg);
@@ -175,7 +175,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 
     struct node *current_node = get_ht_tree(get_JPEG_ht(jpeg, get_DC_huffman_table_id(component)));
     int8_t nombre_de_valeurs_decodees = 0;
-    size_t current_pos = 0;
+    
 
     getHighlyVerbose() ? fprintf(stderr, "Decoding MCUs:\n"):0;
     getHighlyVerbose() ? fprintf(stderr, "\tMCU#%ld:\n", MCU_number):0;
@@ -184,7 +184,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
     getHighlyVerbose() ? fprintf(stderr, "\t\t\tAC huffman table id: %d\n", get_AC_huffman_table_id(component)):0;
 
     // On décode pour trouver la valeur du coefficient DC
-    for (size_t i = current_pos; i < bitstream_size_in_bits; i++) {
+    for (size_t i = *current_pos; i < bitstream_size_in_bits; i++) {
         // (1) On lit le code de Huffman
         // On détermine le bit actuel en inspectant l'octet approprié dans bitstream
         // puis en décalant et en masquant le bit approprié
@@ -230,13 +230,13 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             current_node = get_ht_tree(get_JPEG_ht(jpeg, get_AC_huffman_table_id(component)));
 
             // Et on réaffecte la position courante dans le bitstream pour la suite
-            current_pos = i + magnitude_DC + 1;
+            *current_pos = i + magnitude_DC + 1;
 
             break;  // On a récupéré la valeur du coefficient DC, on peut passer à la suite
         }
 
         // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
-            if (nombre_de_valeurs_decodees < 64 && current_pos == bitstream_size_in_bits - 1) {
+            if (nombre_de_valeurs_decodees < 64 && *current_pos == bitstream_size_in_bits - 1) {
                 fprintf(stderr, "Error: invalid bitstream - does not contain enough values for current MCU#%ld\n", MCU_number);
                 return EXIT_FAILURE;
             }
@@ -244,8 +244,8 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 
     // On décode pour trouver les 63 valeurs des coefficients AC
     while(nombre_de_valeurs_decodees < 64){
-        for (size_t i = current_pos; i < bitstream_size_in_bits; i++) {
-            getHighlyVerbose() ? fprintf(stderr, "\t\t\t\tcurrent_pos = %ld\n", current_pos):0;
+        for (size_t i = *current_pos; i < bitstream_size_in_bits; i++) {
+            getHighlyVerbose() ? fprintf(stderr, "\t\t\t\tcurrent_pos = %ld\n", *current_pos):0;
             // (1) On lit le code de Huffman
             // On détermine le bit actuel en inspectant l'octet approprié dans bitstream
             // puis en décalant et en masquant le bit approprié
@@ -277,7 +277,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                         getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
 
                         // On réaffecte la position courante dans le bitstream pour la suite
-                        current_pos++;
+                        *current_pos += 1;
                     }
                     break;  // On a fini de récupérer les valeurs des coefficients AC, on peut passer à la suite
                 } else if (run_and_size == ZRL){   // (3b) On gère le cas spécial ZRL
@@ -291,7 +291,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                         }
 
                         // On réaffecte la position courante dans le bitstream pour la suite
-                        current_pos++;
+                        *current_pos += 1;
                     }
                 } else {    // (3c) Sinon On ajoute le bon nombre de coefficients nuls avant le coefficient AC
                     uint8_t nb_de_coeff_nuls_a_ajouter_avant = run_and_size >> 4;
@@ -310,7 +310,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     int16_t indice_dans_classe_magnitude_AC = 0;
                     for (uint8_t j = 0; j < magnitude_AC; j++){
                         indice_dans_classe_magnitude_AC <<= 1;
-                        indice_dans_classe_magnitude_AC += (bitstream[(int)((current_pos + 1 + j) / 8)] >> (7 - ((current_pos + 1 + j) % 8))) & 1;
+                        indice_dans_classe_magnitude_AC += (bitstream[(int)((*current_pos + 1 + j) / 8)] >> (7 - ((*current_pos + 1 + j) % 8))) & 1;
                         getHighlyVerbose() ? fprintf(stderr, "%x", indice_dans_classe_magnitude_AC):0;
                     }
                     getHighlyVerbose() ? fprintf(stderr, "\n"):0;
@@ -321,7 +321,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d | \n", AC_value, nombre_de_valeurs_decodees):0;
 
                     // On réaffecte la position courante dans le bitstream pour la suite
-                    current_pos = i + magnitude_AC;
+                    *current_pos = i + magnitude_AC;
                     i += magnitude_AC;
 
                 }
@@ -329,10 +329,12 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                 // On prépare la suite en repositionnant le current_node sur la racine de l'arbre des AC
                 current_node = get_ht_tree(get_JPEG_ht(jpeg, get_AC_huffman_table_id(component)));
             }
-            current_pos++;
+            *current_pos += 1;
+
+            if (nombre_de_valeurs_decodees == 64) break; // On a fini de récupérer les valeurs des coefficients AC, on peut passer à la suite
 
             // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
-            if (nombre_de_valeurs_decodees < 64 && current_pos == bitstream_size_in_bits - 1) {
+            if (nombre_de_valeurs_decodees < 64 && *current_pos == bitstream_size_in_bits - 1) {
                 fprintf(stderr, "Error: invalid bitstream - does not contain enough values for current MCU#%ld\n", MCU_number);
                 exit(EXIT_FAILURE);
             }
@@ -360,6 +362,7 @@ int8_t decode_bitstream(struct JPEG * jpeg){
 
     int previous_DC_values[3] = {0};
 
+    size_t current_pos = 0;
     // On parcours tous les MCUs de l'image
     for (size_t i = 0; i < nb_mcu_width * nb_mcu_height; i++){
         // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a
@@ -367,7 +370,8 @@ int8_t decode_bitstream(struct JPEG * jpeg){
         
         // On parcours toutes les composantes
         for (int8_t j = 0; j < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
-            if (decode_MCU(jpeg, i, j, &previous_DC_values[j])) {
+            
+            if (decode_MCU(jpeg, i, j, &previous_DC_values[j], &current_pos)) {
                 return EXIT_FAILURE;
             }
         }

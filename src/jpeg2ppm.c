@@ -79,6 +79,11 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     };
 
+    // if (YCbCr2RGB(jpeg)) {
+    //     free_JPEG_struct(jpeg);
+    //     return EXIT_FAILURE;
+    // };
+
     if (write_ppm(filename, jpeg)) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
@@ -88,10 +93,10 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Image %s décodée avec succès !\n", filename);
 
 
-    // int *dequantized_values = inv_quantize(rle_decoded_bitstream, get_qt_data(get_JPEG_qt(jpeg)[0]), get_qt_data(get_JPEG_qt(jpeg)[1]));
-    // int* idct_ed_values = idct(dequantized_values);
-
-
+    // thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream
+    // on ne gère pas les fichiers polyglotes (sauf si le jpeg est en début de fichier)
+    // FAIRE IQ
+    // FAIRE YCbCr2RGB
     // Note -8 : factoriser les nb_mcus_width * nb_mcus_height
     // Note -7 : vérifier que la valeur après IQ est bien inférieure au max des int16_t
     // Note -6 : vérifier App0 = JFIF

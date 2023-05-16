@@ -23,11 +23,11 @@ int8_t IZZ_function(struct JPEG *jpeg,size_t MCU_number, int8_t component_index)
     for (int8_t i = 0; i < 64; i++) {
         block[zigzag[i]] = MCUs[MCU_number][i];    
     }
-    fprintf(stderr, "Block après IQ\n");
+    getHighlyVerbose() ? fprintf(stderr, "Block après IQ\n"):0;
     print_block(MCUs[MCU_number]);
     free(MCUs[MCU_number]);
     MCUs[MCU_number] = block;
-    fprintf(stderr, "Block après IZZ\n");
+    getHighlyVerbose() ? fprintf(stderr, "Block après IZZ\n"):0;
     print_block(MCUs[MCU_number]);
 
     return EXIT_SUCCESS;
@@ -42,10 +42,10 @@ int8_t IZZ(struct JPEG * jpeg) {
     } else {
         nb_mcu_width = (get_JPEG_width(jpeg) / 8) + 1;
     }
-    if (get_JPEG_width(jpeg) % 8 == 0) {
-        nb_mcu_height =  get_JPEG_width(jpeg) / 8;
+    if (get_JPEG_height(jpeg) % 8 == 0) {
+        nb_mcu_height =  get_JPEG_height(jpeg) / 8;
     } else {
-        nb_mcu_height = (get_JPEG_width(jpeg) / 8) + 1;
+        nb_mcu_height = (get_JPEG_height(jpeg) / 8) + 1;
     }
 
     // On parcours tous les MCUs de l'image
