@@ -7,13 +7,17 @@
 
 #include <extract.h>
 
+#define COMPONENT_0_INDEX 0
+#define COMPONENT_1_INDEX 1
+#define COMPONENT_2_INDEX 2
+
 // Fonction pour saturer les valeurs entre 0 et 255
 uint8_t saturer(int valeur);
 
 // Fonction pour convertir un pixel YCbCr en pixel RGB
-// Si une seule composante (Y) >>> donner en entrée la même valeur '128' pour Cb et Cr
-void ycbcr_vers_rgb(uint8_t Y, uint8_t Cb, uint8_t Cr, uint8_t *R, uint8_t *G, uint8_t *B);
-// void ycbcr_vers_rgb(struct JPEG *jpeg, size_t MCU_number);
+// Si on a une seule composante, on ne met à jour que la composante 0
+// Si on a plusieurs composantes, on met à jour en lieu et place des composantes 0, 1 et 2 les valeurs R, G et B
+void ycbcr_vers_rgb(struct JPEG *jpeg, size_t MCU_number);
 
 int8_t YCbCr2RGB(struct JPEG *jpeg);
 

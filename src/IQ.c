@@ -89,12 +89,12 @@ int8_t inv_quantize(struct JPEG * jpeg) {
             getHighlyVerbose() ? fprintf(stderr, "Block avant IQ\n"):0;
             print_block(MCUs[j]);
             for (int8_t k = 0; k < 64; k++) {
-                if (isOverflow(MCUs[j][k], test_qt256[k]) && MCUs[j][k] < 0) {
+                if (isOverflow(MCUs[j][k], qt_table[k]) && MCUs[j][k] < 0) {
                     MCUs[j][k] = -32768;
-                } else if (isOverflow(MCUs[j][k], test_qt256[k]) && MCUs[j][k] > 0) {
+                } else if (isOverflow(MCUs[j][k], qt_table[k]) && MCUs[j][k] > 0) {
                     MCUs[j][k] = 32767;
                 } else {
-                    MCUs[j][k] = MCUs[j][k] * test_qt256[k];
+                    MCUs[j][k] = MCUs[j][k] * qt_table[k];
                 }
             }
             getHighlyVerbose() ? fprintf(stderr, "Block après IQ\n"):0;

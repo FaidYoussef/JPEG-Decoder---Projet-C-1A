@@ -83,7 +83,7 @@ struct node * build_huffman_tree(unsigned char *ht_data) {
             }
 
             current_node->symbol = ht_data[pos++];
-            getHighlyVerbose() ? fprintf(stderr, " '%x' ", current_node->symbol):0;
+            getHighlyVerbose() ? fprintf(stderr, " '%hhx' ", current_node->symbol):0;
             code++;
         }
         code <<= 1;

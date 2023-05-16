@@ -79,10 +79,10 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     };
 
-    // if (YCbCr2RGB(jpeg)) {
-    //     free_JPEG_struct(jpeg);
-    //     return EXIT_FAILURE;
-    // };
+    if (YCbCr2RGB(jpeg)) {
+        free_JPEG_struct(jpeg);
+        return EXIT_FAILURE;
+    };
 
     if (write_ppm(filename, jpeg)) {
         free_JPEG_struct(jpeg);
@@ -93,12 +93,11 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Image %s décodée avec succès !\n", filename);
 
 
+    // On ne gère que 3 composantes au maximum
+    // Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment
     // thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream
     // on ne gère pas les fichiers polyglotes (sauf si le jpeg est en début de fichier)
-    // FAIRE IQ : normalement réglé
-    // FAIRE YCbCr2RGB
     // Note -8 : factoriser les nb_mcus_width * nb_mcus_height
-    // Note -7 : vérifier que la valeur après IQ est bien inférieure au max des int16_t
     // Note -6 : vérifier App0 = JFIF
     // Note -3 : peut être réajuster width et height en size_t si on a une image hyper grande ... ???
     // Note -2 : il faut forcer la taille de nos variables avec int8_t, int16_t, int32_t, uint8_t, uint16_t, uint32_t pour éviter les problèmes de taille de variables sur différentes architectures matérielles !!!
