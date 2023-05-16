@@ -9,6 +9,9 @@
 #include <extract.h>
 
 #define NB_VALUES_IN_8x8_BLOCK 64
+#define COMPONENT_0_INDEX 0
+#define COMPONENT_1_INDEX 1
+#define COMPONENT_2_INDEX 2
 
 
 int8_t check_memory_allocation(void *allocated_data);

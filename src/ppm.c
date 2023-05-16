@@ -6,99 +6,89 @@ int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
     int16_t width = get_JPEG_width(jpeg);
     int16_t height = get_JPEG_height(jpeg);
 
-    FILE *output_file = fopen("YOUSSEF.pgm", "wb");
-    if (!output_file) {
-        fprintf(stderr, "Erreur lors de l'ouverture du fichier %s\n", filename);
-        return EXIT_FAILURE;
-    }
-
-    fprintf(output_file, "P5\n%d %d\n255\n", width, height);
+    // On prépare le fichier de sortie
+    FILE *output_file;
     if (nb_components == 1) {
-        
-        int16_t* image_data = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), 0))[0];
-
-        for (int8_t i = 0 ; i < 8 ; i++){
-            for (int8_t j = 0 ; j < 8 ; j++){
-                fprintf(output_file, "%c", image_data[i * 8 + j]);
-            }
-        }
-        
-
-        fclose(output_file);
-
-        fprintf(stderr, "L'image PPM a été écrite dans `YOUSSEF.pgm`\n");
-
-    }
-
-    if (nb_components == 3){
-        
-        int16_t* image_data = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), 0))[0];
-        int16_t* image_data2 = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), 1))[0];
-        int16_t* image_data3 = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), 2))[0];
-
-        FILE *output_file = fopen("YOUSSEF.ppm", "wb");
+        // On vérifie que le fichier a bien été créé/ouvert
+        output_file = fopen("YOUSSEF.pgm", "wb");
         if (!output_file) {
             fprintf(stderr, "Erreur lors de l'ouverture du fichier %s\n", filename);
             return EXIT_FAILURE;
         }
 
+        // On écrit l'en-tête du fichier PGM
+        fprintf(output_file, "P5\n%d %d\n255\n", width, height);
+
+
+    } else if (nb_components == 3) {
+        // On vérifie que le fichier a bien été créé/ouvert
+        output_file = fopen("YOUSSEF.ppm", "wb");
+        if (!output_file) {
+            fprintf(stderr, "Erreur lors de l'ouverture du fichier %s\n", filename);
+            return EXIT_FAILURE;
+        }
+
+        // On écrit l'en-tête du fichier PPM
         fprintf(output_file, "P6\n%d %d\n255\n", width, height);
+    }
+    
 
-        size_t nb_mcu_width = 0;
-        size_t nb_mcu_height = 0;
-        size_t width_reste = get_JPEG_width(jpeg) % 8;
-        size_t height_reste = get_JPEG_height(jpeg) % 8;
+    // On récupère les pointeurs vers les MCUs des composantes disponibles
+    int16_t** MCUs_component0 = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_0_INDEX));
+    int16_t** MCUs_component1;
+    int16_t** MCUs_component2;
 
-        if (width_reste == 0) {
+    if (nb_components > 1) {
+        MCUs_component1 = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_1_INDEX));
+        MCUs_component2 = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_2_INDEX));
+    }
 
-            nb_mcu_width =  get_JPEG_width(jpeg) / 8;
 
-        } else {
+    // On récupère le nombre de mcus en largeur et hauteur
+    size_t nb_mcu_width = 0;
+    size_t nb_mcu_height = 0;
+    if (width % 8 == 0) {
+        nb_mcu_width =  width / 8;
+    } else {
+        nb_mcu_width = (width / 8) + 1;
+    }
+    if (height % 8 == 0) {
+        nb_mcu_height =  height / 8;
+    } else {
+        nb_mcu_height = (height / 8) + 1;
+    }
+    fprintf(stderr, "nb_mcu_width = %ld\n", nb_mcu_width);
+    fprintf(stderr, "nb_mcu_height = %ld\n", nb_mcu_height);
 
-            nb_mcu_width = (get_JPEG_width(jpeg) / 8) + 1;
 
-        }
-        if (height_reste == 0) {
+    // On écrit les valeurs dans le fichier de sortie
+    int16_t cpt_x = 0;
+    int16_t cpt_y = 0;
+    fprintf(stderr, "cpt_x = %d\n", cpt_x);
+    fprintf(stderr, "cpt_y = %d\n\n", cpt_y);
 
-            nb_mcu_height =  get_JPEG_height(jpeg) / 8;
-
-        } else {
-
-            nb_mcu_height = (get_JPEG_height(jpeg) / 8) + 1;
-        }
-        
-        for (int8_t height_mcu_index = 0; height_mcu_index < nb_mcu_height ; height_mcu_index++){
-        
-            for (int8_t width_mcu_index =0; width_mcu_index < nb_mcu_width; width_mcu_index++){
-
-                for (int8_t pixel_index = 0; pixel_index < 8; pixel_index++){
-                    fprintf(output_file, "%c", image_data[width_mcu_index * 8 + pixel_index]);
-                    fprintf(output_file, "%c", image_data2[width_mcu_index * 8 + pixel_index]);
-                    fprintf(output_file, "%c", image_data3[width_mcu_index * 8 + pixel_index]);
+    for (size_t i = 0; i < nb_mcu_height ; i++){
+        for (int8_t l = 0; l < 8; l++) {
+            for (size_t j = 0; j < nb_mcu_width ; j++){
+                for (int8_t k = 0; k < 8; k++){
+                    fprintf(output_file, "%c", MCUs_component0[j + i * 2][k+l*8]);
+                    fprintf(stderr, "cpt_x = %d\n", cpt_x);
+                    cpt_x++;
                 }
-
+                if (cpt_x == width){
+                    cpt_x = 0;
+                    break;
+                }
             }
-                for (int8_t pixel_index = 0; pixel_index < width_reste; pixel_index++){
-                    fprintf(output_file, "%c", image_data[(nb_mcu_width - 1)  * 8 + pixel_index]);
-                    fprintf(output_file, "%c", image_data2[(nb_mcu_width - 1) * 8 + pixel_index]);
-                    fprintf(output_file, "%c", image_data3[(nb_mcu_width - 1) * 8 + pixel_index]);
-                }          
-            }
-        
-
-        for (int8_t pixel_index = 0; pixel_index < height_reste; pixel_index++){
-            for (int8_t width_mcu_index =0; width_mcu_index < nb_mcu_width; width_mcu_index++){
-                fprintf(output_file, "%c", image_data[width_mcu_index * 8 + pixel_index]);
-                fprintf(output_file, "%c", image_data2[width_mcu_index * 8 + pixel_index]);
-                fprintf(output_file, "%c", image_data3[width_mcu_index * 8 + pixel_index]);
-            }
-
-            for (int8_t pixel_index = 0; pixel_index < width_reste; pixel_index++){
-                fprintf(output_file, "%c", image_data[(nb_mcu_width - 1)  * 8 + pixel_index]);
-                fprintf(output_file, "%c", image_data2[(nb_mcu_width - 1) * 8 + pixel_index]);
-                fprintf(output_file, "%c", image_data3[(nb_mcu_width - 1) * 8 + pixel_index]);
-            }
+            cpt_y++;
+            fprintf(stderr, "cpt_y = %d\n", cpt_y);
         }
+        if (cpt_y == height){
+            cpt_y = 0;
+            fprintf(output_file, "\n");
+            break;
+        }
+        
     }
 
     fclose(output_file);

@@ -6,10 +6,7 @@
 #include <stdlib.h>
 
 #include <extract.h>
-
-#define COMPONENT_0_INDEX 0
-#define COMPONENT_1_INDEX 1
-#define COMPONENT_2_INDEX 2
+#include <utils.h>
 
 // Fonction pour saturer les valeurs entre 0 et 255
 uint8_t saturer(int valeur);
