@@ -7,7 +7,7 @@
 
 #define ONE 0x1
 #define EOB 0x00
-#define ZRL 0x78
+#define ZRL 0xf0
 
 
 
@@ -276,11 +276,12 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
                         getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
 
-                        // On réaffecte la position courante dans le bitstream pour la suite
-                        *current_pos += 1;
                     }
+                    // On réaffecte la position courante dans le bitstream pour la suite
+                    *current_pos += 1;
                     break;  // On a fini de récupérer les valeurs des coefficients AC, on peut passer à la suite
                 } else if (run_and_size == ZRL){   // (3b) On gère le cas spécial ZRL
+                    fprintf(stderr, "fhfhfhfhfhfthfth\n");
                     for (int j = 0; j < 16; j++){
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
                         getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
@@ -305,8 +306,8 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     if (magnitude_AC > 10){
                         fprintf(stderr, "Error: invalid magnitude_AC value - value over 10\n");
                         return EXIT_FAILURE;
-                    } else if (magnitude_AC <= 0){
-                        fprintf(stderr, "Error: invalid magnitude_AC value - negative value or equals 0\n");
+                    } else if (magnitude_AC == 0){
+                        fprintf(stderr, "Error: invalid magnitude_AC value - value equals 0\n");
                         return EXIT_FAILURE;
                     }
                     getHighlyVerbose() ? fprintf(stderr, "\t\t\tmagnitude_AC = %x - indice_dans_la_classe_de_magnitude : ", magnitude_AC):0;

@@ -57,22 +57,17 @@ int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
     } else {
         nb_mcu_height = (height / 8) + 1;
     }
-    fprintf(stderr, "nb_mcu_width = %ld\n", nb_mcu_width);
-    fprintf(stderr, "nb_mcu_height = %ld\n", nb_mcu_height);
 
 
     // On écrit les valeurs dans le fichier de sortie
     int16_t cpt_x = 0;
     int16_t cpt_y = 0;
-    fprintf(stderr, "cpt_x = %d\n", cpt_x);
-    fprintf(stderr, "cpt_y = %d\n\n", cpt_y);
 
     for (size_t i = 0; i < nb_mcu_height ; i++){
         for (int8_t l = 0; l < 8; l++) {
             for (size_t j = 0; j < nb_mcu_width ; j++){
                 for (int8_t k = 0; k < 8; k++){
                     fprintf(output_file, "%c", MCUs_component0[j + i * 2][k+l*8]);
-                    fprintf(stderr, "cpt_x = %d\n", cpt_x);
                     cpt_x++;
                 }
                 if (cpt_x == width){
@@ -81,11 +76,9 @@ int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
                 }
             }
             cpt_y++;
-            fprintf(stderr, "cpt_y = %d\n", cpt_y);
         }
         if (cpt_y == height){
             cpt_y = 0;
-            fprintf(output_file, "\n");
             break;
         }
         
