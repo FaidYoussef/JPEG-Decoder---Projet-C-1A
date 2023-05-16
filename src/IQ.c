@@ -11,7 +11,7 @@ const int16_t test_qt2[64] = {
     2, 2, 2, 2, 2, 2, 2, 2
 };
 
-const int16_t test_qt_max_value[64] = {
+const int16_t test_qtminus1[64] = {
     65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
     65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
     65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
@@ -20,6 +20,17 @@ const int16_t test_qt_max_value[64] = {
     65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
     65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535,
     65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535
+};
+
+const int16_t test_qt256[64] = {
+    256, 256, 256, 256, 256, 256, 256, 256,
+    256, 256, 256, 256, 256, 256, 256, 256,
+    256, 256, 256, 256, 256, 256, 256, 256,
+    256, 256, 256, 256, 256, 256, 256, 256,
+    256, 256, 256, 256, 256, 256, 256, 256,
+    256, 256, 256, 256, 256, 256, 256, 256,
+    256, 256, 256, 256, 256, 256, 256, 256,
+    256, 256, 256, 256, 256, 256, 256, 256
 };
 
 const int16_t test_qt0[64] = {
@@ -32,6 +43,20 @@ const int16_t test_qt0[64] = {
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0
 };
+
+
+bool isOverflow(int16_t a, int16_t b) {
+    // Check if either of them is zero
+    if (a == 0 || b == 0)
+        return false;
+     
+    int16_t result = a * b;
+    if (a == result / b) {
+        return false;
+    } else {
+        return true;
+    }
+}
 
 
 // Inverse quantization function using quant_table
@@ -64,7 +89,13 @@ int8_t inv_quantize(struct JPEG * jpeg) {
             getHighlyVerbose() ? fprintf(stderr, "Block avant IQ\n"):0;
             print_block(MCUs[j]);
             for (int8_t k = 0; k < 64; k++) {
-                MCUs[j][k] = MCUs[j][k] * qt_table[k];
+                if (isOverflow(MCUs[j][k], test_qt256[k]) && MCUs[j][k] < 0) {
+                    MCUs[j][k] = -32768;
+                } else if (isOverflow(MCUs[j][k], test_qt256[k]) && MCUs[j][k] > 0) {
+                    MCUs[j][k] = 32767;
+                } else {
+                    MCUs[j][k] = MCUs[j][k] * test_qt256[k];
+                }
             }
             getHighlyVerbose() ? fprintf(stderr, "Block après IQ\n"):0;
             print_block(MCUs[j]);

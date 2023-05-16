@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 
     // thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream
     // on ne gère pas les fichiers polyglotes (sauf si le jpeg est en début de fichier)
-    // FAIRE IQ
+    // FAIRE IQ : normalement réglé
     // FAIRE YCbCr2RGB
     // Note -8 : factoriser les nb_mcus_width * nb_mcus_height
     // Note -7 : vérifier que la valeur après IQ est bien inférieure au max des int16_t

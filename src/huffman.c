@@ -150,7 +150,7 @@ int16_t recover_DC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magn
 
 // Renvoie la valeur du coefficient AC à partir de sa magnitude et de son indice dans la classe de magnitude
 int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude, struct JPEG *jpeg) {
-    if (indice_dans_classe_magnitude == -1){
+    if (indice_dans_classe_magnitude < 0){
         fprintf(stderr, "Error: invalid AC coefficient\n");
         free_JPEG_struct(jpeg);
         exit(EXIT_FAILURE);
@@ -302,8 +302,11 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 
                     // (4) Puis on récupère la magnitude du coefficient AC
                     uint8_t magnitude_AC = run_and_size & 0x0F; // on récupère les 4 LSB en appliquant un masque
-                    if (magnitude_AC > 16){
+                    if (magnitude_AC > 10){
                         fprintf(stderr, "Error: invalid magnitude_AC value - value over 10\n");
+                        return EXIT_FAILURE;
+                    } else if (magnitude_AC <= 0){
+                        fprintf(stderr, "Error: invalid magnitude_AC value - negative value or equals 0\n");
                         return EXIT_FAILURE;
                     }
                     getHighlyVerbose() ? fprintf(stderr, "\t\t\tmagnitude_AC = %x - indice_dans_la_classe_de_magnitude : ", magnitude_AC):0;
