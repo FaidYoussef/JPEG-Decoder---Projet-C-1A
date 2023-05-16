@@ -221,7 +221,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             }
 
             // (4) On récupère finalement la valeur du coefficient DC à partir de la magnitude et de l'indice dans la classe de magnitude
-            int16_t DC_value = recover_DC_coeff_value(magnitude_DC, indice_dans_classe_magnitude_DC, jpeg) - *previous_DC_value;
+            int16_t DC_value = recover_DC_coeff_value(magnitude_DC, indice_dans_classe_magnitude_DC, jpeg) + *previous_DC_value;
             set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, DC_value);
             *previous_DC_value = get_MCUs(component)[MCU_number][DC_VALUE_INDEX];
             getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", DC_value, nombre_de_valeurs_decodees):0;
