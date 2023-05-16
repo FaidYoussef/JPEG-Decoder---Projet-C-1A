@@ -46,7 +46,7 @@ int8_t IDCT_function(struct JPEG *jpeg, size_t MCU_number, int8_t component_inde
 
     int16_t** MCUs = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), component_index));
 
-    initialize();
+    // initialize();
     load();
 
     int16_t *output = (int16_t *) malloc(NN * sizeof(int16_t));
@@ -72,12 +72,10 @@ int8_t IDCT_function(struct JPEG *jpeg, size_t MCU_number, int8_t component_inde
             }
         }
     }
-    getHighlyVerbose() ? fprintf(stderr, "Block après IZZ\n"):0;
-    print_block(MCUs[MCU_number]);
     free(MCUs[MCU_number]);
     MCUs[MCU_number] = output;
-    getHighlyVerbose() ? fprintf(stderr, "Block après IDCT\n"):0;
-    print_block(MCUs[MCU_number]);
+    getHighlyVerbose() ? fprintf(stderr, "MCU après IDCT\n"):0;
+    print_block(MCUs[MCU_number], MCU_number);
 
     return EXIT_SUCCESS;
 }

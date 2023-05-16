@@ -236,7 +236,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
         }
 
         // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
-            if (nombre_de_valeurs_decodees < 64 && *current_pos == bitstream_size_in_bits - 1) {
+            if (nombre_de_valeurs_decodees < 64 && *current_pos == bitstream_size_in_bits) {
                 fprintf(stderr, "Error: invalid bitstream - does not contain enough values for current MCU#%ld\n", MCU_number);
                 return EXIT_FAILURE;
             }
@@ -281,7 +281,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     *current_pos += 1;
                     break;  // On a fini de récupérer les valeurs des coefficients AC, on peut passer à la suite
                 } else if (run_and_size == ZRL){   // (3b) On gère le cas spécial ZRL
-                    fprintf(stderr, "fhfhfhfhfhfthfth\n");
+                    fprintf(stderr, "Error: invalid bitstream - ZRL not implemented\n");
                     for (int j = 0; j < 16; j++){
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
                         getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
@@ -291,9 +291,9 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                             return EXIT_FAILURE;
                         }
 
-                        // On réaffecte la position courante dans le bitstream pour la suite
-                        *current_pos += 1;
                     }
+                    // On réaffecte la position courante dans le bitstream pour la suite
+                    *current_pos += 1;
                 } else {    // (3c) Sinon On ajoute le bon nombre de coefficients nuls avant le coefficient AC
                     uint8_t nb_de_coeff_nuls_a_ajouter_avant = run_and_size >> 4;
                     for (int8_t j = 0; j < nb_de_coeff_nuls_a_ajouter_avant; j++){
@@ -338,7 +338,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             if (nombre_de_valeurs_decodees == 64) break; // On a fini de récupérer les valeurs des coefficients AC, on peut passer à la suite
 
             // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
-            if (nombre_de_valeurs_decodees < 64 && *current_pos == bitstream_size_in_bits - 1) {
+            if (nombre_de_valeurs_decodees < 64 && *current_pos == bitstream_size_in_bits) {
                 fprintf(stderr, "Error: invalid bitstream - does not contain enough values for current MCU#%ld\n", MCU_number);
                 exit(EXIT_FAILURE);
             }

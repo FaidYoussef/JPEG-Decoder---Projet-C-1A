@@ -23,12 +23,10 @@ int8_t IZZ_function(struct JPEG *jpeg,size_t MCU_number, int8_t component_index)
     for (int8_t i = 0; i < 64; i++) {
         block[zigzag[i]] = MCUs[MCU_number][i];    
     }
-    getHighlyVerbose() ? fprintf(stderr, "Block après IQ\n"):0;
-    print_block(MCUs[MCU_number]);
     free(MCUs[MCU_number]);
     MCUs[MCU_number] = block;
-    getHighlyVerbose() ? fprintf(stderr, "Block après IZZ\n"):0;
-    print_block(MCUs[MCU_number]);
+    getHighlyVerbose() ? fprintf(stderr, "MCU après IZZ\n"):0;
+    print_block(MCUs[MCU_number], MCU_number);
 
     return EXIT_SUCCESS;
 }

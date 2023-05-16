@@ -86,8 +86,8 @@ int8_t inv_quantize(struct JPEG * jpeg) {
 
         // On parcours tous les MCUs de l'image
         for (size_t j = 0; j < nb_mcu_width * nb_mcu_height; j++){
-            getHighlyVerbose() ? fprintf(stderr, "Block avant IQ\n"):0;
-            print_block(MCUs[j]);
+            getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
+            print_block(MCUs[j], j);
             for (int8_t k = 0; k < 64; k++) {
                 if (isOverflow(MCUs[j][k], qt_table[k]) && MCUs[j][k] < 0) {
                     MCUs[j][k] = -32768;
@@ -97,8 +97,8 @@ int8_t inv_quantize(struct JPEG * jpeg) {
                     MCUs[j][k] = MCUs[j][k] * qt_table[k];
                 }
             }
-            getHighlyVerbose() ? fprintf(stderr, "Block après IQ\n"):0;
-            print_block(MCUs[j]);
+            getHighlyVerbose() ? fprintf(stderr, "MCU après IQ\n"):0;
+            print_block(MCUs[j], j);
         }
     }
     return EXIT_SUCCESS;
