@@ -41,7 +41,7 @@ int8_t load() {
         initialize();
         // Et on re-vérifie qu'il a bien été créé
         if( (file = fopen("C_cos_values.dat", "rb")) == NULL) {
-            fprintf(stderr, "Impossible d'ouvrir le fichier C_cos_values.dat !\n", );
+            fprintf(stderr, "Impossible d'ouvrir le fichier C_cos_values.dat !\n");
             return EXIT_FAILURE;
         }
     }

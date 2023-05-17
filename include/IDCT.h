@@ -14,7 +14,7 @@
 
 void initialize();
 
-void load();
+int8_t load();
 
 // Inverse Discrete Cosine Transform function
 int8_t IDCT_function(struct JPEG *jpeg,size_t MCU_number, int8_t component_index);
