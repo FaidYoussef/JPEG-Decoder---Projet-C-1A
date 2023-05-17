@@ -14,6 +14,7 @@
 #define COMPONENT_2_INDEX 2
 
 
+// Check if memory allocation was successful
 int8_t check_memory_allocation(void *allocated_data);
 
 // Display block in matrix format
