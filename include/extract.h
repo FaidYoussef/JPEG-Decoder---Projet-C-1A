@@ -33,6 +33,7 @@
 #define MAX_NUMBER_OF_QUANTIZATION_TABLES 3
 
 struct JPEG;
+
 #include <huffman.h>
 //**********************************************************************************************************************
 struct QuantizationTable;
