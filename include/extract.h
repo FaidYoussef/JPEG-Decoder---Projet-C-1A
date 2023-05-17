@@ -41,7 +41,7 @@ struct QuantizationTable;
 int8_t initialize_qt(struct QuantizationTable *qt, int8_t id, size_t length, unsigned char *data);
 int8_t get_qt_id(struct QuantizationTable *qt);
 size_t get_qt_length(struct QuantizationTable *qt);
-unsigned char * get_qt_data(struct QuantizationTable *qt);
+uint8_t * get_qt_data(struct QuantizationTable *qt);
 
 //**********************************************************************************************************************
 struct ComponentSOF;
@@ -92,7 +92,7 @@ struct StartOfFrame ** get_JPEG_sof(struct JPEG *jpeg);
 struct HuffmanTable * get_JPEG_ht(struct JPEG *jpeg, int8_t index);
 struct StartOfScan ** get_JPEG_sos(struct JPEG *jpeg);
 unsigned char * get_JPEG_image_data(struct JPEG* jpeg);
-size_t get_JPEG_image_data_size_in_bits(struct JPEG* jpeg);
+unsigned long long get_JPEG_image_data_size_in_bits(struct JPEG* jpeg);
 
 //**********************************************************************************************************************
 int16_t two_bytes_to_dec(FILE *input);

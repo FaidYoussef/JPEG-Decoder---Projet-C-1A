@@ -338,8 +338,8 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             if (nombre_de_valeurs_decodees == 64) break; // On a fini de récupérer les valeurs des coefficients AC, on peut passer à la suite
 
             // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
-            if (nombre_de_valeurs_decodees < 64 && *current_pos == bitstream_size_in_bits) {
-                fprintf(stderr, "Error: invalid bitstream - does not contain enough values for current MCU#%ld\n", MCU_number);
+            if (nombre_de_valeurs_decodees < 64 && *current_pos == bitstream_size_in_bits +1) {
+                fprintf(stderr, "Error: invalid bitstream dans boucle AC - does not contain enough values for current MCU#%ld\n", MCU_number);
                 exit(EXIT_FAILURE);
             }
         }
@@ -351,18 +351,8 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 //**********************************************************************************************************************
 // Décode le bitstream et récupère les MCU de chacune des composantes
 int8_t decode_bitstream(struct JPEG * jpeg){
-    size_t nb_mcu_width = 0;
-    size_t nb_mcu_height = 0;
-    if (get_JPEG_width(jpeg) % 8 == 0) {
-        nb_mcu_width =  get_JPEG_width(jpeg) / 8;
-    } else {
-        nb_mcu_width = (get_JPEG_width(jpeg) / 8) + 1;
-    }
-    if (get_JPEG_width(jpeg) % 8 == 0) {
-        nb_mcu_height =  get_JPEG_width(jpeg) / 8;
-    } else {
-        nb_mcu_height = (get_JPEG_width(jpeg) / 8) + 1;
-    }
+    size_t nb_mcu_width = (get_JPEG_width(jpeg) + 7) / 8;
+    size_t nb_mcu_height = (get_JPEG_height(jpeg) + 7) / 8;
 
     int previous_DC_values[3] = {0};
 

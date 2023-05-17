@@ -97,18 +97,8 @@ int8_t IDCT_function(int16_t **mcu){
 
 
 int8_t IDCT(struct JPEG * jpeg) {
-    size_t nb_mcu_width = 0;
-    size_t nb_mcu_height = 0;
-    if (get_JPEG_width(jpeg) % 8 == 0) {
-        nb_mcu_width =  get_JPEG_width(jpeg) / 8;
-    } else {
-        nb_mcu_width = (get_JPEG_width(jpeg) / 8) + 1;
-    }
-    if (get_JPEG_height(jpeg) % 8 == 0) {
-        nb_mcu_height =  get_JPEG_height(jpeg) / 8;
-    } else {
-        nb_mcu_height = (get_JPEG_height(jpeg) / 8) + 1;
-    }
+    size_t nb_mcu_width = (get_JPEG_width(jpeg) + 7) / 8;
+    size_t nb_mcu_height = (get_JPEG_height(jpeg) + 7) / 8;
 
     // On vérifie si le fichier C_cos_values.dat existe déjà et on le recrée si besoin
     // Et on le charge en mémoire

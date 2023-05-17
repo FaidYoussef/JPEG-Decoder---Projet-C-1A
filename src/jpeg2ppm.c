@@ -110,5 +110,8 @@ int main(int argc, char **argv) {
     // On libère la mémoire
     free_JPEG_struct(jpeg);
 
+    printf("\a");
+
+
     return EXIT_SUCCESS;
 }

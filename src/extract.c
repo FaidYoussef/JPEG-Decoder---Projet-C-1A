@@ -5,7 +5,7 @@
 struct QuantizationTable{
     int8_t id;
     size_t length;
-    unsigned char *data;
+    uint8_t *data;
 };
 
 int8_t initialize_qt(struct QuantizationTable *qt, int8_t id, size_t length, unsigned char *data){
@@ -24,7 +24,7 @@ size_t get_qt_length(struct QuantizationTable *qt){
     return qt->length;
 }
 
-unsigned char * get_qt_data(struct QuantizationTable *qt){
+uint8_t * get_qt_data(struct QuantizationTable *qt){
     return qt->data;
 }
 
@@ -240,7 +240,7 @@ struct JPEG {
     struct HuffmanTable **huffman_tables;
     struct StartOfScan **start_of_scan;
     unsigned char *image_data;
-    size_t image_data_size_in_bits;
+    unsigned long long image_data_size_in_bits;
 };
 
 int8_t initialize_JPEG_struct(struct JPEG *jpeg){
@@ -422,7 +422,7 @@ unsigned char * get_JPEG_image_data(struct JPEG* jpeg){
     return jpeg->image_data;
 }
 
-size_t get_JPEG_image_data_size_in_bits(struct JPEG* jpeg){
+unsigned long long get_JPEG_image_data_size_in_bits(struct JPEG* jpeg){
     return jpeg->image_data_size_in_bits;
 }
 
@@ -465,7 +465,7 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
 
     struct QuantizationTable *qt = (struct QuantizationTable *) malloc(sizeof(struct QuantizationTable));
     if (check_memory_allocation((void *) qt)) return NULL;
-    qt->data = (unsigned char *) malloc(length * sizeof(unsigned char *));
+    qt->data = (uint8_t *) malloc(length * sizeof(uint8_t *));
     if (check_memory_allocation((void *) qt->data)) {
         free(qt);
         return NULL;
@@ -860,9 +860,9 @@ struct JPEG * extract(char *filename) {
                 }
 
                 // On lit la data en enlevant les 0 (à cause du byte stuffing)
-                size_t data_size = INITIAL_DATA_SIZE; // On donne une estimation de la taille des données à récupérer
+                unsigned long long data_size = INITIAL_DATA_SIZE; // On donne une estimation de la taille des données à récupérer
 
-                size_t nb_data = 0;
+                unsigned long long nb_data = 0;
 
                 while (!feof(input)){ // On arrête la boucle si on arrive à la fin du fichier sans avoir lu de marker EOF
                     fread(buffer, 1, 1, input);
@@ -888,7 +888,7 @@ struct JPEG * extract(char *filename) {
                         } else if (buffer[0] == EOI){   // On ne prend pas en compte le dernier 0xff du marker EOI
                             jpeg->image_data_size_in_bits = 8 * nb_data;
                             // On a fini la lecture des données
-                            getVerbose() ? printf("\tLongueur du bitstream_image_data (bits) : %ld\n", 8 * nb_data):0;
+                            getVerbose() ? printf("\tLongueur du bitstream_image_data (bits) : %lld\n", 8 * nb_data):0;
                             getVerbose() ? printf("\tBitstream : "):0;
                             for (size_t i =0; i < nb_data; i++) {
                                 getVerbose() ? printf("%x", (jpeg->image_data[i])):0;
