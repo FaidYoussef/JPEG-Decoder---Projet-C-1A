@@ -37,8 +37,11 @@ test-IDCT: obj/IDCT.o
 test-ppm: obj/ppm.o
 	make -C tests/ ppm-test 
 
-test-quant_zigzag: obj/quant_zigzag.o
-	make -C tests/ quant_zigzag-test
+test-IQ: obj/IQ.o
+	make -C tests/ IQ-test
+
+test-IZZ: obj/IZZ.o
+	make -C tests/ IZZ-test
 
 test-ycbcr2rgb: obj/ycbcr2rgb.o
 	make -C tests/ ycbcr2rgb-test 
@@ -46,4 +49,4 @@ test-ycbcr2rgb: obj/ycbcr2rgb.o
 .PHONY: clean
 
 clean:
-	rm -rf jpeg2ppm tests/huffman-test tests/IDCT-test tests/ppm tests/quant_zigzag-test tests/ycbcr2rgb $(OBJ_FILES)
+	rm -rf jpeg2ppm tests/huffman-test tests/IDCT-test tests/ppm tests/IQ-test tests/IZZ-test tests/ycbcr2rgb $(OBJ_FILES)

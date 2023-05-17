@@ -2,10 +2,11 @@ CC = gcc
 CFLAGS = -std=c99 -Wall -Wextra -g -O0 -mavx -I../include
 LDFLAGS = -lm
 
-TESTS = huffman-test \
+TESTS = IQ-test \
+	IZZ-test \
+	huffman-test \
 	IDCT-test \
 	ppm-test \
-	quant_zigzag-test\
 	ycbcr2rgb-test
 
 SRC = $(TESTS:=.c)
