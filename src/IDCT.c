@@ -5,11 +5,17 @@
 
 #include <IDCT.h>
 
+#define PI 3.14159265358979323846
+#define N 8
+#define NN N*N
+
 
 double C[N];
 double C_cos_values[N][N][N][N];
 
-void initialize() {
+
+// Fonction qui calcule les valeurs de C_cos_values et les enregistre dans un fichier
+void initialize_C_cos_values() {
     FILE *file;
 
     for (int i = 0; i < N; i++) {
@@ -32,15 +38,18 @@ void initialize() {
 }
 
 
-int8_t load() {
-    FILE *file;
+// Fonction qui vérifie si le fichier C_cos_values.dat existe et le crée si besoin
+// Puis on charge les valeurs de C_cos_values en mémoire
+int8_t load_C_cos_values() {
+    FILE *file = fopen("C_cos_values.dat", "rb");
 
     // On vérifie si le fichier existe déjà
-    if( (file = fopen("C_cos_values.dat", "rb")) == NULL) {
+    if(file  == NULL) {
         // Si le fichier n'existe pas, on le crée
-        initialize();
+        initialize_C_cos_values();
         // Et on re-vérifie qu'il a bien été créé
-        if( (file = fopen("C_cos_values.dat", "rb")) == NULL) {
+        file = fopen("C_cos_values.dat", "rb");
+        if(file == NULL) {
             fprintf(stderr, "Impossible d'ouvrir le fichier C_cos_values.dat !\n");
             return EXIT_FAILURE;
         }
@@ -54,12 +63,7 @@ int8_t load() {
 
 
 // Inverse Discrete Cosine Transform function
-int8_t IDCT_function(struct JPEG *jpeg, size_t MCU_number, int8_t component_index){
-
-    int16_t** MCUs = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), component_index));
-
-    
-    if (load) return EXIT_FAILURE;
+int8_t IDCT_function(int16_t **mcu){
 
     int16_t *output = (int16_t *) malloc(NN * sizeof(int16_t));
     if (check_memory_allocation(output)) return EXIT_FAILURE;
@@ -70,7 +74,7 @@ int8_t IDCT_function(struct JPEG *jpeg, size_t MCU_number, int8_t component_inde
 
             for (int8_t u = 0; u < N; u++) {
                 for (int8_t v = 0; v < N; v++) {
-                    int16_t dct_uv = MCUs[MCU_number][u * N + v];
+                    int16_t dct_uv = (*mcu)[u * N + v];
                     sum +=  dct_uv * C_cos_values[x][y][u][v];
                 }
             }
@@ -84,10 +88,9 @@ int8_t IDCT_function(struct JPEG *jpeg, size_t MCU_number, int8_t component_inde
             }
         }
     }
-    free(MCUs[MCU_number]);
-    MCUs[MCU_number] = output;
-    getHighlyVerbose() ? fprintf(stderr, "MCU après IDCT\n"):0;
-    print_block(MCUs[MCU_number], MCU_number);
+
+    free(*mcu);
+    *mcu = output;
 
     return EXIT_SUCCESS;
 }
@@ -107,14 +110,25 @@ int8_t IDCT(struct JPEG * jpeg) {
         nb_mcu_height = (get_JPEG_height(jpeg) / 8) + 1;
     }
 
-    // On parcours tous les MCUs de l'image
-    for (size_t i = 0; i < nb_mcu_width * nb_mcu_height; i++){
-        // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a
-        // plusieurs scans/frames ---> mode progressif
+    // On vérifie si le fichier C_cos_values.dat existe déjà et on le recrée si besoin
+    // Et on le charge en mémoire
+    if (load_C_cos_values()) return EXIT_FAILURE;
+
+    // On parcours toutes les composantes
+    for (int8_t i = 0; i < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); i++) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressifi
         
-        // On parcours toutes les composantes
-        for (int8_t j = 0; j < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
-            if (IDCT_function(jpeg, i, j) ) return EXIT_FAILURE;
+        int16_t** MCUs = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), i));
+
+        // On parcours tous les MCUs de l'image
+        for (size_t j = 0; j < nb_mcu_width * nb_mcu_height; j++){
+            // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a
+            // plusieurs scans/frames ---> mode progressif
+        
+            if (IDCT_function(&(MCUs[j])) ) return EXIT_FAILURE;
+            
+            getHighlyVerbose() ? fprintf(stderr, "MCU après IDCT\n"):0;
+            print_block(MCUs[j], j);
+            
         }
     }
     return EXIT_SUCCESS;
