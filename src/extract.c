@@ -732,8 +732,20 @@ struct JPEG * extract(char *filename) {
         }
     }
 
-    // Ajouter la vérification de la présence de JFIF dans le marker APP0
+    ignore_bytes(input, 3); // Ignorer les 2 octets suivants (longueur du segment)
 
+    // Vérification de la conformité du fichier avec JFIF
+    unsigned char JFIF[5] = {0x4A, 0x46, 0x49, 0x46, 0x00}; // JFIF suivi de 0
+    unsigned char buffer_2[5];
+    fread(buffer_2, sizeof(buffer_2), 1, input);
+
+    for (int i=0; i<5; i++){
+        if (buffer_2[i] != JFIF[i]){
+            fprintf(stderr, "Le fichier %s n'est pas un fichier JPEG\n", filename);
+            fclose(input);
+            return NULL;
+        }
+    }
 
     // Récupération des données de l'en-tête
     unsigned char buffer[1];    // Buffer
