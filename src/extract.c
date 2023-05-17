@@ -68,7 +68,7 @@ struct StartOfFrame {
 };
 
 int8_t initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table){
-    sof->nb_components = nb_components; // 1 = greyscale, 3 = YCbCr or YIQ
+    sof->nb_components = nb_components; // 1 = greyscale, 3 = YCbCr or YIQ, 4 = CMYK
     
     if (nb_components == 0) {
         sof->components = NULL;
@@ -194,7 +194,7 @@ struct StartOfScan {
 };
 
 int8_t initialize_sos(struct StartOfScan *sos, int8_t nb_components, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCU){
-    sos->nb_components = nb_components; // 1 = greyscale, 3 = YCbCr or YIQ
+    sos->nb_components = nb_components; // 1 = greyscale, 3 = YCbCr or YIQ, 4 = CMYK
 
     if (nb_components == 0) {
         sos->components = NULL;
@@ -519,18 +519,8 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
 
     // On met à jour le nombre de mcus dans le Start Of Scan s'il existe
     if (jpeg->start_of_scan[0]->nb_components == nb_components) {
-        size_t nb_mcu_width = 0;
-        size_t nb_mcu_height = 0;
-        if (width  % 8 == 0) {
-            nb_mcu_width =  width / 8;
-        } else {
-            nb_mcu_width = (width / 8) + 1;
-        }
-        if (height % 8 == 0) {
-            nb_mcu_height =  height / 8;
-        } else {
-            nb_mcu_height = (height / 8) + 1;
-        }
+        size_t nb_mcu_width = (width + 7) / 8;
+        size_t nb_mcu_height = (height + 7) / 8;
 
         for (int8_t i=0; i < nb_components; i++) {
             (&(jpeg->start_of_scan[0]->components[i]))->nb_of_MCUs = nb_mcu_width * nb_mcu_height;
@@ -671,18 +661,9 @@ int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
         // On met à jour le nombre de mcus à partir des informations du Start Of Frame s'il existe
         // (si oui, la donnée de hauteur et largeur de l'image a été mise à jour dans la structure jpeg)
         if (jpeg->start_of_frame[0]->nb_components == nb_components) {
-            size_t nb_mcu_width = 0;
-            size_t nb_mcu_height = 0;
-            if (jpeg->width % 8 == 0) {
-                nb_mcu_width =  jpeg->width / 8;
-            } else {
-                nb_mcu_width = (jpeg->width / 8) + 1;
-            }
-            if (jpeg->height % 8 == 0) {
-                nb_mcu_height =  jpeg->height / 8;
-            } else {
-                nb_mcu_height = (jpeg->height / 8) + 1;
-            }
+            size_t nb_mcu_width = (jpeg->width + 7) / 8;
+            size_t nb_mcu_height = (jpeg->height + 7) / 8;
+
             components[i].nb_of_MCUs = nb_mcu_width * nb_mcu_height;
             components[i].MCUs = (int16_t **) malloc(nb_mcu_width * nb_mcu_height * sizeof(int16_t *));
             if (check_memory_allocation((void *) components[i].MCUs)) {

@@ -27,7 +27,7 @@ int8_t IZZ_function(struct JPEG *jpeg,size_t MCU_number, int8_t component_index)
     MCUs[MCU_number] = block;
 
     getHighlyVerbose() ? fprintf(stderr, "MCU après IZZ\n"):0;
-    print_block(MCUs[MCU_number], MCU_number);
+    print_block(MCUs[MCU_number], MCU_number, component_index);
 
     return EXIT_SUCCESS;
 }
@@ -44,7 +44,7 @@ int8_t IZZ(struct JPEG * jpeg) {
         
         // On parcourt toutes les composantes
         for (int8_t j = 0; j < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
-            if (IZZ_function(jpeg, i, j) ) return EXIT_FAILURE;
+            if (IZZ_function(jpeg, j, i) ) return EXIT_FAILURE;
         }
     }
     return EXIT_SUCCESS;

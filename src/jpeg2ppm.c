@@ -69,6 +69,8 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     };
 
+    fprintf(stderr, "Image\n");
+
     if (IZZ(jpeg)) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
@@ -93,6 +95,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Image %s décodée avec succès !\n", filename);
 
 
+    // Ajouter une musique de victoire + défaite et un gif de chatons
     // On ne gère que 3 composantes au maximum
     // Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment
     // thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream

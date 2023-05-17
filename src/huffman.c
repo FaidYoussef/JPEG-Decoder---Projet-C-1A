@@ -281,7 +281,6 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     *current_pos += 1;
                     break;  // On a fini de récupérer les valeurs des coefficients AC, on peut passer à la suite
                 } else if (run_and_size == ZRL){   // (3b) On gère le cas spécial ZRL
-                    fprintf(stderr, "Error: invalid bitstream - ZRL not implemented\n");
                     for (int j = 0; j < 16; j++){
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
                         getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
@@ -353,6 +352,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 int8_t decode_bitstream(struct JPEG * jpeg){
     size_t nb_mcu_width = (get_JPEG_width(jpeg) + 7) / 8;
     size_t nb_mcu_height = (get_JPEG_height(jpeg) + 7) / 8;
+    getVerbose() ? fprintf(stderr, "nb_mcus = %ld\n", nb_mcu_width * nb_mcu_height):0;
 
     int previous_DC_values[3] = {0};
 

@@ -117,7 +117,7 @@ int8_t IDCT(struct JPEG * jpeg) {
             if (IDCT_function(&(MCUs[j])) ) return EXIT_FAILURE;
             
             getHighlyVerbose() ? fprintf(stderr, "MCU après IDCT\n"):0;
-            print_block(MCUs[j], j);
+            print_block(MCUs[j], j, i);
             
         }
     }

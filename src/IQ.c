@@ -34,8 +34,12 @@ int8_t inv_quantize(struct JPEG * jpeg) {
     size_t nb_mcu_width = (get_JPEG_width(jpeg) + 7) / 8;
     size_t nb_mcu_height = (get_JPEG_height(jpeg) + 7) / 8;
 
+    int8_t truc;
+
     // On parcours toutes les composantes
     for (int8_t i = 0; i < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); i++) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
+        truc = i;
+        
         // On récupère la table de quantification associée à la composante
         int8_t qt_index = get_num_quantization_table(get_sof_components((get_JPEG_sof(jpeg)[0]))[i]);
         getHighlyVerbose() ? fprintf(stderr, "qt_index : %d\n", qt_index):0;
@@ -48,12 +52,12 @@ int8_t inv_quantize(struct JPEG * jpeg) {
         // On parcours tous les MCUs de l'image
         for (size_t j = 0; j < nb_mcu_width * nb_mcu_height; j++){
             getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
-            print_block(MCUs[j], j);
+            print_block(MCUs[j], j, i);
 
             IQ(MCUs[j], qt_table);
 
             getHighlyVerbose() ? fprintf(stderr, "MCU après IQ\n"):0;
-            print_block(MCUs[j], j);
+            print_block(MCUs[j], j, i);
         }
     }
     return EXIT_SUCCESS;
