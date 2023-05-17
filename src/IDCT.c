@@ -32,12 +32,24 @@ void initialize() {
 }
 
 
-void load() {
+int8_t load() {
     FILE *file;
 
-    file = fopen("C_cos_values.dat", "rb");
+    // On vérifie si le fichier existe déjà
+    if( (file = fopen("C_cos_values.dat", "rb")) == NULL) {
+        // Si le fichier n'existe pas, on le crée
+        initialize();
+        // Et on re-vérifie qu'il a bien été créé
+        if( (file = fopen("C_cos_values.dat", "rb")) == NULL) {
+            fprintf(stderr, "Impossible d'ouvrir le fichier C_cos_values.dat !\n", );
+            return EXIT_FAILURE;
+        }
+    }
+
     fread(C_cos_values, sizeof(double), N*N*N*N, file);
     fclose(file);
+
+    return EXIT_SUCCESS;
 }
 
 
@@ -46,8 +58,8 @@ int8_t IDCT_function(struct JPEG *jpeg, size_t MCU_number, int8_t component_inde
 
     int16_t** MCUs = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), component_index));
 
-    // initialize();
-    load();
+    
+    if (load) return EXIT_FAILURE;
 
     int16_t *output = (int16_t *) malloc(NN * sizeof(int16_t));
     if (check_memory_allocation(output)) return EXIT_FAILURE;
