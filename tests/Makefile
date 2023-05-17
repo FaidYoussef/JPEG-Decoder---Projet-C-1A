@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c99 -Wall -Wextra -g -O0 -mavx -I../include
+CFLAGS = -std=c99 -Wall -Wextra -g -O3 -mavx -I../include
 LDFLAGS = -lm
 
 TESTS = IQ-test \

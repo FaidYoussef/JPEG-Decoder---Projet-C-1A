@@ -44,7 +44,7 @@ int8_t IZZ(struct JPEG * jpeg) {
         
         // On parcourt toutes les composantes
         for (int8_t j = 0; j < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
-            if (IZZ_function(jpeg, j, i) ) return EXIT_FAILURE;
+            if (IZZ_function(jpeg, i, j) ) return EXIT_FAILURE;
         }
     }
     return EXIT_SUCCESS;
