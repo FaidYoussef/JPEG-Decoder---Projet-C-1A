@@ -11,10 +11,11 @@
 #include <utils.h>
 #include <verbose.h>
 
-#define THREE_BYTES_LONG 3
+#define FOUR_BYTES_LONG 4
 
 #define SEGMENT_START 0xff  // Segment start marker
 #define SOI     0xd8        // Start of Image
+#define APP0    0xe0        // Application segment 0
 #define SOF_0   0xc0        // Baseline DCT
 #define SOF_1   0xc1        // Extended sequential DCT
 #define SOF_2   0xc2        // Progressive DCT

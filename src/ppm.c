@@ -45,43 +45,23 @@ int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
 
 
     // On récupère le nombre de mcus en largeur et hauteur
-    size_t nb_mcu_width = 0;
-    size_t nb_mcu_height = 0;
-    if (width % 8 == 0) {
-        nb_mcu_width =  width / 8;
-    } else {
-        nb_mcu_width = (width / 8) + 1;
-    }
-    if (height % 8 == 0) {
-        nb_mcu_height =  height / 8;
-    } else {
-        nb_mcu_height = (height / 8) + 1;
-    }
+    size_t nb_mcu_width = (width + 7) / 8;
+    size_t nb_mcu_height = (height + 7) / 8;
+    
 
 
-    // On écrit les valeurs dans le fichier de sortie
-    int16_t cpt_x = 0;
-    int16_t cpt_y = 0;
 
     for (size_t i = 0; i < nb_mcu_height ; i++){
         for (int8_t l = 0; l < 8; l++) {
             for (size_t j = 0; j < nb_mcu_width ; j++){
                 for (int8_t k = 0; k < 8; k++){
-                    fprintf(output_file, "%c", MCUs_component0[j + i * 2][k+l*8]);
-                    cpt_x++;
-                }
-                if (cpt_x == width){
-                    cpt_x = 0;
-                    break;
+                    if (j * 8 + k < width && i * 8 + l < height) {
+                        fprintf(output_file, "%c", MCUs_component0[j + i * nb_mcu_width][k+l*8]);
+                    }
+                    
                 }
             }
-            cpt_y++;
         }
-        if (cpt_y == height){
-            cpt_y = 0;
-            break;
-        }
-        
     }
 
     fclose(output_file);
