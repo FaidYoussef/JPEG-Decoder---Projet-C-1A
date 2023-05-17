@@ -720,19 +720,19 @@ struct JPEG * extract(char *filename) {
     }
 
     // Vérification conformité fichier via JPEG Magic number 
-    unsigned char first3bytes[THREE_BYTES_LONG];
-    fread(first3bytes, sizeof(first3bytes), 1, input);
-    unsigned char JPEG_magic_Number[THREE_BYTES_LONG] = {SEGMENT_START, SOI, SEGMENT_START};
+    unsigned char first4bytes[FOUR_BYTES_LONG];
+    fread(first4bytes, sizeof(first4bytes), 1, input);
+    unsigned char JPEG_magic_Number[FOUR_BYTES_LONG] = {SEGMENT_START, SOI, SEGMENT_START, APP0};
 
-    for (int i=0; i<3; i++){
-        if (first3bytes[i] != JPEG_magic_Number[i]){
+    for (int i=0; i<4; i++){
+        if (first4bytes[i] != JPEG_magic_Number[i]){
             fprintf(stderr, "Le fichier %s n'est pas un fichier JPEG\n", filename);
             fclose(input);
             return NULL;
         }
     }
 
-    ignore_bytes(input, 3); // Ignorer les 2 octets suivants (longueur du segment)
+    ignore_bytes(input, 2); // Ignorer les 2 octets suivants (longueur du segment)
 
     // Vérification de la conformité du fichier avec JFIF
     unsigned char JFIF[5] = {0x4A, 0x46, 0x49, 0x46, 0x00}; // JFIF suivi de 0
