@@ -87,8 +87,12 @@ int8_t get_sof_nb_components(struct StartOfFrame *sof){
     return sof->nb_components;
 }
 
-struct ComponentSOF ** get_sof_components(struct StartOfFrame *sof){
-    return &sof->components;
+struct ComponentSOF * get_sof_components(struct StartOfFrame *sof){
+    return sof->components;
+}
+
+struct ComponentSOF * get_sof_component(struct ComponentSOF * components, int8_t index){
+    return &components[index];
 }
 
 
@@ -745,10 +749,12 @@ struct JPEG * extract(char *filename) {
         fclose(input);
         return NULL;
     }
+    
     if (initialize_JPEG_struct(jpeg)) {
         fclose(input);
         return NULL;
     }
+
 
     while (!feof(input)){ // On arrête la boucle si on arrive à la fin du fichier sans avoir lu de marker EOF
         fread(buffer, 1, 1, input);

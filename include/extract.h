@@ -54,7 +54,8 @@ int8_t get_num_quantization_table(struct ComponentSOF *component);
 struct StartOfFrame;
 int8_t initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table);
 int8_t get_sof_nb_components(struct StartOfFrame *sof);
-struct ComponentSOF ** get_sof_components(struct StartOfFrame *sof);
+struct ComponentSOF * get_sof_components(struct StartOfFrame *sof);
+struct ComponentSOF * get_sof_component(struct ComponentSOF * components, int8_t index);
 
 //**********************************************************************************************************************
 struct HuffmanTable;
