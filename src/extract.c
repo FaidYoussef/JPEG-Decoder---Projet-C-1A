@@ -515,6 +515,10 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     getVerbose() ? printf("\tLargeur de l'image en pixel : %d\n", width):0;
 
     int8_t nb_components = read_byte(input, buffer);
+    if (nb_components > 3 || nb_components == 2 || nb_components <= 0) {
+        fprintf(stderr, RED("Erreur : le nombre de composantes n'est pas supporté par jpeg2ppm\n"));
+        return EXIT_FAILURE;
+    }
     getVerbose() ? printf("\tNombre de composantes : %d\n", nb_components):0;
 
     // On met à jour le nombre de mcus dans le Start Of Scan s'il existe
@@ -636,6 +640,10 @@ int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
     ignore_bytes(input, 2); // Longueur du segment (ignoré)
 
     int8_t nb_components = read_byte(input, buffer); // Nombre de composantes
+    if (nb_components > 3 || nb_components == 2 || nb_components <= 0) {
+        fprintf(stderr, RED("Erreur : le nombre de composantes n'est pas supporté par jpeg2ppm\n"));
+        return EXIT_FAILURE;
+    }
     jpeg->start_of_scan[0]->nb_components = nb_components;
     getVerbose() ? printf("\tNombre de composantes : %d\n", nb_components):0;
 
