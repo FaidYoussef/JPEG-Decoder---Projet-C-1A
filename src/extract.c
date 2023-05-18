@@ -436,9 +436,17 @@ int16_t two_bytes_to_dec(FILE *input){
     // Lecture et renvoie de la valeur décimale de deux octets
     int16_t length = 0;
     int16_t length2 = 0;
-    fread(&length, 1, 1, input);
+    if(fread(&length, 1, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier\n");
+        // Free là
+        return EXIT_FAILURE;
+    }
     length = length << 8;
-    fread(&length2, 1, 1, input);
+    if(fread(&length, 1, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier\n");
+        // Free là
+        return EXIT_FAILURE;
+    }
     length = length + length2;
     return length;
 }
@@ -446,14 +454,22 @@ int16_t two_bytes_to_dec(FILE *input){
 
 int8_t read_byte(FILE *input, unsigned char *buffer){
     // Lecture et renvoie d'un octet
-    fread(buffer, 1, 1, input);
+    if(fread(buffer, 1, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier\n");
+        // Free là
+        return EXIT_FAILURE;
+    }
     return buffer[0];
 }
 
 
 void ignore_bytes(FILE *input, int nb_bytes){
     unsigned char buffer[nb_bytes];
-    fread(buffer, nb_bytes, 1, input);
+    if(fread(buffer, nb_bytes, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier\n");
+        // Free là
+        return;
+    }
 }
 
 
@@ -475,9 +491,19 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
         return NULL;
     }
     
-    fread(buffer, 1, 1, input);
+     if(fread(buffer, 1, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier\n");
+        free(qt->data);
+        free(qt);
+        return NULL;
+    }
     if (buffer[0] == LUMINANCE_ID) {
-        fread(qt->data, length, 1, input);
+        if(fread(qt->data, length, 1, input) != 1){
+            fprintf(stderr, "Erreur de lecture du fichier\n");
+            free(qt->data);
+            free(qt);
+            return NULL;
+        }
         // Affichage des tables de quantification
         for (int i=0; i<length; i++){
             getVerbose() ? printf("%x", qt->data[i]):0;
@@ -486,7 +512,12 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
         qt->id = LUMINANCE_ID;
 
     } else if (buffer[0] == CHROMINANCE_ID) {
-        fread(qt->data, length, 1, input);
+        if(fread(qt->data, length, 1, input) != 1){
+            fprintf(stderr, "Erreur de lecture du fichier\n");
+            free(qt->data);
+            free(qt);
+            return NULL;
+        }
         // Affichage des tables de quantification
         for (int16_t i=0; i<length; i++){
             getVerbose() ? printf("%x", qt->data[i]):0;
@@ -607,7 +638,11 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
         return NULL;
     }
 
-    fread(huffman_data, length, 1, input);
+    if(fread(huffman_data, length, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier\n");
+        free(huffman_data);
+        return NULL;
+    }
 
     // Affichage des tables de Huffman
     for (int i=0; i<length; i++){
@@ -714,7 +749,11 @@ struct JPEG * extract(char *filename) {
 
     // Vérification conformité fichier via JPEG Magic number 
     unsigned char first4bytes[FOUR_BYTES_LONG];
-    fread(first4bytes, sizeof(first4bytes), 1, input);
+    if(fread(first4bytes, sizeof(first4bytes), 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier\n");
+        fclose(input);
+        return NULL;
+    }
     unsigned char JPEG_magic_Number[FOUR_BYTES_LONG] = {SEGMENT_START, SOI, SEGMENT_START, APP0};
 
     for (int i=0; i<4; i++){
@@ -730,7 +769,11 @@ struct JPEG * extract(char *filename) {
     // Vérification de la conformité du fichier avec JFIF
     unsigned char JFIF[5] = {0x4A, 0x46, 0x49, 0x46, 0x00}; // JFIF suivi de 0
     unsigned char buffer_2[5];
-    fread(buffer_2, sizeof(buffer_2), 1, input);
+    if(fread(buffer_2, sizeof(buffer_2), 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier\n");
+        fclose(input);
+        return NULL;
+    }
 
     for (int i=0; i<5; i++){
         if (buffer_2[i] != JFIF[i]){
@@ -757,10 +800,20 @@ struct JPEG * extract(char *filename) {
 
 
     while (!feof(input)){ // On arrête la boucle si on arrive à la fin du fichier sans avoir lu de marker EOF
-        fread(buffer, 1, 1, input);
+        if(fread(buffer, 1, 1, input) != 1){
+            fprintf(stderr, "Erreur de lecture du fichier\n");
+            fclose(input);
+            free(jpeg);
+            return NULL;
+        }
 
         if (buffer[0] == SEGMENT_START){
-            fread(id, 1, 1, input);
+            if(fread(id, 1, 1, input) != 1){
+                fprintf(stderr, "Erreur de lecture du fichier\n");
+                fclose(input);
+                free(jpeg);
+                return NULL;
+            }
             //**********************************************************************************************************************
             if (id[0] == DQT){
                 
@@ -860,7 +913,12 @@ struct JPEG * extract(char *filename) {
                 unsigned long long nb_data = 0;
 
                 while (!feof(input)){ // On arrête la boucle si on arrive à la fin du fichier sans avoir lu de marker EOF
-                    fread(buffer, 1, 1, input);
+                    if(fread(buffer, 1, 1, input) != 1){
+                        fprintf(stderr, "Erreur de lecture du fichier\n");
+                        fclose(input);
+                        free(jpeg);
+                        return NULL;
+                    }
 
                     // On réalloue de la mémoire si on a besoin
                     if(nb_data >= data_size -1){
@@ -874,7 +932,12 @@ struct JPEG * extract(char *filename) {
                     }
 
                     if (buffer[0] == SEGMENT_START){
-                        fread(buffer, 1, 1, input);
+                        if(fread(buffer, 1, 1, input) != 1){
+                            fprintf(stderr, "Erreur de lecture du fichier\n");
+                            fclose(input);
+                            free(jpeg);
+                            return NULL;
+                        }
 
                         if (buffer[0] == 0x00){ // On a du byte stuffing et on le supprime
                             jpeg->image_data[nb_data] = SEGMENT_START;
