@@ -69,8 +69,6 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     };
 
-    fprintf(stderr, "Image\n");
-
     if (IZZ(jpeg)) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
