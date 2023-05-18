@@ -8,7 +8,7 @@ LD = gcc
 # C'est utile pour débugger, par contre en "production"
 # on active au moins les optimisations de niveau 2 (-O2).
 # -lm on lie la bibliothèque mathématique (sqrt, cos, etc.)
-CFLAGS = -Wall -Wextra -std=c99 -Iinclude -O3 -mavx -g -lm
+CFLAGS = -Wall -Wextra -std=c99 -Iinclude -O3 -mavx -mavx2 -g -lm
 LDFLAGS =
 
 # Par défaut, on compile tous les fichiers source (.c) qui se trouvent dans le
@@ -35,14 +35,14 @@ test-huffman: obj/huffman.o
 test-IDCT: obj/IDCT.o
 	make -C tests/ IDCT-test 
 
-test-ppm: obj/ppm.o
-	make -C tests/ ppm-test 
-
 test-IQ: obj/IQ.o
 	make -C tests/ IQ-test
 
 test-IZZ: obj/IZZ.o
 	make -C tests/ IZZ-test
+
+test-ppm: obj/ppm.o
+	make -C tests/ ppm-test 
 
 test-ycbcr2rgb: obj/ycbcr2rgb.o
 	make -C tests/ ycbcr2rgb-test 
