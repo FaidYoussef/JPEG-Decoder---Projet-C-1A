@@ -92,7 +92,7 @@ int main(void) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
 
-    IQ(initial_data, test_qt0);
+    IQ_function(initial_data, test_qt0);
 
     getHighlyVerbose() ? fprintf(stderr, "MCU après IQ\n"):0;
     print_block(initial_data, 0, 0);
@@ -106,7 +106,7 @@ int main(void) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
 
-    IQ(initial_data, test_qt1);
+    IQ_function(initial_data, test_qt1);
 
     getHighlyVerbose() ? fprintf(stderr, "MCU après IQ\n"):0;
     print_block(initial_data, 0, 0);
@@ -120,7 +120,7 @@ int main(void) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
 
-    IQ(initial_data, test_qt2);
+    IQ_function(initial_data, test_qt2);
 
     getHighlyVerbose() ? fprintf(stderr, "MCU après IQ\n"):0;
     print_block(initial_data, 0, 0);
@@ -134,7 +134,7 @@ int main(void) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
 
-    IQ(initial_data, test_qt1and2);
+    IQ_function(initial_data, test_qt1and2);
 
     getHighlyVerbose() ? fprintf(stderr, "MCU après IQ\n"):0;
     print_block(initial_data, 0, 0);
@@ -148,7 +148,7 @@ int main(void) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
 
-    IQ(initial_data, test_qt255);
+    IQ_function(initial_data, test_qt255);
 
     getHighlyVerbose() ? fprintf(stderr, "MCU après IQ\n"):0;
     print_block(initial_data, 0, 0);
@@ -164,7 +164,7 @@ int main(void) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
 
-    IQ(initial_data, test_qt255);
+    IQ_function(initial_data, test_qt255);
 
     getHighlyVerbose() ? fprintf(stderr, "MCU après IQ\n"):0;
     print_block(initial_data, 0, 0);

@@ -14,9 +14,9 @@
 bool isOverflow(int16_t a, int16_t b);
 
 // Inverse quantization function
-void IQ(int16_t *mcu, const uint8_t *qtable);
+void IQ_function(int16_t *mcu, const uint8_t *qtable);
 
 // Fonction qui récupère les données de la structure JPEG et qui procède à la quantification inverse
-int8_t inv_quantize(struct JPEG * jpeg);
+int8_t IQ(struct JPEG * jpeg);
 
 #endif

@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     };
 
-    if (inv_quantize(jpeg)) {
+    if (IQ(jpeg)) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
     };
