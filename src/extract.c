@@ -375,7 +375,7 @@ void free_JPEG_struct(struct JPEG *jpeg){
                 if ((jpeg->start_of_scan[i])->components != NULL){
                     for (int8_t j=0; j < jpeg->start_of_scan[i]->nb_components; j++){
                         if (&((jpeg->start_of_scan[i])->components[j]) != NULL){
-                            for (size_t k=0; k < (&((jpeg->start_of_scan[i])->components[j]))->nb_of_MCUs; k++){
+                            for (size_t k=0; k < (&( (jpeg->start_of_scan[i])->components[j] ))->nb_of_MCUs; k++){
                                 if ((&((jpeg->start_of_scan[i])->components[j]))->MCUs[k] != NULL){
                                     free(   (&((jpeg->start_of_scan[i])->components[j]))->MCUs[k]);
                                 }
