@@ -57,6 +57,10 @@ int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
                 for (int8_t k = 0; k < 8; k++){
                     if (j * 8 + k < width && i * 8 + l < height) {
                         fprintf(output_file, "%c", MCUs_component0[j + i * nb_mcu_width][k+l*8]);
+                        if (nb_components > 1) {
+                            fprintf(output_file, "%c", MCUs_component1[j + i * nb_mcu_width][k+l*8]);
+                            fprintf(output_file, "%c", MCUs_component2[j + i * nb_mcu_width][k+l*8]);
+                        }
                     }
                     
                 }
