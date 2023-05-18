@@ -257,7 +257,7 @@ int8_t initialize_JPEG_struct(struct JPEG *jpeg){
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
     }
-    for (int i=0; i<2; i++){
+    for (int i=0; i < MAX_NUMBER_OF_QUANTIZATION_TABLES; i++){
         jpeg->quantization_tables[i] = (struct QuantizationTable *) malloc(sizeof(struct QuantizationTable));
         if (check_memory_allocation((void *) jpeg->quantization_tables[i])) {
             free_JPEG_struct(jpeg);
