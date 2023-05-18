@@ -18,8 +18,8 @@ uint8_t saturer(int valeur) {
 // Si on a plusieurs composantes, on met à jour en lieu et place des composantes 0, 1 et 2 les valeurs R, G et B
 void ycbcr_vers_rgb(struct JPEG *jpeg, size_t MCU_number) {
     int16_t* MCU_component0 = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_0_INDEX))[MCU_number];
-    int16_t* MCU_component1;
-    int16_t* MCU_component2;
+    int16_t* MCU_component1 = NULL;
+    int16_t* MCU_component2 = NULL;
 
     if (get_sos_nb_components(get_JPEG_sos(jpeg)[0]) > 1){
         MCU_component1 = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_1_INDEX))[MCU_number];
@@ -28,13 +28,13 @@ void ycbcr_vers_rgb(struct JPEG *jpeg, size_t MCU_number) {
 
     for (int8_t i = 0; i < 64; i++){
         int r = MCU_component0[i];
-        int g;
-        int b;
+        int g = MCU_component0[i];
+        int b = MCU_component0[i];
 
         if (get_sos_nb_components(get_JPEG_sos(jpeg)[0]) > 1){
-            r = MCU_component0[i] + 1.402 * (MCU_component2[i] - 128);
-            g = MCU_component0[i] - 0.34414 * (MCU_component1[i] - 128) - 0.71414 * (MCU_component2[i] - 128);
-            b = MCU_component0[i] + 1.772 * (MCU_component1[i] - 128);
+            r += 1.402 * (MCU_component2[i] - 128);
+            g += - 0.34414 * (MCU_component1[i] - 128) - 0.71414 * (MCU_component2[i] - 128);
+            b += 1.772 * (MCU_component1[i] - 128);
         }
 
         MCU_component0[i] = saturer(r);
