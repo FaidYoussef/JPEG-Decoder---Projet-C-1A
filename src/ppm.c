@@ -35,8 +35,8 @@ int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
 
     // On récupère les pointeurs vers les MCUs des composantes disponibles
     int16_t** MCUs_component0 = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_0_INDEX));
-    int16_t** MCUs_component1;
-    int16_t** MCUs_component2;
+    int16_t** MCUs_component1 = NULL;
+    int16_t** MCUs_component2 = NULL;
 
     if (nb_components > 1) {
         MCUs_component1 = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_1_INDEX));
@@ -55,7 +55,7 @@ int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
         for (int8_t l = 0; l < 8; l++) {
             for (size_t j = 0; j < nb_mcu_width ; j++){
                 for (int8_t k = 0; k < 8; k++){
-                    if (j * 8 + k < width && i * 8 + l < height) {
+                    if (j * 8 + k < (size_t) width && i * 8 + l < (size_t)height) {
                         fprintf(output_file, "%c", MCUs_component0[j + i * nb_mcu_width][k+l*8]);
                         if (nb_components > 1) {
                             fprintf(output_file, "%c", MCUs_component1[j + i * nb_mcu_width][k+l*8]);
