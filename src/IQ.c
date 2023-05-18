@@ -54,7 +54,7 @@ int8_t IQ(struct JPEG * jpeg) {
             getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
             print_block(MCUs[j], j, i);
 
-            IQ(MCUs[j], qt_table);
+            IQ_function(MCUs[j], qt_table);
 
             getHighlyVerbose() ? fprintf(stderr, "MCU après IQ\n"):0;
             print_block(MCUs[j], j, i);
