@@ -491,7 +491,7 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
         qt->id = CHROMINANCE_ID;
 
     } else {
-        fprintf(stderr, "Erreur dans la lecture des tables de quantification\n");
+        fprintf(stderr, RED("Erreur dans la lecture des tables de quantification\n"));
     }
     qt->length = length;
 
@@ -595,7 +595,7 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
     // Contenu de la table
     unsigned char *huffman_data = (unsigned char *) malloc(length*sizeof(unsigned char));
     if (check_memory_allocation((void *) huffman_data)) {
-        fprintf(stderr, "Erreur dans l'allocation de la mémoire pour les données de la table de Huffman (huffman_data)\n");
+        fprintf(stderr, RED("Erreur dans l'allocation de la mémoire pour les données de la table de Huffman (huffman_data)\n"));
         return NULL;
     }
 
@@ -609,7 +609,7 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
 
     struct HuffmanTable *huffman_table = (struct HuffmanTable *) malloc(sizeof(struct HuffmanTable));
     if (check_memory_allocation((void *) huffman_table)) {
-        fprintf(stderr, "Erreur dans l'allocation de la mémoire pour les données de la table de Huffman (huffman_table)\n");
+        fprintf(stderr, RED("Erreur dans l'allocation de la mémoire pour les données de la table de Huffman (huffman_table)\n"));
         free(huffman_data);
         return NULL;
     }
@@ -618,7 +618,7 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
     huffman_table->length = length;
     huffman_table->data = huffman_data;
     if ( (huffman_table->huffman_tree = build_huffman_tree(huffman_data)) == NULL) {
-        fprintf(stderr, "Erreur dans l'allocation de la mémoire pour les données de la table de Huffman (huffman_tree)\n");
+        fprintf(stderr, RED("Erreur dans l'allocation de la mémoire pour les données de la table de Huffman (huffman_tree)\n"));
         free(huffman_data);
         free(huffman_table);
         return NULL;
@@ -696,7 +696,7 @@ struct JPEG * extract(char *filename) {
     // Ouverture et vérification de la présence du fichier
     FILE *input;
     if( (input = fopen(filename, "r")) == NULL) {
-        fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", filename);
+        fprintf(stderr, RED("Impossible d'ouvrir le fichier %s\n"), filename);
         return NULL;
     }
 
@@ -707,7 +707,7 @@ struct JPEG * extract(char *filename) {
 
     for (int i=0; i<4; i++){
         if (first4bytes[i] != JPEG_magic_Number[i]){
-            fprintf(stderr, "Le fichier %s n'est pas un fichier JPEG\n", filename);
+            fprintf(stderr, RED("Le fichier %s n'est pas un fichier JPEG\n"), filename);
             fclose(input);
             return NULL;
         }
@@ -722,7 +722,7 @@ struct JPEG * extract(char *filename) {
 
     for (int i=0; i<5; i++){
         if (buffer_2[i] != JFIF[i]){
-            fprintf(stderr, "Le fichier %s n'est pas un fichier JPEG\n", filename);
+            fprintf(stderr, RED("Le fichier %s n'est pas un fichier JPEG\n"), filename);
             fclose(input);
             return NULL;
         }
@@ -879,7 +879,7 @@ struct JPEG * extract(char *filename) {
                             return jpeg;
 
                         } else if (feof(input)){    // On atteint la fin du fichier avant d'avoir lu un marker EOI
-                            getVerbose() ? printf("Fin du fichier atteinte avant d'avoir lu un EOI !!!\n"):0;
+                            getVerbose() ? printf(RED("Fin du fichier atteinte avant d'avoir lu un EOI !!!\n")):0;
                             fclose(input);
                             free_JPEG_struct(jpeg);
                             return NULL;

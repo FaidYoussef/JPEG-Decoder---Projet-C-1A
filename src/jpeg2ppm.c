@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
             Si y'a pas au moins un argument en ligne de commandes, on
     	    boude. 
         */
-    	fprintf(stderr, "Usage: %s fichier.jpeg\n", argv[0]);
+    	fprintf(stderr, BLUE("Usage: %s fichier.jpeg\n"), argv[0]);
     	return EXIT_FAILURE;
     }
 
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
     };
 
 
-    fprintf(stderr, "Image %s décodée avec succès !\n", filename);
+    fprintf(stderr, GREEN("Image %s décodée avec succès !\n"), filename);
 
 
     // Ajouter une musique de victoire + défaite et un gif de chatons

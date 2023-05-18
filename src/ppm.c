@@ -12,7 +12,7 @@ int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
         // On vérifie que le fichier a bien été créé/ouvert
         output_file = fopen("YOUSSEF.pgm", "wb");
         if (!output_file) {
-            fprintf(stderr, "Erreur lors de l'ouverture du fichier %s\n", filename);
+            fprintf(stderr, RED("Erreur lors de l'ouverture du fichier %s\n"), filename);
             return EXIT_FAILURE;
         }
 
@@ -24,7 +24,7 @@ int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
         // On vérifie que le fichier a bien été créé/ouvert
         output_file = fopen("YOUSSEF.ppm", "wb");
         if (!output_file) {
-            fprintf(stderr, "Erreur lors de l'ouverture du fichier %s\n", filename);
+            fprintf(stderr, RED("Erreur lors de l'ouverture du fichier %s\n"), filename);
             return EXIT_FAILURE;
         }
 

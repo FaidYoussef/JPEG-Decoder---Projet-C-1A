@@ -49,7 +49,7 @@ int main(void) {
     for(int i = 0; i < 64; i++){
         if(initial_data[i] != expected_data[i]) result = false;
     }
-    result ? fprintf(stderr, "test : OK\n") : fprintf(stderr, "test : KO !!!\n");
+    result ? fprintf(stderr, GREEN("test : OK\n")) : fprintf(stderr, RED("test : KO !!!\n"));
 
 
     return EXIT_SUCCESS;
