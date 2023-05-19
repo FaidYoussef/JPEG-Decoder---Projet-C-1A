@@ -435,8 +435,7 @@ unsigned long long get_JPEG_image_data_size_in_bits(struct JPEG* jpeg){
 int8_t ignore_bytes(FILE *input, int nb_bytes){
     unsigned char buffer[nb_bytes];
     if(fread(buffer, nb_bytes, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier\n");
-        // Free là
+        fprintf(stderr, RED("ERROR : READ - extract.c > ignore_bytes()\n"));
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
@@ -452,7 +451,7 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
 
     int16_t length = 0;
     if(fread(&length, 2, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier\n");
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_qt() > length\n"));
         return NULL;
     }
     length = (length << 8) | ((length >> 8) & 0xFF);
@@ -468,15 +467,16 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
         return NULL;
     }
     
-     if(fread(buffer, 1, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier\n");
+    if(fread(buffer, 1, 1, input) != 1){
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_qt() > buffer\n"));
         free(qt->data);
         free(qt);
         return NULL;
     }
+
     if (buffer[0] == LUMINANCE_ID) {
         if(fread(qt->data, length, 1, input) != 1){
-            fprintf(stderr, "Erreur de lecture du fichier\n");
+            fprintf(stderr, RED("ERROR : READ - extract.c > get_qt() > qt->data\n"));
             free(qt->data);
             free(qt);
             return NULL;
@@ -490,7 +490,7 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
 
     } else if (buffer[0] == CHROMINANCE_ID) {
         if(fread(qt->data, length, 1, input) != 1){
-            fprintf(stderr, "Erreur de lecture du fichier\n");
+            fprintf(stderr, RED("ERROR : READ - extract.c > get_qt() > qt->data\n"));
             free(qt->data);
             free(qt);
             return NULL;
@@ -503,7 +503,7 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
         qt->id = CHROMINANCE_ID;
 
     } else {
-        fprintf(stderr, RED("Erreur dans la lecture des tables de quantification\n"));
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_qt()"));
     }
     qt->length = length;
 
@@ -517,20 +517,20 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     getVerbose() ? printf("\nStart of frame\n"):0;
 
     if(ignore_bytes(input, 3)){
-        fprintf(stderr, RED("Erreur dans la lecture du segment Start_Of_Frame\n"));
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_SOF() > ignore_bytes()\n"));
         return EXIT_FAILURE;
     } // On ignore la longueur et la précision
 
     int16_t height = 0;
     if(fread(&height, 2, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier - height dans get_SOF\n");
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_SOF() > height\n"));
         return EXIT_FAILURE;
     }
     height = (height << 8) | ((height >> 8) & 0xFF);
 
     int16_t width = 0;
     if(fread(&width, 2, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier - height dans get_SOF\n");
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_SOF() > width\n"));
         return EXIT_FAILURE;
     }
     width = (width << 8) | ((width >> 8) & 0xFF);
@@ -543,13 +543,13 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     getVerbose() ? printf("\tLargeur de l'image en pixel : %d\n", width):0;
 
     if(fread(buffer, 1, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier dans SOF\n");
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_SOF() > nb_components\n"));
         return EXIT_FAILURE;
     }
     int8_t nb_components = buffer[0];
 
     if (nb_components > 3 || nb_components == 2 || nb_components <= 0) {
-        fprintf(stderr, RED("Erreur : le nombre de composantes n'est pas supporté par jpeg2ppm\n"));
+        fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > nb_components\n"));
         return EXIT_FAILURE;
     }
     getVerbose() ? printf("\tNombre de composantes : %d\n", nb_components):0;
@@ -578,14 +578,14 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     getVerbose() ? printf("\tComposantes :\n"):0;
     for (int8_t i=0; i<nb_components; i++){
         if(fread(buffer, 1, 1, input) != 1){
-            fprintf(stderr, RED("Erreur de lecture du fichier - id_component dans SOF\n"));
+            fprintf(stderr, RED("ERROR : READ - extract.c > get_SOF() > id_component\n"));
             return EXIT_FAILURE;
         }
         int8_t id_component = buffer[0]; // ID composante
         
         // Facteur d'échantillonnage
         if(fread(buffer, 1, 1, input) != 1){
-            fprintf(stderr, "Erreur de lecture du fichier - sampling_factor dans SOF\n");
+            fprintf(stderr, RED("ERROR : READ - extract.c > get_SOF() > sampling_factor\n"));
             return EXIT_FAILURE;
         }
         int8_t sampling_factor = buffer[0]; // Il faut faire une conversion car c'est un octet et on veut deux bits
@@ -594,7 +594,7 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
         int8_t sampling_factor_y = sampling_factor & 0x0F;
 
         if(fread(buffer, 1, 1, input) != 1){
-            fprintf(stderr, "Erreur de lecture du fichier - num_quantization_table dans SOF\n");
+            fprintf(stderr, RED("ERROR : READ - extract.c > get_SOF() > num_quantization_table\n"));
             return EXIT_FAILURE;
         }
         int8_t num_quantization_table = buffer[0]; // Tables de quantification
@@ -627,7 +627,7 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
 
     int16_t length = 0; // Longueur du segment
     if(fread(&length, 2, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier - length dans get_DHT\n");
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_DHT() > length\n"));
         return NULL;
     }
     length = (length << 8) | ((length >> 8) & 0xFF);
@@ -635,7 +635,7 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
     length = length - 2 - 1; // On enlève la longueur du segment et l'octet de précision 
     
     if(fread(buffer, 1, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier - id_table dans get_DHT\n");
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_DHT() > id_table\n"));
         return NULL;
     }
     int8_t id_table = buffer[0]; // ID de la table
@@ -655,12 +655,12 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
     // Contenu de la table
     unsigned char *huffman_data = (unsigned char *) malloc(length*sizeof(unsigned char));
     if (check_memory_allocation((void *) huffman_data)) {
-        fprintf(stderr, RED("Erreur dans l'allocation de la mémoire pour les données de la table de Huffman (huffman_data)\n"));
+        fprintf(stderr, RED("ERROR : MEMORY ALLOCATION - extract.c > get_DHT() > huffman_data\n"));
         return NULL;
     }
 
     if(fread(huffman_data, length, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier\n");
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_DHT() > huffman_data\n"));
         free(huffman_data);
         return NULL;
     }
@@ -673,7 +673,7 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
 
     struct HuffmanTable *huffman_table = (struct HuffmanTable *) malloc(sizeof(struct HuffmanTable));
     if (check_memory_allocation((void *) huffman_table)) {
-        fprintf(stderr, RED("Erreur dans l'allocation de la mémoire pour les données de la table de Huffman (huffman_table)\n"));
+        fprintf(stderr, RED("ERROR : MEMORY ALLOCATION - extract.c > get_DHT() > huffman_table\n"));
         free(huffman_data);
         return NULL;
     }
@@ -682,7 +682,7 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
     huffman_table->length = length;
     huffman_table->data = huffman_data;
     if ( (huffman_table->huffman_tree = build_huffman_tree(huffman_data)) == NULL) {
-        fprintf(stderr, RED("Erreur dans l'allocation de la mémoire pour les données de la table de Huffman (huffman_tree)\n"));
+        fprintf(stderr, RED("ERROR : BUILD HUFFMAN TREE - extract.c > get_DHT() > huffman_table->huffman_tree\n"));
         free(huffman_data);
         free(huffman_table);
         return NULL;
@@ -698,18 +698,18 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
 int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
     getVerbose() ? printf("\nStart of scan + data\n"):0;
     if(ignore_bytes(input, 2)){
-        fprintf(stderr, RED("Erreur : impossible d'ignorer les 2 premiers octets du segment SOS, erreur de lecture\n"));
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_SOS() > ignore_bytes()\n"));
         return EXIT_FAILURE;
     } // Longueur du segment (ignoré)
 
     if(fread(buffer, 1, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier - nb_components dans get_SOS\n");
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_SOS() > nb_components\n"));
         return EXIT_FAILURE;
     }
     int8_t nb_components = buffer[0]; // Nombre de composantes
 
     if (nb_components > 3 || nb_components == 2 || nb_components <= 0) {
-        fprintf(stderr, RED("Erreur : le nombre de composantes n'est pas supporté par jpeg2ppm\n"));
+        fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOS() > nb_components\n"));
         return EXIT_FAILURE;
     }
     jpeg->start_of_scan[0]->nb_components = nb_components;
@@ -721,14 +721,14 @@ int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
     // Composantes
     for (int8_t i=0; i < nb_components; i++){
         if(fread(buffer, 1, 1, input) != 1){
-            fprintf(stderr, "Erreur de lecture du fichier - id_component dans get_SOS\n");
+            fprintf(stderr, RED("ERROR : READ - extract.c > get_SOS() > id_component\n"));
             free(components);
             return EXIT_FAILURE;
         }
         int8_t id_component = buffer[0]; // ID composante
         
         if(fread(buffer, 1, 1, input) != 1){
-            fprintf(stderr, "Erreur de lecture du fichier - ht_ids dans get_SOS\n");
+            fprintf(stderr, RED("ERROR : READ - extract.c > get_SOS() > ht_ids\n"));
             free(components);
             return EXIT_FAILURE;
         }
@@ -769,7 +769,7 @@ int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
 
     // Paramètres ignorés
     if(ignore_bytes(input, 3)){
-        fprintf(stderr, RED("Erreur : impossible d'ignorer 3 octets du segment SOS, erreur de lecture\n"));
+        fprintf(stderr, RED("ERROR : READ - extract.c > get_SOS() > ignore_bytes()\n"));
         return EXIT_FAILURE;
     } // Octet de début de spectre, octet de fin de spectre, approximation (ignorés)
 
@@ -786,14 +786,14 @@ struct JPEG * extract(char *filename) {
     // Ouverture et vérification de la présence du fichier
     FILE *input;
     if( (input = fopen(filename, "r")) == NULL) {
-        fprintf(stderr, RED("Impossible d'ouvrir le fichier %s\n"), filename);
+        fprintf(stderr, RED("ERROR : OPEN - extract.c > extract() with file %s\n"), filename);
         return NULL;
     }
 
     // Vérification conformité fichier via JPEG Magic number 
     unsigned char first4bytes[FOUR_BYTES_LONG];
     if(fread(first4bytes, sizeof(first4bytes), 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier\n");
+        fprintf(stderr, RED("ERROR : READ - extract.c > extract() > JPEG Magic number\n"));
         fclose(input);
         return NULL;
     }
@@ -801,14 +801,14 @@ struct JPEG * extract(char *filename) {
 
     for (int i=0; i<4; i++){
         if (first4bytes[i] != JPEG_magic_Number[i]){
-            fprintf(stderr, RED("Le fichier %s n'est pas un fichier JPEG\n"), filename);
+            fprintf(stderr, RED("ERROR : FORMAT - extract.c > extract() with file %s\n"), filename);
             fclose(input);
             return NULL;
         }
     }
 
     if(ignore_bytes(input, 2)){
-        fprintf(stderr, RED("Erreur : impossible d'ignorer les 2 premiers octets du segment APP0, erreur de lecture\n"));
+        fprintf(stderr, RED("ERROR : READ - extract.c > extract() > ignore_bytes()\n"));
         fclose(input);
         return NULL;
     } // Ignorer les 2 octets suivants (longueur du segment)
@@ -817,14 +817,14 @@ struct JPEG * extract(char *filename) {
     unsigned char JFIF[5] = {0x4A, 0x46, 0x49, 0x46, 0x00}; // JFIF suivi de 0
     unsigned char buffer_2[5];
     if(fread(buffer_2, sizeof(buffer_2), 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier\n");
+        fprintf(stderr, RED("ERROR : READ - extract.c > extract() > buffer_2 (JFIF)\n"));
         fclose(input);
         return NULL;
     }
 
     for (int i=0; i<5; i++){
         if (buffer_2[i] != JFIF[i]){
-            fprintf(stderr, RED("Le fichier %s n'est pas un fichier JPEG\n"), filename);
+            fprintf(stderr, RED("ERROR : FORMAT - extract.c > extract() with file %s\n"), filename);
             fclose(input);
             return NULL;
         }
@@ -848,7 +848,7 @@ struct JPEG * extract(char *filename) {
 
     while (!feof(input)){ // On arrête la boucle si on arrive à la fin du fichier sans avoir lu de marker EOF
         if(fread(buffer, 1, 1, input) != 1){
-            fprintf(stderr, "Erreur de lecture du fichier\n");
+            fprintf(stderr, RED("ERROR : READ - extract.c > extract() > !feof\n"));
             fclose(input);
             free(jpeg);
             return NULL;
@@ -856,7 +856,7 @@ struct JPEG * extract(char *filename) {
 
         if (buffer[0] == SEGMENT_START){
             if(fread(id, 1, 1, input) != 1){
-                fprintf(stderr, "Erreur de lecture du fichier\n");
+                fprintf(stderr, RED("ERROR : READ - extract.c > extract() > SEGMENT_START\n"));
                 fclose(input);
                 free(jpeg);
                 return NULL;
@@ -961,7 +961,7 @@ struct JPEG * extract(char *filename) {
 
                 while (!feof(input)){ // On arrête la boucle si on arrive à la fin du fichier sans avoir lu de marker EOF
                     if(fread(buffer, 1, 1, input) != 1){
-                        fprintf(stderr, "Erreur de lecture du fichier\n");
+                        fprintf(stderr, RED("ERROR : READ - extract.c > extract() id[0] == SOS > !feof\n"));
                         fclose(input);
                         free(jpeg);
                         return NULL;
@@ -980,7 +980,7 @@ struct JPEG * extract(char *filename) {
 
                     if (buffer[0] == SEGMENT_START){
                         if(fread(buffer, 1, 1, input) != 1){
-                            fprintf(stderr, "Erreur de lecture du fichier\n");
+                            fprintf(stderr, RED("ERROR : READ - extract.c > extract() id[0] == SOS > SEGMENT_START\n"));
                             fclose(input);
                             free(jpeg);
                             return NULL;
@@ -1003,7 +1003,7 @@ struct JPEG * extract(char *filename) {
                             return jpeg;
 
                         } else if (feof(input)){    // On atteint la fin du fichier avant d'avoir lu un marker EOI
-                            getVerbose() ? printf(RED("Fin du fichier atteinte avant d'avoir lu un EOI !!!\n")):0;
+                            fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > extract() | EOI marker is missing\n"));
                             fclose(input);
                             free_JPEG_struct(jpeg);
                             return NULL;
