@@ -13,8 +13,8 @@ uint8_t saturer(int16_t valeur) {
 }
 
 // Fonction pour convertir un pixel YCbCr en pixel RGB
-// Si on a une seule composante, on ne met à jour que la composante 0
-// Si on a plusieurs composantes, on met à jour en lieu et place des composantes 0, 1 et 2 les valeurs R, G et B
+// Si 1 composante : on met à jour en lieu et place des composantes 0, 1 et 2 avec la valeur de la luminance uniquement
+// Si 3 composantes : on met à jour en lieu et place des composantes 0, 1 et 2 avec les valeurs R, G et B
 void pixel_YCbCr2RGB(int16_t *pixel_Y, int16_t *pixel_Cb, int16_t *pixel_Cr, int8_t nb_components) {
 
         int16_t r = *pixel_Y;
