@@ -29,11 +29,11 @@ const float sqrt_2 = 1.41421356237309504880168872420;
 //     int16_t *output = (int16_t *) malloc(NN * sizeof(int16_t));
 //     if (check_memory_allocation(output)) return EXIT_FAILURE;
 
-//     for (int x = 0; x < N; x++) {
-//         for (int y = 0; y < N; y++) { 
+//     for (int8_t x = 0; x < N; x++) {
+//         for (int8_t y = 0; y < N; y++) { 
 //             double sum = 0.0;
 //             double cu = C[u];
-//             for (int v = 0; v < N; v++) {
+//             for (int8_t v = 0; v < N; v++) {
 //                 double cv = C[v];
 //                 int dct_uv = input[u * N + v];
 //                 sum += cu * cv * dct_uv * cos_values[x][y][u][v];
@@ -60,15 +60,15 @@ const float sqrt_2 = 1.41421356237309504880168872420;
 // int8_t initialize_C_cos_values() {
 //     FILE *file;
 
-//     for (int i = 0; i < N; i++) {
+//     for (int8_t i = 0; i < N; i++) {
 //         C[i] = (i == 0) ? 0.5 / sqrt_2 : 0.5;
 //     }
     
 
-//     for (int x = 0; x < N; x++) {
-//         for (int y = 0; y < N; y++) {
-//             for (int u = 0; u < N; u++) {
-//                 for (int v = 0; v < N; v++) {
+//     for (int8_t x = 0; x < N; x++) {
+//         for (int8_t y = 0; y < N; y++) {
+//             for (int8_t u = 0; u < N; u++) {
+//                 for (int8_t v = 0; v < N; v++) {
 //                     C_cos_values[x][y][u][v] = C[u] * C[v] * cos(((2 * x + 1) * u * PI) / (2 * N)) * cos(((2 * y + 1) * v * PI) / (2 * N));
 //                 }
 //             }
