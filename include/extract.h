@@ -96,11 +96,7 @@ unsigned char * get_JPEG_image_data(struct JPEG* jpeg);
 unsigned long long get_JPEG_image_data_size_in_bits(struct JPEG* jpeg);
 
 //**********************************************************************************************************************
-int16_t two_bytes_to_dec(FILE *input);
-
-int8_t read_byte(FILE *input, unsigned char *buffer);
-
-void ignore_bytes(FILE *input, int nb_bytes);
+int8_t ignore_bytes(FILE *input, int nb_bytes);
 
 struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer);
 

@@ -432,44 +432,14 @@ unsigned long long get_JPEG_image_data_size_in_bits(struct JPEG* jpeg){
 
 
 //**********************************************************************************************************************
-int16_t two_bytes_to_dec(FILE *input){
-    // Lecture et renvoie de la valeur décimale de deux octets
-    int16_t length = 0;
-    int16_t length2 = 0;
-    if(fread(&length, 1, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier\n");
-        // Free là
-        return EXIT_FAILURE;
-    }
-    length = length << 8;
-    if(fread(&length, 1, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier\n");
-        // Free là
-        return EXIT_FAILURE;
-    }
-    length = length + length2;
-    return length;
-}
-
-
-int8_t read_byte(FILE *input, unsigned char *buffer){
-    // Lecture et renvoie d'un octet
-    if(fread(buffer, 1, 1, input) != 1){
-        fprintf(stderr, "Erreur de lecture du fichier\n");
-        // Free là
-        return EXIT_FAILURE;
-    }
-    return buffer[0];
-}
-
-
-void ignore_bytes(FILE *input, int nb_bytes){
+int8_t ignore_bytes(FILE *input, int nb_bytes){
     unsigned char buffer[nb_bytes];
     if(fread(buffer, nb_bytes, 1, input) != 1){
         fprintf(stderr, "Erreur de lecture du fichier\n");
         // Free là
-        return;
+        return EXIT_FAILURE;
     }
+    return EXIT_SUCCESS;
 }
 
 
@@ -478,9 +448,16 @@ void ignore_bytes(FILE *input, int nb_bytes){
 struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
     // On souhaite récupérer les tables de quantification
     getVerbose() ? printf("\nQuantization table\n"):0;
-    getVerbose() ? printf("\tDonnées de la table : "):0;
+    getVerbose() ? printf("\tDonnées de la table : \n"):0;
+
     int16_t length = 0;
-    length = two_bytes_to_dec(input);
+    if(fread(&length, 2, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier\n");
+        return NULL;
+    }
+    length = (length << 8) | ((length >> 8) & 0xFF);
+
+    getVerbose() ? printf("longueur : %d\n", length):0;
     length = length - 2 - 1;
 
     struct QuantizationTable *qt = (struct QuantizationTable *) malloc(sizeof(struct QuantizationTable));
@@ -538,10 +515,26 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
 // Récupère les données du segment Start_Of_Frame
 int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     getVerbose() ? printf("\nStart of frame\n"):0;
-    ignore_bytes(input, 3); // On ignore la longueur et la précision
 
-    int16_t height = two_bytes_to_dec(input);
-    int16_t width = two_bytes_to_dec(input);
+    if(ignore_bytes(input, 3)){
+        fprintf(stderr, RED("Erreur dans la lecture du segment Start_Of_Frame\n"));
+        return EXIT_FAILURE;
+    } // On ignore la longueur et la précision
+
+    int16_t height = 0;
+    if(fread(&height, 2, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier - height dans get_SOF\n");
+        return EXIT_FAILURE;
+    }
+    height = (height << 8) | ((height >> 8) & 0xFF);
+
+    int16_t width = 0;
+    if(fread(&width, 2, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier - height dans get_SOF\n");
+        return EXIT_FAILURE;
+    }
+    width = (width << 8) | ((width >> 8) & 0xFF);
+
     // On stocke ces valeurs dans la super structure JPEG plutôt que dans le SOF ...
     // si on a plusieurs frames ils seront de toute façon de la même taille ...
     jpeg->height = height;
@@ -549,7 +542,12 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     getVerbose() ? printf("\tHauteur de l'image en pixel : %d\n", height):0;
     getVerbose() ? printf("\tLargeur de l'image en pixel : %d\n", width):0;
 
-    int8_t nb_components = read_byte(input, buffer);
+    if(fread(buffer, 1, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier dans SOF\n");
+        return EXIT_FAILURE;
+    }
+    int8_t nb_components = buffer[0];
+
     if (nb_components > 3 || nb_components == 2 || nb_components <= 0) {
         fprintf(stderr, RED("Erreur : le nombre de composantes n'est pas supporté par jpeg2ppm\n"));
         return EXIT_FAILURE;
@@ -579,15 +577,27 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
 
     getVerbose() ? printf("\tComposantes :\n"):0;
     for (int8_t i=0; i<nb_components; i++){
-        int8_t id_component = read_byte(input, buffer); // ID composante
+        if(fread(buffer, 1, 1, input) != 1){
+            fprintf(stderr, RED("Erreur de lecture du fichier - id_component dans SOF\n"));
+            return EXIT_FAILURE;
+        }
+        int8_t id_component = buffer[0]; // ID composante
         
         // Facteur d'échantillonnage
-        int8_t sampling_factor = read_byte(input, buffer); // Il faut faire une conversion car c'est un octet et on veut deux bits
+        if(fread(buffer, 1, 1, input) != 1){
+            fprintf(stderr, "Erreur de lecture du fichier - sampling_factor dans SOF\n");
+            return EXIT_FAILURE;
+        }
+        int8_t sampling_factor = buffer[0]; // Il faut faire une conversion car c'est un octet et on veut deux bits
 
         int8_t sampling_factor_x = sampling_factor >> 4;
         int8_t sampling_factor_y = sampling_factor & 0x0F;
 
-        int8_t num_quantization_table = read_byte(input, buffer); // Tables de quantification
+        if(fread(buffer, 1, 1, input) != 1){
+            fprintf(stderr, "Erreur de lecture du fichier - num_quantization_table dans SOF\n");
+            return EXIT_FAILURE;
+        }
+        int8_t num_quantization_table = buffer[0]; // Tables de quantification
         getVerbose() ? printf("\t\tID composante : %d\n", id_component):0;
         getVerbose() ? printf("\t\t\tFacteur d'échantillonnage X : %d\n", sampling_factor_x):0;
         getVerbose() ? printf("\t\t\tFacteur d'échantillonnage Y : %d\n", sampling_factor_y):0;
@@ -614,10 +624,21 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
 // Récupère les données de la table de Huffman
 struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
     getVerbose() ? printf("\nHuffman table\n"):0;
-    int16_t length = two_bytes_to_dec(input); // Longueur du segment
+
+    int16_t length = 0; // Longueur du segment
+    if(fread(&length, 2, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier - length dans get_DHT\n");
+        return NULL;
+    }
+    length = (length << 8) | ((length >> 8) & 0xFF);
+
     length = length - 2 - 1; // On enlève la longueur du segment et l'octet de précision 
     
-    int8_t id_table = read_byte(input, buffer); // ID de la table
+    if(fread(buffer, 1, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier - id_table dans get_DHT\n");
+        return NULL;
+    }
+    int8_t id_table = buffer[0]; // ID de la table
     // Les 4 bits de poids fort indiquent la classe de la table (DC ou AC)
     // 0 : DC or lossless table,
     // 1 : AC
@@ -676,9 +697,17 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
 // Récupère les données du segment Start_Of_Scan
 int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
     getVerbose() ? printf("\nStart of scan + data\n"):0;
-    ignore_bytes(input, 2); // Longueur du segment (ignoré)
+    if(ignore_bytes(input, 2)){
+        fprintf(stderr, RED("Erreur : impossible d'ignorer les 2 premiers octets du segment SOS, erreur de lecture\n"));
+        return EXIT_FAILURE;
+    } // Longueur du segment (ignoré)
 
-    int8_t nb_components = read_byte(input, buffer); // Nombre de composantes
+    if(fread(buffer, 1, 1, input) != 1){
+        fprintf(stderr, "Erreur de lecture du fichier - nb_components dans get_SOS\n");
+        return EXIT_FAILURE;
+    }
+    int8_t nb_components = buffer[0]; // Nombre de composantes
+
     if (nb_components > 3 || nb_components == 2 || nb_components <= 0) {
         fprintf(stderr, RED("Erreur : le nombre de composantes n'est pas supporté par jpeg2ppm\n"));
         return EXIT_FAILURE;
@@ -691,9 +720,20 @@ int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
 
     // Composantes
     for (int8_t i=0; i < nb_components; i++){
-        int8_t id_component = read_byte(input, buffer); // ID composante
+        if(fread(buffer, 1, 1, input) != 1){
+            fprintf(stderr, "Erreur de lecture du fichier - id_component dans get_SOS\n");
+            free(components);
+            return EXIT_FAILURE;
+        }
+        int8_t id_component = buffer[0]; // ID composante
         
-        int8_t ht_ids = read_byte(input, buffer); // ID des tables de Huffman utilisées pour cette composante
+        if(fread(buffer, 1, 1, input) != 1){
+            fprintf(stderr, "Erreur de lecture du fichier - ht_ids dans get_SOS\n");
+            free(components);
+            return EXIT_FAILURE;
+        }
+        int8_t ht_ids = buffer[0]; // ID des tables de Huffman utilisées pour cette composante
+
         int8_t DC_huffman_table_id = ht_ids >> 4;
         int8_t AC_huffman_table_id = (ht_ids & 0x0F) + 2;    // On ajoute 2 car les index des tables_AC commencent à 2
 
@@ -728,7 +768,10 @@ int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
     }
 
     // Paramètres ignorés
-    ignore_bytes(input, 3); // Octet de début de spectre, octet de fin de spectre, approximation (ignorés)
+    if(ignore_bytes(input, 3)){
+        fprintf(stderr, RED("Erreur : impossible d'ignorer 3 octets du segment SOS, erreur de lecture\n"));
+        return EXIT_FAILURE;
+    } // Octet de début de spectre, octet de fin de spectre, approximation (ignorés)
 
     jpeg->start_of_scan[0]->components = components;
 
@@ -764,7 +807,11 @@ struct JPEG * extract(char *filename) {
         }
     }
 
-    ignore_bytes(input, 2); // Ignorer les 2 octets suivants (longueur du segment)
+    if(ignore_bytes(input, 2)){
+        fprintf(stderr, RED("Erreur : impossible d'ignorer les 2 premiers octets du segment APP0, erreur de lecture\n"));
+        fclose(input);
+        return NULL;
+    } // Ignorer les 2 octets suivants (longueur du segment)
 
     // Vérification de la conformité du fichier avec JFIF
     unsigned char JFIF[5] = {0x4A, 0x46, 0x49, 0x46, 0x00}; // JFIF suivi de 0
