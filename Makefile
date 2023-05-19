@@ -1,14 +1,45 @@
 CC = gcc
 LD = gcc
 
+
 # -O0 désactive les optimisations à la compilation
-# -O3 active les optimisations de niveau 3
-# -fopt-info-vec-optimized permet d'afficher les optimisations vectorielles
-# -maxvx active les optimisations AVX (loop vectorization, ...)
 # C'est utile pour débugger, par contre en "production"
 # on active au moins les optimisations de niveau 2 (-O2).
+# -O3 active les optimisations de niveau 3
+CFLAGS = -Wall -Wextra -std=c99 -Iinclude -O3 -g
+
+# -maxvx et -mavx2 permettent d'utiliser respectivement les instructions AVX et AVX2 du processeur (loop vectorization, ...)
+# -fopt-info-vec-optimized permet d'afficher les optimisations vectorielles
+# Il faut cependant vérifier que le processeur supporte ces instructions
+
+# On récupère l'environnement (Linux, Mac OS X, Windows, ...)
+UNAME := $(shell uname)
+
+# On vérifie que le processeur supporte les instructions AVX et AVX2 et on les active si c'est le cas
+ifeq ($(UNAME), Linux)
+check_avx := $(shell echo | gcc -dM -E - -mavx 2>/dev/null | grep -c "AVX")
+check_avx2 := $(shell echo | gcc -dM -E - -mavx2 2>/dev/null | grep -c "AVX2")
+else ifeq ($(UNAME), Darwin)
+check_avx := $(shell echo | gcc -dM -E - -mavx 2>/dev/null | grep -c "AVX")
+check_avx2 := $(shell echo | gcc -dM -E - -mavx2 2>/dev/null | grep -c "AVX2")
+else ifeq ($(UNAME), Windows_NT)
+check_avx := $(shell echo | gcc -dM -E - -mavx 2>NUL | find /C "AVX")
+check_avx2 := $(shell echo | gcc -dM -E - -mavx2 2>NUL | find /C "AVX2")
+else
+$(error Unsupported operating system: $(UNAME))
+endif
+
+ifeq ($(check_avx), 1)
+CFLAGS += -mavx
+endif
+
+ifeq ($(check_avx2), 1)
+CFLAGS += -mavx2
+endif
+
 # -lm on lie la bibliothèque mathématique (sqrt, cos, etc.)
-CFLAGS = -Wall -Wextra -std=c99 -Iinclude -O3 -mavx -mavx2 -g -lm
+# Note : ce flag DOIT se trouver en fin de ligne !!!
+CFLAGS += -lm
 LDFLAGS =
 
 # Par défaut, on compile tous les fichiers source (.c) qui se trouvent dans le
@@ -50,4 +81,5 @@ test-ycbcr2rgb: obj/ycbcr2rgb.o
 .PHONY: clean
 
 clean:
-	rm -rf jpeg2ppm tests/huffman-test tests/IDCT-test tests/ppm tests/IQ-test tests/IZZ-test tests/ycbcr2rgb $(OBJ_FILES)
+	rm -rf jpeg2ppm tests/IDCT-test tests/IQ-test tests/IZZ-test tests/ppm tests/ycbcr2rgb $(OBJ_FILES)
+	make -C tests/ clean
