@@ -74,6 +74,9 @@ IZZ-test: IZZ-test.o ../obj/IZZ.o
 ppm-test: ppm-test.o ../obj/ppm.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
+ycbcr2rgb-test: ycbcr2rgb-test.o ../obj/ycbcr2rgb.o
+	$(CC) $^ -o $@ $(LDFLAGS)
+
 # .PHONY: clean
 .PHONY: all
 
