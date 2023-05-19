@@ -2,7 +2,7 @@
 
 
 // Fonction pour saturer les valeurs entre 0 et 255
-uint8_t saturer(int valeur) {
+uint8_t saturer(int16_t valeur) {
     if (valeur < 0) {
         return 0;
     } else if (valeur > 255) {
@@ -27,9 +27,9 @@ void ycbcr_vers_rgb(struct JPEG *jpeg, size_t MCU_number) {
     }
 
     for (int8_t i = 0; i < 64; i++){
-        int r = MCU_component0[i];
-        int g = MCU_component0[i];
-        int b = MCU_component0[i];
+        int16_t r = MCU_component0[i];
+        int16_t g = MCU_component0[i];
+        int16_t b = MCU_component0[i];
 
         if (get_sos_nb_components(get_JPEG_sos(jpeg)[0]) > 1){
             r += 1.402 * (MCU_component2[i] - 128);
