@@ -95,14 +95,11 @@ int main(int argc, char **argv) {
 
     // Ajouter une musique de victoire + défaite et un gif de chatons
     // On ne gère que 3 composantes au maximum
+    // on ne gère pas les fichiers polyglotes (sauf si le jpeg est en début de fichier)
     // Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment
     // thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream
-    // on ne gère pas les fichiers polyglotes (sauf si le jpeg est en début de fichier)
-    // Note -8 : factoriser les nb_mcus_width * nb_mcus_height
-    // Note -6 : vérifier App0 = JFIF
     // Note -3 : peut être réajuster width et height en size_t si on a une image hyper grande ... ???
     // Note -2 : il faut forcer la taille de nos variables avec int8_t, int16_t, int32_t, uint8_t, uint16_t, uint32_t pour éviter les problèmes de taille de variables sur différentes architectures matérielles !!!
-    // Note 0 : prévoir de détecter si image N&B, couleur ou couleur avec alpha (>nb de composantes ?) pour adapter le décodage du bitstream en conséquence !!!
     // Note 1 : prévoir de repasser toutes les structures en [8][8] ou [64] pour optimiser l'utilisation mémoire et accélérer l'exécution du programme !!!
     // Note 2 : prévoir de reformater nos sorties du mode verbose pour rendre la lecture plus facile&jolie ... s'inspirer de jpeg2blabla ?
     // Note 3 : prévoir de refaire des vrais tests avec toutes ces fonctions modifiées depuis début de semaine !!!
