@@ -8,6 +8,12 @@
 #define ONE 0x1
 #define EOB 0x00
 #define ZRL 0xf0
+#define MAX_HUFFMAN_CODE_LENGTH_FOR_8x8_BLOCK 16
+#define SYMBOLS_START_OFFSET_IN_DHT_SEGMENT 16
+#define MAX_MAGNITUDE_DC_VALUE 11
+#define MAX_MAGNITUDE_AC_VALUE 10
+#define MIN_MAGNITUDE_AC_VALUE 1
+#define NB_OF_COEFF_IN_8x8_BLOCK 64
 
 
 
@@ -37,13 +43,13 @@ struct node *create_node(int8_t symbol, struct node *left, struct node *right) {
 // Construit l'arbre de huffman à partir de la table de huffman
 struct node * build_huffman_tree(unsigned char *ht_data) {
     getHighlyVerbose() ? fprintf(stderr, "\tHuffman Tree :\n"):0;
-    // On vérifie que la table de Huffman est valide
+    // On vérifie que le pointeur de la table de Huffman existe
     if (ht_data == NULL) {
         fprintf(stderr, RED("Error: invalid Huffman table\n"));
         return NULL;
     }
-    // Il faut également vérifier que le nombre de code pour chaque longueur est valide
-    for (uint16_t i = 0; i < 16; i++) {
+    // Il faut également vérifier que le nombre de code pour chaque longueur est valide ... ne fait pas vraiment le job mais c'est un début
+    for (uint16_t i = 0; i < MAX_HUFFMAN_CODE_LENGTH_FOR_8x8_BLOCK; i++) {
         uint16_t nb_max_symbols_per_level = (ONE << (i+1)) - 1;
         getHighlyVerbose() ? fprintf(stderr, "\t\tnb_max_symbols_per_level: %d\n", nb_max_symbols_per_level):0;
         getHighlyVerbose() ? fprintf(stderr, "\t\tNombre de codes: %d\n", ht_data[i]):0;
@@ -55,11 +61,11 @@ struct node * build_huffman_tree(unsigned char *ht_data) {
 
     struct node *root, *current_node;
     if ( (root = create_node(0, NULL, NULL)) == NULL) return NULL;
-    int pos = 16;
+    size_t pos = SYMBOLS_START_OFFSET_IN_DHT_SEGMENT;
     uint16_t code = 0;
 
     getHighlyVerbose() ? fprintf(stderr, "\t\tSymbol(s): "):0;
-    for (int i = 1; i <= 16; i++) {
+    for (int i = 1; i <= MAX_HUFFMAN_CODE_LENGTH_FOR_8x8_BLOCK; i++) {
         for (int j = 0; j < ht_data[i - 1]; j++) {
             current_node = root;
             for (int k = i - 1; k >= 0; k--) {
@@ -207,7 +213,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             if (magnitude_DC < 0) {
                 fprintf(stderr, RED("Error: invalid DC magnitude - negative value\n"));
                 return EXIT_FAILURE;
-            } else if (magnitude_DC > 11) {
+            } else if (magnitude_DC > MAX_MAGNITUDE_DC_VALUE) {
                 fprintf(stderr, RED("Error: invalid DC magnitude - value over 11\n"));
                 return EXIT_FAILURE;
             }
@@ -236,14 +242,14 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
         }
 
         // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
-            if (nombre_de_valeurs_decodees < 64 && *current_pos == bitstream_size_in_bits) {
+            if (nombre_de_valeurs_decodees < NB_OF_COEFF_IN_8x8_BLOCK && *current_pos == bitstream_size_in_bits) {
                 fprintf(stderr, RED("Error: invalid bitstream - does not contain enough values for current MCU#%ld\n"), MCU_number);
                 return EXIT_FAILURE;
             }
     }
 
     // On décode pour trouver les 63 valeurs des coefficients AC
-    while(nombre_de_valeurs_decodees < 64){
+    while(nombre_de_valeurs_decodees < NB_OF_COEFF_IN_8x8_BLOCK){
         for (size_t i = *current_pos; i < bitstream_size_in_bits; i++) {
             getHighlyVerbose() ? fprintf(stderr, "\t\t\t\tcurrent_pos = %ld\n", *current_pos):0;
             // (1) On lit le code de Huffman
@@ -271,7 +277,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                 
                 // (3) On récupère la valeur du coefficient AC à partir du Run/Size
                 if (run_and_size == EOB){   // (3a) On gère le cas spécial EOB
-                    int8_t nombre_de_zero_a_ajouter = 64 - nombre_de_valeurs_decodees;
+                    int8_t nombre_de_zero_a_ajouter = NB_OF_COEFF_IN_8x8_BLOCK - nombre_de_valeurs_decodees;
                     for (int8_t j = 0; j < nombre_de_zero_a_ajouter; j++){
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
                         getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
@@ -285,7 +291,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
                         getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
 
-                        if (nombre_de_valeurs_decodees > 64){
+                        if (nombre_de_valeurs_decodees > NB_OF_COEFF_IN_8x8_BLOCK){
                             fprintf(stderr, RED("Error: invalid number of decoded values - RLE exeeded MCU size\n"));
                             return EXIT_FAILURE;
                         }
@@ -302,10 +308,10 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 
                     // (4) Puis on récupère la magnitude du coefficient AC
                     uint8_t magnitude_AC = run_and_size & 0x0F; // on récupère les 4 LSB en appliquant un masque
-                    if (magnitude_AC > 10){
+                    if (magnitude_AC > MAX_MAGNITUDE_AC_VALUE){
                         fprintf(stderr, RED("Error: invalid magnitude_AC value - value over 10\n"));
                         return EXIT_FAILURE;
-                    } else if (magnitude_AC == 0){
+                    } else if (magnitude_AC < MIN_MAGNITUDE_AC_VALUE){
                         fprintf(stderr, RED("Error: invalid magnitude_AC value - value equals 0\n"));
                         return EXIT_FAILURE;
                     }
@@ -334,10 +340,10 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             }
             *current_pos += 1;
 
-            if (nombre_de_valeurs_decodees == 64) break; // On a fini de récupérer les valeurs des coefficients AC, on peut passer à la suite
+            if (nombre_de_valeurs_decodees == NB_OF_COEFF_IN_8x8_BLOCK) break; // On a fini de récupérer les valeurs des coefficients AC, on peut passer à la suite
 
             // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
-            if (nombre_de_valeurs_decodees < 64 && *current_pos == bitstream_size_in_bits +1) {
+            if (nombre_de_valeurs_decodees < NB_OF_COEFF_IN_8x8_BLOCK && *current_pos == bitstream_size_in_bits +1) {
                 fprintf(stderr, RED("Error: invalid bitstream dans boucle AC - does not contain enough values for current MCU#%ld\n"), MCU_number);
                 exit(EXIT_FAILURE);
             }
@@ -354,7 +360,7 @@ int8_t decode_bitstream(struct JPEG * jpeg){
     size_t nb_mcu_height = (get_JPEG_height(jpeg) + 7) / 8;
     getVerbose() ? fprintf(stderr, "nb_mcus = %ld\n", nb_mcu_width * nb_mcu_height):0;
 
-    int previous_DC_values[3] = {0};
+    int previous_DC_values[3] = {0};    // On initialise le prédicat DC à 0 pour chaque composante (3 composantes max dans notre implémentation)
 
     size_t current_pos = 0;
     // On parcours tous les MCUs de l'image
