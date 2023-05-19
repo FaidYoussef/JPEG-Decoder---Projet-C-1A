@@ -1,2 +1,6 @@
 *.blabla
 *.o
+jpeg2ppm
+
+#vscode stuff
+.vscode/*
