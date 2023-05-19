@@ -7,6 +7,6 @@
 #include <extract.h>
 #include <utils.h>
 
-int8_t write_ppm(const char *filename, struct JPEG *jpeg);
+int8_t write_ppm(const char *output_filename, struct JPEG *jpeg);
 
 #endif

@@ -1,6 +1,6 @@
 #include <ppm.h>
 
-int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
+int8_t write_ppm(const char *output_filename, struct JPEG *jpeg) {
 
     int8_t nb_components = get_sof_nb_components(get_JPEG_sof(jpeg)[0]);
     int16_t width = get_JPEG_width(jpeg);
@@ -12,7 +12,7 @@ int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
         // On vérifie que le fichier a bien été créé/ouvert
         output_file = fopen("YOUSSEF.pgm", "wb");
         if (!output_file) {
-            fprintf(stderr, RED("Erreur lors de l'ouverture du fichier %s\n"), filename);
+            fprintf(stderr, RED("Erreur lors de l'ouverture du fichier %s\n"), output_filename);
             return EXIT_FAILURE;
         }
 
@@ -24,7 +24,7 @@ int8_t write_ppm(const char *filename, struct JPEG *jpeg) {
         // On vérifie que le fichier a bien été créé/ouvert
         output_file = fopen("YOUSSEF.ppm", "wb");
         if (!output_file) {
-            fprintf(stderr, RED("Erreur lors de l'ouverture du fichier %s\n"), filename);
+            fprintf(stderr, RED("Erreur lors de l'ouverture du fichier %s\n"), output_filename);
             return EXIT_FAILURE;
         }
 
