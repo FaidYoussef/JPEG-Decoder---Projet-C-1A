@@ -297,7 +297,7 @@ int8_t fast_IDCT_function(int16_t **input){
     for (uint8_t i = 0; i<8; i++){
         for (uint8_t j = 0; j<8; j++){
             input_float[i][j] = round(8 * input_float[i][j] + 128) < 0 ? 0 : round(8 * input_float[i][j] + 128) > 255 ? 255 : round(8 * input_float[i][j] + 128);
-            (*input)[i * 8 + j] = (int) input_float[i][j];
+            (*input)[i * 8 + j] = (int16_t) input_float[i][j];
         }
     }
 
