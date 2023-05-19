@@ -65,10 +65,10 @@ struct node * build_huffman_tree(unsigned char *ht_data) {
     uint16_t code = 0;
 
     getHighlyVerbose() ? fprintf(stderr, "\t\tSymbol(s): "):0;
-    for (int i = 1; i <= MAX_HUFFMAN_CODE_LENGTH_FOR_8x8_BLOCK; i++) {
-        for (int j = 0; j < ht_data[i - 1]; j++) {
+    for (int8_t i = 1; i <= MAX_HUFFMAN_CODE_LENGTH_FOR_8x8_BLOCK; i++) {
+        for (int8_t j = 0; j < ht_data[i - 1]; j++) {
             current_node = root;
-            for (int k = i - 1; k >= 0; k--) {
+            for (int8_t k = i - 1; k >= 0; k--) {
                 if (code & (1 << k)) {
                     if (!current_node->right) {
                         if ( (current_node->right = create_node(0, NULL, NULL)) == NULL) {
@@ -111,8 +111,8 @@ void free_huffman_tree(struct node *root) {
 
 
 // Affiche la représentation binaire d'un entier
-void print_binary(uint16_t value, int length) {
-    for (int i = length ; i >= 0; i--) {
+void print_binary(uint16_t value, int16_t length) {
+    for (int16_t i = length ; i >= 0; i--) {
         printf("%d", (value >> i) & 1);
     }
 }
@@ -173,7 +173,7 @@ int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magn
 // Décode un MCU
 // utilise les tables de Huffman de la composante
 // puis récupère les valeurs à encoder via RLE et encodage via magnitude
-int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int* previous_DC_value, size_t *current_pos) {
+int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int16_t* previous_DC_value, size_t *current_pos) {
     // On récupère les 64 valeurs du bloc 8x8
     struct ComponentSOS *component = get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), component_index);
     unsigned char *bitstream = get_JPEG_image_data(jpeg);
@@ -194,7 +194,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
         // (1) On lit le code de Huffman
         // On détermine le bit actuel en inspectant l'octet approprié dans bitstream
         // puis en décalant et en masquant le bit approprié
-        unsigned char current_bit = (bitstream[i / 8] >> (7 - (i % 8))) & 1;
+        unsigned char current_bit = (bitstream[(size_t)(i / 8)] >> (7 - (i % 8))) & 1;
 
         // On parcours l'arbre de Huffman à la recherche d'un mot de code
         current_node = (current_bit == 1) ? current_node->right : current_node->left;
@@ -255,7 +255,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             // (1) On lit le code de Huffman
             // On détermine le bit actuel en inspectant l'octet approprié dans bitstream
             // puis en décalant et en masquant le bit approprié
-            unsigned char current_bit = (bitstream[(int)(i / 8)] >> (7 - (i % 8))) & 1;
+            unsigned char current_bit = (bitstream[(size_t)(i / 8)] >> (7 - (i % 8))) & 1;
 
             // On parcours l'arbre de Huffman à la recherche d'un mot de code
             current_node = (current_bit == 1) ? current_node->right : current_node->left;
@@ -287,7 +287,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     *current_pos += 1;
                     break;  // On a fini de récupérer les valeurs des coefficients AC, on peut passer à la suite
                 } else if (run_and_size == ZRL){   // (3b) On gère le cas spécial ZRL
-                    for (int j = 0; j < 16; j++){
+                    for (int8_t j = 0; j < 16; j++){
                         set_value_in_MCU(component, MCU_number, nombre_de_valeurs_decodees++, 0);
                         getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
 
@@ -360,7 +360,7 @@ int8_t decode_bitstream(struct JPEG * jpeg){
     size_t nb_mcu_height = (get_JPEG_height(jpeg) + 7) / 8;
     getVerbose() ? fprintf(stderr, "nb_mcus = %ld\n", nb_mcu_width * nb_mcu_height):0;
 
-    int previous_DC_values[3] = {0};    // On initialise le prédicat DC à 0 pour chaque composante (3 composantes max dans notre implémentation)
+    int16_t previous_DC_values[3] = {0};    // On initialise le prédicat DC à 0 pour chaque composante (3 composantes max dans notre implémentation)
 
     size_t current_pos = 0;
     // On parcours tous les MCUs de l'image
