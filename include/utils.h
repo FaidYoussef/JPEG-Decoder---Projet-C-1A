@@ -27,4 +27,7 @@ int8_t check_memory_allocation(void *allocated_data);
 // Display block in matrix format
 void print_block(int16_t *block, size_t MCU_number, int8_t component_index);
 
+// Check if option exists in argv
+int optionExists(int argc, char *argv[], const char *option);
+
 #endif

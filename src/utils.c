@@ -16,3 +16,12 @@ void print_block(int16_t *block, size_t MCU_number, int8_t component_index){
     }
     getHighlyVerbose() ? printf("\n"):0;
 }
+
+int optionExists(int argc, char *argv[], const char *option) {
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], option) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}

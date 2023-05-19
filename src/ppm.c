@@ -1,8 +1,9 @@
 #include <ppm.h>
 
-int8_t write_ppm(const char *output_filename, struct JPEG *jpeg) {
+int8_t write_ppm(const char *output_filename, struct JPEG *jpeg, bool force_grayscale) {
 
     int8_t nb_components = get_sof_nb_components(get_JPEG_sof(jpeg)[0]);
+    if (force_grayscale) nb_components = 1;
     int16_t width = get_JPEG_width(jpeg);
     int16_t height = get_JPEG_height(jpeg);
 
