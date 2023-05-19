@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <extract.h>
 #include <IQ.h>
 #include <utils.h>
 #include <verbose.h>
@@ -141,7 +142,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
     getHighlyVerbose() ? fprintf(stderr, "Table de quantification utilisée :\n"):0;
-    print_block(test_qt0, 0, 0);
+    print_block((int16_t *) test_qt0, 0, 0);
 
     IQ_function(initial_data, test_qt0);
 
@@ -163,7 +164,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
     getHighlyVerbose() ? fprintf(stderr, "Table de quantification utilisée :\n"):0;
-    print_block(test_qt1, 0, 0);
+    print_block((int16_t *) test_qt1, 0, 0);
 
     IQ_function(initial_data, test_qt1);
 
@@ -185,7 +186,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
     getHighlyVerbose() ? fprintf(stderr, "Table de quantification utilisée :\n"):0;
-    print_block(test_qt2, 0, 0);
+    print_block((int16_t *) test_qt2, 0, 0);
 
     IQ_function(initial_data, test_qt2);
 
@@ -207,7 +208,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
     getHighlyVerbose() ? fprintf(stderr, "Table de quantification utilisée :\n"):0;
-    print_block(test_qt1and2, 0, 0);
+    print_block((int16_t *) test_qt1and2, 0, 0);
 
     IQ_function(initial_data, test_qt1and2);
 
@@ -229,7 +230,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
     getHighlyVerbose() ? fprintf(stderr, "Table de quantification utilisée :\n"):0;
-    print_block(test_qt255, 0, 0);
+    print_block((int16_t *) test_qt255, 0, 0);
 
     IQ_function(initial_data, test_qt255);
 
@@ -253,7 +254,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
     getHighlyVerbose() ? fprintf(stderr, "Table de quantification utilisée :\n"):0;
-    print_block(test_qt255, 0, 0);
+    print_block((int16_t *) test_qt255, 0, 0);
 
     IQ_function(initial_data, test_qt255);
 
