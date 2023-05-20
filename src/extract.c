@@ -116,11 +116,11 @@ void initialize_ht(struct HuffmanTable *ht, int8_t class, int8_t destination, si
     ht->set = set;
 }
 
-unsigned char get_ht_class(struct HuffmanTable *ht){
+int8_t get_ht_class(struct HuffmanTable *ht){
     return ht->class;
 }
 
-unsigned char get_ht_destination(struct HuffmanTable *ht){
+int8_t get_ht_destination(struct HuffmanTable *ht){
     return ht->destination;
 }
 
@@ -193,7 +193,7 @@ void set_value_in_MCU(struct ComponentSOS *component, int index_of_mcu, int inde
 
 
 struct StartOfScan {
-    unsigned char nb_components;
+    int8_t nb_components;
     struct ComponentSOS *components;
 };
 
@@ -221,7 +221,7 @@ int8_t initialize_sos(struct StartOfScan *sos, int8_t nb_components, int8_t id_t
     return EXIT_SUCCESS;
 }
 
-unsigned char get_sos_nb_components(struct StartOfScan *sos){
+int8_t get_sos_nb_components(struct StartOfScan *sos){
     return sos->nb_components;
 }
 
