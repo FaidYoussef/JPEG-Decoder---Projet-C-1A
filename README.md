@@ -52,7 +52,8 @@ Réalisation d'un décodeur JPEG.
 
     - Tests unitaires
         - mode standard et mode verbose (utiliser `-hv`) pour voir les détails
-        - coloration sympa pour voir rapidement les tests qui passent et ceux qui ne passent pas
+        
+        ![tests unitaires printscreen](http://JonathanMAROTTA.github.io/tests_unitaires.png?raw=true)
 
 
 - Décodeur JPEG `Mode progressive` #TODO
