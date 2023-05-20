@@ -18,6 +18,7 @@ Réalisation d'un décodeur JPEG.
 - thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream
 - voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille
 - Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment
+- ajouter l'upsampling dans le schéma du README.MD
 - Ajouter une musique de victoire + défaite (et un gif de chatons)
 - prévoir de reformater nos sorties du mode verbose pour rendre la lecture plus facile&jolie ... s'inspirer de jpeg2blabla ?
 
