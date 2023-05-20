@@ -28,7 +28,7 @@ Réalisation d'un décodeur JPEG.
     - grayscale et couleurs (Note : on ne gère que 3 composantes au maximum, sinon on détecte et annonce la non implémentation)
     
     - Options (Note : on peut placer les options dans n'importe quel sens dans la ligne de commande)  
-        `-h` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; affiche l'aide
+        `-h` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; affiche l'aide  
         `-v` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mode verbose  
         `-hv` &nbsp;&nbsp;&nbsp;&nbsp; mode highly verbose  
         `--force-grayscale` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; force la conversion en niveau de gris  
