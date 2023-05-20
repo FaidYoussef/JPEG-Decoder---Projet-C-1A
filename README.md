@@ -36,11 +36,13 @@ Réalisation d'un décodeur JPEG.
         `-hv` &nbsp;&nbsp;&nbsp;&nbsp; mode highly verbose  
         `--force-grayscale` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; force la conversion en niveau de gris  
 
+        ![--force-grayscale printscreen](http://JonathanMAROTTA.github.io/--force-grayscale.png?raw=true)
+
     - Optimisations temps d'exécution et utilisation mémoire
         - fast_IDCT d'après [PRACTICAL FAST 1-D DCT ALGORITHMS WITH 11 MULTIPLICATIONS (Loeffler *et al.*)](https://formationc.pages.ensimag.fr/projet/jpeg/jpeg/distrib/loeffler.pdf)
         - multiprocessing (vérification de la possibilité via Makefile)
         - utilisation des instructions SIMD via AVX et AVX2 si disponibles (vérification de la possibilité via Makefile)
-        - optimisation utilisation mémoire (écriture et accès)
+        - optimisation utilisation mémoire (écriture et accès)  
 
     - gestion des erreurs
         - vérification de la validité du fichier JPEG (via magic number JPEG classique FFD8FF & via présence de l'APP0 JFIF)
@@ -51,6 +53,7 @@ Réalisation d'un décodeur JPEG.
     - Tests unitaires
         - mode standard et mode verbose (utiliser `-hv`) pour voir les détails
         - coloration sympa pour voir rapidement les tests qui passent et ceux qui ne passent pas
+
 
 - Décodeur JPEG `Mode progressive` #TODO
 
