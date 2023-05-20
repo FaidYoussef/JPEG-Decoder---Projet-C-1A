@@ -266,9 +266,9 @@ int8_t initialize_JPEG_struct(struct JPEG *jpeg){
 
     jpeg->nb_Mcu_Height_Strechted = 0;
 
-    jpeg->Sampling_Factor_X = 0;
+    jpeg->Sampling_Factor_X = 1;
 
-    jpeg->Sampling_Factor_Y = 0;
+    jpeg->Sampling_Factor_Y = 1;
 
     jpeg->quantization_tables = (struct QuantizationTable **) malloc(MAX_NUMBER_OF_QUANTIZATION_TABLES * sizeof(struct QuantizationTable *));
     if (check_memory_allocation((void *) jpeg->quantization_tables)) {
@@ -640,11 +640,6 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
         int8_t sampling_factor_x = sampling_factor >> 4;
         int8_t sampling_factor_y = sampling_factor & 0x0F;
 
-        jpeg->Sampling_Factor_X = sampling_factor_x;
-        jpeg->Sampling_Factor_Y = sampling_factor_y;
-
-        fprintf(stderr, "sampling_factor_x = %d\n", sampling_factor_x );
-        fprintf(stderr, "sampling_factor_y = %d", sampling_factor_y );
 
         if (i == 0) {
             // && sampling_factor_x != 4 && sampling_factor_y != 4) {
@@ -659,6 +654,8 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
                 jpeg->nb_Mcu_Height_Strechted++;
             }
 
+            jpeg->Sampling_Factor_X = sampling_factor_x;
+            jpeg->Sampling_Factor_Y = sampling_factor_y;
 
         } else {
             // if ( sampling_factor_x != 1 || sampling_factor_y != 1  ) {

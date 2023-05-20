@@ -184,7 +184,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
     int8_t nombre_de_valeurs_decodees = 0;
     
 
-    getHighlyVerbose() ? fprintf(stderr, "Decoding MCUs:\n"):0;
+    getHighlyVerbose() ? fprintf(stderr, "Decoding MCU:\n"):0;
     getHighlyVerbose() ? fprintf(stderr, "\tMCU#%ld:\n", MCU_number):0;
     getHighlyVerbose() ? fprintf(stderr, "\t\tComponent#%d\n", component_index):0;
     getHighlyVerbose() ? fprintf(stderr, "\t\t\tDC huffman table id: %d\n", get_DC_huffman_table_id(component)):0;
@@ -250,7 +250,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
     }
 
     // On décode pour trouver les 63 valeurs des coefficients AC
-    while(nombre_de_valeurs_decodees < NB_OF_COEFF_IN_8x8_BLOCK){
+    while(nombre_de_valeurs_decodees < NB_OF_COEFF_IN_8x8_BLOCK && *current_pos < bitstream_size_in_bits){
         for (size_t i = *current_pos; i < bitstream_size_in_bits; i++) {
             getHighlyVerbose() ? fprintf(stderr, "\t\t\t\tcurrent_pos = %ld\n", *current_pos):0;
             // (1) On lit le code de Huffman
