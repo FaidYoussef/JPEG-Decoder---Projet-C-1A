@@ -255,8 +255,20 @@ struct JPEG {
 
 int8_t initialize_JPEG_struct(struct JPEG *jpeg){
     jpeg->height = 0;
-
+    
     jpeg->width = 0;
+
+    jpeg->nb_Mcu_Width = 0;
+
+    jpeg->nb_Mcu_Height = 0;
+
+    jpeg->nb_Mcu_Width_Strechted = 0;
+
+    jpeg->nb_Mcu_Height_Strechted = 0;
+
+    jpeg->Sampling_Factor_X = 0;
+
+    jpeg->Sampling_Factor_Y = 0;
 
     jpeg->quantization_tables = (struct QuantizationTable **) malloc(MAX_NUMBER_OF_QUANTIZATION_TABLES * sizeof(struct QuantizationTable *));
     if (check_memory_allocation((void *) jpeg->quantization_tables)) {
@@ -628,6 +640,9 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
         int8_t sampling_factor_x = sampling_factor >> 4;
         int8_t sampling_factor_y = sampling_factor & 0x0F;
 
+        jpeg->Sampling_Factor_X = sampling_factor_x;
+        jpeg->Sampling_Factor_Y = sampling_factor_y;
+
 
         if (nb_components == 0) {
             // && sampling_factor_x != 4 && sampling_factor_y != 4) {
@@ -644,10 +659,10 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
 
 
         } else {
-            // if ( sampling_factor_x != 1 || sampling_factor_y != 1  ) {
-            //     fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > sampling_factor\n"));
-            //     return EXIT_FAILURE;
-            // }
+            if ( sampling_factor_x != 1 || sampling_factor_y != 1  ) {
+                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > sampling_factor\n"));
+                return EXIT_FAILURE;
+            }
         }
         if(fread(buffer, 1, 1, input) != 1){
             fprintf(stderr, RED("ERROR : READ - extract.c > get_SOF() > num_quantization_table\n"));

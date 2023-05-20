@@ -360,10 +360,6 @@ int8_t decode_bitstream(struct JPEG * jpeg){
 
     getVerbose() ? fprintf(stderr, "nb_mcus = %ld\n", get_JPEG_nb_Mcu_Width_Strechted(jpeg) * get_JPEG_nb_Mcu_Height_Strechted(jpeg)):0;
 
-    fprintf(stderr, "get_JPEG_nb_Mcu_Width_Strechted(jpeg) = %ld\n", get_JPEG_nb_Mcu_Width_Strechted(jpeg));
-    fprintf(stderr, "get_JPEG_nb_Mcu_Height_Strechted(jpeg) = %ld\n", get_JPEG_nb_Mcu_Height_Strechted(jpeg));
-    fprintf(stderr, "get_JPEG_nb_Mcu_Width(jpeg) = %ld\n", get_JPEG_nb_Mcu_Width(jpeg));
-    fprintf(stderr, "get_JPEG_nb_Mcu_Height(jpeg) = %ld\n", get_JPEG_nb_Mcu_Height(jpeg));
     int16_t previous_DC_values[3] = {0};    // On initialise le prédicat DC à 0 pour chaque composante (3 composantes max dans notre implémentation)
 
     size_t current_pos = 0;
@@ -381,11 +377,9 @@ int8_t decode_bitstream(struct JPEG * jpeg){
             for (int8_t i = 0; i < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); i++) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
                 for (int8_t v = 0; v < get_JPEG_Sampling_Factor_Y(jpeg); v++) {
                     for (int8_t h = 0; h < get_JPEG_Sampling_Factor_X(jpeg); h++) {
-                        fprintf(stderr, "mcu#%ld\n", (y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h));
                         if (decode_MCU(jpeg, (y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h), i, &previous_DC_values[i], &current_pos)) {
                             return EXIT_FAILURE;
                         }
-                        fprintf(stderr, "mcu#%ld\n", (y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h));
                     }
                 }
             }

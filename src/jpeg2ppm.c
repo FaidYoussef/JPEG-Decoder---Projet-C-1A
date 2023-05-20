@@ -103,7 +103,6 @@ int main(int argc, char **argv) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
     };
-    fprintf(stderr, GREEN("Image %s extraite avec succès !\n"), filename);
 
     if (IQ(jpeg)) {
         free_JPEG_struct(jpeg);
