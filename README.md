@@ -13,11 +13,13 @@ Réalisation d'un décodeur JPEG.
 
 ## TODO
 
-- apparemment il nous faut un Gantt chart ou équivalent dégueulasse ... cf. fin de cette page
+- upsampling (partiel + complet)
+- régler le problème de double free() et éventuelle fuite mémoire sur les images couleurs
 - refaire fonctionner les tests avec toutes les fonctions !!!
-- thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream
-- voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille
+- apparemment il nous faut un Gantt chart ou équivalent dégueulasse ... cf. fin de cette page
+- thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream et avant YCbCr2RGB
 - Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment
+- voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille
 - ajouter l'upsampling dans le schéma du README.MD
 - Ajouter une musique de victoire + défaite (et un gif de chatons)
 - prévoir de reformater nos sorties du mode verbose pour rendre la lecture plus facile&jolie ... s'inspirer de jpeg2blabla ?
