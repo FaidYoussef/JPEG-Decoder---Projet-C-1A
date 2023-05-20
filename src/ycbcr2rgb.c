@@ -38,10 +38,16 @@ void pixel_YCbCr2RGB(int16_t *pixel_Y, int16_t *pixel_Cb, int16_t *pixel_Cr, int
 
 
 // Fonction pour convertir un MCU YCbCr en pixel RGB
-void MCU_YCbCr2RGB(int16_t *MCU_Y, int16_t *MCU_Cb, int16_t *MCU_Cr, int8_t nb_components, bool force_grayscale) {
+void MCU_YCbCr2RGB(int16_t *MCU_Y, int16_t *MCU_Cb, int16_t *MCU_Cr, const uint8_t Sampling_Factor_X, const uint8_t Sampling_Factor_Y, const uint8_t v, const uint8_t h, int8_t nb_components, bool force_grayscale) {
 
-    for (int8_t i = 0; i < 64; i++){
-        pixel_YCbCr2RGB(&MCU_Y[i], &MCU_Cb[i], &MCU_Cr[i], nb_components, force_grayscale);
+    for (uint8_t y = 7; y < 8; y--){
+        for (uint8_t x = 7; x < 8; x--){
+            const uint8_t pixel_index = y * 8 + x;
+            const uint8_t CbCr_pixel_row = y / Sampling_Factor_Y + 4 * v;
+            const uint8_t CbCr_pixel_col = x / Sampling_Factor_X + 4 * h;
+            const uint8_t CbCr_pixel_index = CbCr_pixel_row * 8 + CbCr_pixel_col;
+            pixel_YCbCr2RGB(&MCU_Y[pixel_index], &MCU_Cb[CbCr_pixel_index], &MCU_Cr[CbCr_pixel_index], nb_components, force_grayscale);
+        }
     }
     
 }
@@ -49,21 +55,31 @@ void MCU_YCbCr2RGB(int16_t *MCU_Y, int16_t *MCU_Cb, int16_t *MCU_Cr, int8_t nb_c
 
 int8_t YCbCr2RGB(struct JPEG *jpeg, bool force_grayscale){
 
+    const uint8_t Sampling_Factor_X = get_JPEG_Sampling_Factor_X(jpeg);
+    const uint8_t Sampling_Factor_Y = get_JPEG_Sampling_Factor_Y(jpeg);
+
     // On parcours tous les MCUs de l'image
-    for (size_t i = 0; i < get_JPEG_nb_Mcu_Width_Strechted(jpeg) * get_JPEG_nb_Mcu_Height(jpeg); i++){
-        // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a
-        // plusieurs scans/frames ---> mode progressif
+    for (size_t y = 0; y < get_JPEG_nb_Mcu_Height(jpeg); y+= Sampling_Factor_Y){
+        for (size_t x = 0; x < get_JPEG_nb_Mcu_Width(jpeg); x+= Sampling_Factor_X){
 
-        int16_t* MCU_Y = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_0_INDEX))[i];
-        int16_t* MCU_Cb = NULL;
-        int16_t* MCU_Cr = NULL;
+            int16_t *MCU_Cb = NULL;
+            int16_t *MCU_Cr = NULL;
 
-        if (!force_grayscale && get_sos_nb_components(get_JPEG_sos(jpeg)[0]) > 1){
-            MCU_Cb = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_1_INDEX))[i];
-            MCU_Cr = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_2_INDEX))[i];
+            if (!force_grayscale && get_sos_nb_components(get_JPEG_sos(jpeg)[0]) > 1){
+                MCU_Cb = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_1_INDEX))[y * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + x];
+                MCU_Cr = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_2_INDEX))[y * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + x];
+
+            }
+            
+            for (uint8_t v = get_JPEG_Sampling_Factor_Y(jpeg) -1; v < get_JPEG_Sampling_Factor_Y(jpeg); v--){
+                for (uint8_t h = Sampling_Factor_X -1; h < Sampling_Factor_X; h--){
+                    
+                    int16_t *MCU_Y = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_0_INDEX))[(y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h)];
+
+                    MCU_YCbCr2RGB(MCU_Y, MCU_Cb, MCU_Cr, Sampling_Factor_X, Sampling_Factor_Y, v, h, get_sos_nb_components(get_JPEG_sos(jpeg)[0]), force_grayscale);
+                }
+            }
         }
-
-        MCU_YCbCr2RGB(MCU_Y, MCU_Cb, MCU_Cr, get_sos_nb_components(get_JPEG_sos(jpeg)[0]), force_grayscale);
     }
     return EXIT_SUCCESS;
 }

@@ -647,10 +647,10 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
                 fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > sampling_factor\n"));
                 return EXIT_FAILURE;
             }
-            if ( components[i].sampling_factor_x == 2 && jpeg->nb_Mcu_Width % 2 == 1 ) {
+            if ( sampling_factor_x == 2 && jpeg->nb_Mcu_Width % 2 == 1 ) {
                 jpeg->nb_Mcu_Width_Strechted++;
             }
-            if ( components[i].sampling_factor_y == 2 && jpeg->nb_Mcu_Height % 2 == 1 ) {
+            if ( sampling_factor_y == 2 && jpeg->nb_Mcu_Height % 2 == 1 ) {
                 jpeg->nb_Mcu_Height_Strechted++;
             }
 
