@@ -305,31 +305,28 @@ int8_t fast_IDCT_function(int16_t **input){
 }
 
 
-//*********************************************************************************************************************************************************************************************
+// Fonction qui récupère les données de la structure JPEG et qui procède à l'IDCT inverse
 int8_t IDCT(struct JPEG * jpeg) {
-    size_t nb_mcu_width = (get_JPEG_width(jpeg) + 7) / 8;
-    size_t nb_mcu_height = (get_JPEG_height(jpeg) + 7) / 8;
 
-    // // Section à décommenter si on veut utiliser la première version optimisée de l'IDCT
-    // // On vérifie si le fichier C_cos_values.dat existe déjà et on le recrée si besoin
-    // // Et on le charge en mémoire
-    // if (load_C_cos_values()) return EXIT_FAILURE;
+    // On parcours tous les MCUs de l'image
+    for (size_t y = 0; y < get_JPEG_nb_Mcu_Height(jpeg); y += get_JPEG_Sampling_Factor_Y(jpeg)) {
+        for (size_t x = 0; x < get_JPEG_nb_Mcu_Width(jpeg); x += get_JPEG_Sampling_Factor_X(jpeg)) {
+            for (int8_t i = 0; i < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); i++) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
+                
+                // On récupère les MCUs de la composante
+                int16_t** MCUs = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), i));
+                
+                for (int8_t v = 0; v < get_JPEG_Sampling_Factor_Y(jpeg); v++) {
+                    for (int8_t h = 0; h < get_JPEG_Sampling_Factor_X(jpeg); h++) {
+                        // On récupère le MCU
+                        int16_t *mcu = MCUs[(y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h)];
 
-    // On parcours toutes les composantes
-    for (int8_t i = 0; i < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); i++) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressifi
-        
-        int16_t** MCUs = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), i));
-
-        // On parcours tous les MCUs de l'image
-        for (size_t j = 0; j < nb_mcu_width * nb_mcu_height; j++){
-            // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a
-            // plusieurs scans/frames ---> mode progressif
-        
-            if (fast_IDCT_function(&(MCUs[j])) ) return EXIT_FAILURE;
-            
-            getHighlyVerbose() ? fprintf(stderr, "MCU après IDCT\n"):0;
-            print_block(MCUs[j], j, i);
-            
+                        if (fast_IDCT_function(&mcu )) return EXIT_FAILURE;
+                        
+                        getHighlyVerbose() ? fprintf(stderr, "MCU après IDCT\n"):0;
+                        print_block(mcu, v * get_JPEG_Sampling_Factor_X(jpeg) + h, i);                    }
+                }
+            }
         }
     }
     return EXIT_SUCCESS;

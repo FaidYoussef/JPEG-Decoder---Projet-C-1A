@@ -46,12 +46,9 @@ int8_t write_ppm(const char *output_filename, struct JPEG *jpeg, bool force_gray
 
 
     // On récupère le nombre de mcus en largeur et hauteur
-    size_t nb_mcu_width = (width + 7) / 8;
-    size_t nb_mcu_height = (height + 7) / 8;
+    size_t nb_mcu_width = get_JPEG_nb_Mcu_Width_Strechted(jpeg);
+    size_t nb_mcu_height = get_JPEG_nb_Mcu_Height_Strechted(jpeg);
     
-
-
-
     for (size_t i = 0; i < nb_mcu_height ; i++){
         for (int8_t l = 0; l < 8; l++) {
             for (size_t j = 0; j < nb_mcu_width ; j++){

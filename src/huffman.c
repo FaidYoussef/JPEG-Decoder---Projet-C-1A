@@ -174,6 +174,7 @@ int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magn
 // utilise les tables de Huffman de la composante
 // puis récupère les valeurs à encoder via RLE et encodage via magnitude
 int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, int16_t* previous_DC_value, size_t *current_pos) {
+    
     // On récupère les 64 valeurs du bloc 8x8
     struct ComponentSOS *component = get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), component_index);
     unsigned char *bitstream = get_JPEG_image_data(jpeg);
@@ -356,26 +357,39 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 //**********************************************************************************************************************
 // Décode le bitstream et récupère les MCU de chacune des composantes
 int8_t decode_bitstream(struct JPEG * jpeg){
-    size_t nb_mcu_width = (get_JPEG_width(jpeg) + 7) / 8;
-    size_t nb_mcu_height = (get_JPEG_height(jpeg) + 7) / 8;
-    getVerbose() ? fprintf(stderr, "nb_mcus = %ld\n", nb_mcu_width * nb_mcu_height):0;
 
+    getVerbose() ? fprintf(stderr, "nb_mcus = %ld\n", get_JPEG_nb_Mcu_Width_Strechted(jpeg) * get_JPEG_nb_Mcu_Height_Strechted(jpeg)):0;
+
+    fprintf(stderr, "get_JPEG_nb_Mcu_Width_Strechted(jpeg) = %ld\n", get_JPEG_nb_Mcu_Width_Strechted(jpeg));
+    fprintf(stderr, "get_JPEG_nb_Mcu_Height_Strechted(jpeg) = %ld\n", get_JPEG_nb_Mcu_Height_Strechted(jpeg));
+    fprintf(stderr, "get_JPEG_nb_Mcu_Width(jpeg) = %ld\n", get_JPEG_nb_Mcu_Width(jpeg));
+    fprintf(stderr, "get_JPEG_nb_Mcu_Height(jpeg) = %ld\n", get_JPEG_nb_Mcu_Height(jpeg));
     int16_t previous_DC_values[3] = {0};    // On initialise le prédicat DC à 0 pour chaque composante (3 composantes max dans notre implémentation)
 
     size_t current_pos = 0;
     // On parcours tous les MCUs de l'image
-    for (size_t i = 0; i < nb_mcu_width * nb_mcu_height; i++){
-        // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a
-        // plusieurs scans/frames ---> mode progressif
-        
-        // On parcours toutes les composantes
-        for (int8_t j = 0; j < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); ++j) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
+    for (size_t y = 0; y < get_JPEG_nb_Mcu_Height(jpeg);y+= get_JPEG_Sampling_Factor_Y(jpeg)){
+        fprintf(stderr, "y = %ld\n", y);
+        fprintf(stderr, "get_JPEG_Sampling_Factor_Y(jpeg) = %d\n", get_JPEG_Sampling_Factor_Y(jpeg));
+        fprintf(stderr, "get_JPEG_Sampling_Factor_X(jpeg) = %d\n", get_JPEG_Sampling_Factor_X(jpeg));
+        for (size_t x = 0; x < get_JPEG_nb_Mcu_Width(jpeg); x+= get_JPEG_Sampling_Factor_X(jpeg)) {
+            // fprintf(stderr, "x = %ld\n", x);
+            // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a
+            // plusieurs scans/frames ---> mode progressif
             
-            if (decode_MCU(jpeg, i, j, &previous_DC_values[j], &current_pos)) {
-                return EXIT_FAILURE;
+            // On parcours toutes les composantes
+            for (int8_t i = 0; i < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); i++) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
+                for (int8_t v = 0; v < get_JPEG_Sampling_Factor_Y(jpeg); v++) {
+                    for (int8_t h = 0; h < get_JPEG_Sampling_Factor_X(jpeg); h++) {
+                        fprintf(stderr, "mcu#%ld\n", (y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h));
+                        if (decode_MCU(jpeg, (y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h), i, &previous_DC_values[i], &current_pos)) {
+                            return EXIT_FAILURE;
+                        }
+                        fprintf(stderr, "mcu#%ld\n", (y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h));
+                    }
+                }
             }
         }
-
     }
     return EXIT_SUCCESS;
 }

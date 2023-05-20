@@ -95,12 +95,15 @@ int main(int argc, char **argv) {
     char *filename = argv[argc - 1];
 
     struct JPEG *jpeg = extract(filename);
+
+
     if (jpeg == NULL) return EXIT_FAILURE;
 
     if (decode_bitstream(jpeg)) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
     };
+    fprintf(stderr, GREEN("Image %s extraite avec succès !\n"), filename);
 
     if (IQ(jpeg)) {
         free_JPEG_struct(jpeg);

@@ -1,4 +1,4 @@
-#include <extract.h>
+    #include <extract.h>
 
 //**********************************************************************************************************************
 // Quantization tables
@@ -239,6 +239,12 @@ struct ComponentSOS * get_sos_component(struct ComponentSOS * components, int8_t
 struct JPEG {
     int16_t width;
     int16_t height;
+    size_t nb_Mcu_Width;
+    size_t nb_Mcu_Height;
+    size_t nb_Mcu_Width_Strechted;
+    size_t nb_Mcu_Height_Strechted;
+    int8_t Sampling_Factor_X;
+    int8_t Sampling_Factor_Y;
     struct QuantizationTable **quantization_tables;
     struct StartOfFrame **start_of_frame;
     struct HuffmanTable **huffman_tables;
@@ -406,6 +412,30 @@ int16_t get_JPEG_width(struct JPEG *jpeg){
     return jpeg->width;
 }
 
+size_t get_JPEG_nb_Mcu_Width(struct JPEG *jpeg){
+    return jpeg->nb_Mcu_Width;
+}
+
+size_t get_JPEG_nb_Mcu_Height(struct JPEG *jpeg){
+    return jpeg->nb_Mcu_Height;
+}
+
+size_t get_JPEG_nb_Mcu_Width_Strechted(struct JPEG *jpeg){
+    return jpeg->nb_Mcu_Width_Strechted;
+}
+
+size_t get_JPEG_nb_Mcu_Height_Strechted(struct JPEG *jpeg){
+    return jpeg->nb_Mcu_Height_Strechted;
+}
+
+int8_t get_JPEG_Sampling_Factor_X(struct JPEG *jpeg){
+    return jpeg->Sampling_Factor_X;
+}
+
+int8_t get_JPEG_Sampling_Factor_Y(struct JPEG *jpeg){
+    return jpeg->Sampling_Factor_Y;
+}
+
 struct QuantizationTable ** get_JPEG_qt(struct JPEG *jpeg){
     return jpeg->quantization_tables;
 }
@@ -539,6 +569,13 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     // si on a plusieurs frames ils seront de toute façon de la même taille ...
     jpeg->height = height;
     jpeg->width = width;
+
+    jpeg->nb_Mcu_Width = (width + 7) / 8;
+    jpeg->nb_Mcu_Height = (height + 7) / 8;
+
+    jpeg->nb_Mcu_Width_Strechted = jpeg->nb_Mcu_Width;
+    jpeg->nb_Mcu_Height_Strechted = jpeg->nb_Mcu_Height;
+
     getVerbose() ? printf("\tHauteur de l'image en pixel : %d\n", height):0;
     getVerbose() ? printf("\tLargeur de l'image en pixel : %d\n", width):0;
 
@@ -548,7 +585,7 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     }
     int8_t nb_components = buffer[0];
 
-    if (nb_components > 3 || nb_components == 2 || nb_components <= 0) {
+    if (nb_components > 3 || nb_components == 2 || nb_components < 1) {
         fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > nb_components\n"));
         return EXIT_FAILURE;
     }
@@ -556,16 +593,14 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
 
     // On met à jour le nombre de mcus dans le Start Of Scan s'il existe
     if (jpeg->start_of_scan[0]->nb_components == nb_components) {
-        size_t nb_mcu_width = (width + 7) / 8;
-        size_t nb_mcu_height = (height + 7) / 8;
 
         for (int8_t i=0; i < nb_components; i++) {
-            (&(jpeg->start_of_scan[0]->components[i]))->nb_of_MCUs = nb_mcu_width * nb_mcu_height;
+            (&(jpeg->start_of_scan[0]->components[i]))->nb_of_MCUs = jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted;
 
-            (&(jpeg->start_of_scan[0]->components[i]))->MCUs = (int16_t **) malloc(nb_mcu_width * nb_mcu_height * sizeof(int16_t *));
+            (&(jpeg->start_of_scan[0]->components[i]))->MCUs = (int16_t **) malloc(jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted * sizeof(int16_t *));
             if (check_memory_allocation((void *) (&(jpeg->start_of_scan[0]->components[i]))->MCUs)) return EXIT_FAILURE;
 
-            for (size_t j=0; j < nb_mcu_width * nb_mcu_height; i++) {
+            for (size_t j=0; j < jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted; i++) {
                 (&(jpeg->start_of_scan[0]->components[i]))->MCUs[j] = (int16_t *) malloc(64 * sizeof(int16_t));
                 if (check_memory_allocation((void *) (&(jpeg->start_of_scan[0]->components[i]))->MCUs[j])) return EXIT_FAILURE;
             }
@@ -593,6 +628,27 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
         int8_t sampling_factor_x = sampling_factor >> 4;
         int8_t sampling_factor_y = sampling_factor & 0x0F;
 
+
+        if (nb_components == 0) {
+            // && sampling_factor_x != 4 && sampling_factor_y != 4) {
+            if ( (sampling_factor_x != 1 && sampling_factor_x != 2  ) || (sampling_factor_y != 1 && sampling_factor_y != 2) ) {
+                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > sampling_factor\n"));
+                return EXIT_FAILURE;
+            }
+            if ( components[i].sampling_factor_x == 2 && jpeg->nb_Mcu_Width % 2 == 1 ) {
+                jpeg->nb_Mcu_Width_Strechted++;
+            }
+            if ( components[i].sampling_factor_y == 2 && jpeg->nb_Mcu_Height % 2 == 1 ) {
+                jpeg->nb_Mcu_Height_Strechted++;
+            }
+
+
+        } else {
+            // if ( sampling_factor_x != 1 || sampling_factor_y != 1  ) {
+            //     fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > sampling_factor\n"));
+            //     return EXIT_FAILURE;
+            // }
+        }
         if(fread(buffer, 1, 1, input) != 1){
             fprintf(stderr, RED("ERROR : READ - extract.c > get_SOF() > num_quantization_table\n"));
             return EXIT_FAILURE;

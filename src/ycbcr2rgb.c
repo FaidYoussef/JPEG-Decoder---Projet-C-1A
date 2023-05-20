@@ -48,12 +48,9 @@ void MCU_YCbCr2RGB(int16_t *MCU_Y, int16_t *MCU_Cb, int16_t *MCU_Cr, int8_t nb_c
 
 
 int8_t YCbCr2RGB(struct JPEG *jpeg, bool force_grayscale){
-    size_t nb_mcu_width = (get_JPEG_width(jpeg) + 7) / 8;
-    size_t nb_mcu_height = (get_JPEG_height(jpeg) + 7) / 8;
-
 
     // On parcours tous les MCUs de l'image
-    for (size_t i = 0; i < nb_mcu_width * nb_mcu_height; i++){
+    for (size_t i = 0; i < get_JPEG_nb_Mcu_Width_Strechted(jpeg) * get_JPEG_nb_Mcu_Height(jpeg); i++){
         // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a
         // plusieurs scans/frames ---> mode progressif
 
