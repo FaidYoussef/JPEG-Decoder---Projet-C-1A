@@ -60,8 +60,8 @@ struct ComponentSOF * get_sof_component(struct ComponentSOF * components, int8_t
 //**********************************************************************************************************************
 struct HuffmanTable;
 void initialize_ht(struct HuffmanTable *ht, int8_t class, int8_t destination, size_t length, unsigned char *data, struct node * huffman_tree, bool set);
-unsigned char get_ht_class(struct HuffmanTable *ht);
-unsigned char get_ht_destination(struct HuffmanTable *ht);
+int8_t get_ht_class(struct HuffmanTable *ht);
+int8_t get_ht_destination(struct HuffmanTable *ht);
 size_t get_ht_length(struct HuffmanTable *ht);
 unsigned char * get_ht_data(struct HuffmanTable *ht);
 struct node * get_ht_tree(struct HuffmanTable *ht);
@@ -73,12 +73,11 @@ int8_t initialize_component_sos(struct ComponentSOS *component, int8_t id_table,
 int8_t get_DC_huffman_table_id(struct ComponentSOS *component);
 int8_t get_AC_huffman_table_id(struct ComponentSOS *component);
 int16_t **get_MCUs(struct ComponentSOS *component);
-// int16_t *get_MCU(struct ComponentSOS *component, int index_of_mcu);
 void set_value_in_MCU(struct ComponentSOS *component, int index_of_mcu, int index_of_pixel_in_mcu, int16_t value);
 
 struct StartOfScan;
 int8_t initialize_sos(struct StartOfScan *sos, int8_t nb_components, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCU);
-unsigned char get_sos_nb_components(struct StartOfScan *sos);
+int8_t get_sos_nb_components(struct StartOfScan *sos);
 struct ComponentSOS * get_sos_components(struct StartOfScan *sos);
 struct ComponentSOS * get_sos_component(struct ComponentSOS * components, int8_t index);
 
