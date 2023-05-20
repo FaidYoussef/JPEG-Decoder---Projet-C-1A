@@ -19,6 +19,7 @@ Réalisation d'un décodeur JPEG.
 - apparemment il nous faut un Gantt chart ou équivalent dégueulasse ... cf. fin de cette page
 - thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream et avant YCbCr2RGB
 - Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment
+- ajouter une boucle while (! feof(input)) pour chercher SOI+APP0 dans un fichier PUIS enchainer avec extraction des données >>> pour gérer les fichiers polyglotes
 - voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille
 - ajouter l'upsampling dans le schéma du README.MD
 - Ajouter une musique de victoire + défaite (et un gif de chatons)
