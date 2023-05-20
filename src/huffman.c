@@ -370,8 +370,9 @@ int8_t decode_bitstream(struct JPEG * jpeg){
             
             // On parcours toutes les composantes
             for (int8_t i = 0; i < get_sos_nb_components(get_JPEG_sos(jpeg)[0]); i++) {   // attention ici l'index 0 correspond au 1er scan/frame ... prévoir d'intégrer un index pour le mode progressif
-                for (int8_t v = 0; v < get_JPEG_Sampling_Factor_Y(jpeg); v++) {
-                    for (int8_t h = 0; h < get_JPEG_Sampling_Factor_X(jpeg); h++) {
+                for (int8_t v = 0; v < get_sampling_factor_y(get_sof_component(get_sof_components(get_JPEG_sof(jpeg)[0]), i)); v++) {
+                    for (int8_t h = 0; h < get_sampling_factor_x(get_sof_component(get_sof_components(get_JPEG_sof(jpeg)[0]), i)); h++) {
+
                         if (decode_MCU(jpeg, (y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h), i, &previous_DC_values[i], &current_pos)) {
                             return EXIT_FAILURE;
                         }
