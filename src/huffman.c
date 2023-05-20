@@ -357,17 +357,12 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 //**********************************************************************************************************************
 // Décode le bitstream et récupère les MCU de chacune des composantes
 int8_t decode_bitstream(struct JPEG * jpeg){
-
-    getVerbose() ? fprintf(stderr, "nb_mcus = %ld\n", get_JPEG_nb_Mcu_Width_Strechted(jpeg) * get_JPEG_nb_Mcu_Height_Strechted(jpeg)):0;
-
+    
     int16_t previous_DC_values[3] = {0};    // On initialise le prédicat DC à 0 pour chaque composante (3 composantes max dans notre implémentation)
 
     size_t current_pos = 0;
     // On parcours tous les MCUs de l'image
     for (size_t y = 0; y < get_JPEG_nb_Mcu_Height(jpeg);y+= get_JPEG_Sampling_Factor_Y(jpeg)){
-        fprintf(stderr, "y = %ld\n", y);
-        fprintf(stderr, "get_JPEG_Sampling_Factor_Y(jpeg) = %d\n", get_JPEG_Sampling_Factor_Y(jpeg));
-        fprintf(stderr, "get_JPEG_Sampling_Factor_X(jpeg) = %d\n", get_JPEG_Sampling_Factor_X(jpeg));
         for (size_t x = 0; x < get_JPEG_nb_Mcu_Width(jpeg); x+= get_JPEG_Sampling_Factor_X(jpeg)) {
             // fprintf(stderr, "x = %ld\n", x);
             // Prévoir possibilité de reset-er les données `previous_DC_values` dans le cas où l'on a

@@ -643,8 +643,10 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
         jpeg->Sampling_Factor_X = sampling_factor_x;
         jpeg->Sampling_Factor_Y = sampling_factor_y;
 
+        fprintf(stderr, "sampling_factor_x = %d\n", sampling_factor_x );
+        fprintf(stderr, "sampling_factor_y = %d", sampling_factor_y );
 
-        if (nb_components == 0) {
+        if (i == 0) {
             // && sampling_factor_x != 4 && sampling_factor_y != 4) {
             if ( (sampling_factor_x != 1 && sampling_factor_x != 2  ) || (sampling_factor_y != 1 && sampling_factor_y != 2) ) {
                 fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > sampling_factor\n"));
@@ -659,10 +661,10 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
 
 
         } else {
-            if ( sampling_factor_x != 1 || sampling_factor_y != 1  ) {
-                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > sampling_factor\n"));
-                return EXIT_FAILURE;
-            }
+            // if ( sampling_factor_x != 1 || sampling_factor_y != 1  ) {
+            //     fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > sampling_factor\n"));
+            //     return EXIT_FAILURE;
+            // }
         }
         if(fread(buffer, 1, 1, input) != 1){
             fprintf(stderr, RED("ERROR : READ - extract.c > get_SOF() > num_quantization_table\n"));
