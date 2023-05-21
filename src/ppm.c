@@ -54,10 +54,10 @@ int8_t write_ppm(const char *output_filename, struct JPEG *jpeg, bool force_gray
             for (size_t j = 0; j < nb_mcu_width ; j++){
                 for (int8_t k = 0; k < 8; k++){
                     if (j * 8 + k < (size_t) width && i * 8 + l < (size_t)height) {
-                        fprintf(output_file, "%c", MCUs_component0[j + i * nb_mcu_width][k+l*8]);
+                        fputc(MCUs_component0[j + i * nb_mcu_width][k+l*8], output_file);
                         if (nb_components > 1) {
-                            fprintf(output_file, "%c", MCUs_component1[j + i * nb_mcu_width][k+l*8]);
-                            fprintf(output_file, "%c", MCUs_component2[j + i * nb_mcu_width][k+l*8]);
+                            fputc(MCUs_component1[j + i * nb_mcu_width][k+l*8], output_file);
+                            fputc(MCUs_component2[j + i * nb_mcu_width][k+l*8], output_file);
                         }
                     }
                     
