@@ -503,7 +503,10 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
         qt->id = CHROMINANCE_ID;
 
     } else {
-        fprintf(stderr, RED("ERROR : READ - extract.c > get_qt()"));
+        fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_qt()"));
+        free(qt->data);
+        free(qt);
+        return NULL;
     }
     qt->length = length;
 
