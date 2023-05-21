@@ -13,6 +13,7 @@ Réalisation d'un décodeur JPEG.
 
 ## TODO
 
+----test-----
 - new remote repository
 - upsampling (partiel + complet)
 - régler le problème de double free() et éventuelle fuite mémoire sur les images couleurs
