@@ -447,7 +447,6 @@ int8_t ignore_bytes(FILE *input, int nb_bytes){
 struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
     // On souhaite récupérer les tables de quantification
     getVerbose() ? printf("\nQuantization table\n"):0;
-    getVerbose() ? printf("\tDonnées de la table : \n"):0;
 
     int16_t length = 0;
     if(fread(&length, 2, 1, input) != 1){
@@ -456,7 +455,7 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
     }
     length = (length << 8) | ((length >> 8) & 0xFF);
 
-    getVerbose() ? printf("longueur : %d\n", length):0;
+    getVerbose() ? printf("\tlongueur : %d\n", length):0;
     length = length - 2 - 1;
 
     struct QuantizationTable *qt = (struct QuantizationTable *) malloc(sizeof(struct QuantizationTable));
@@ -482,6 +481,7 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
             return NULL;
         }
         // Affichage des tables de quantification
+        getVerbose() ? printf("\tDonnées de la table : \n"):0;
         for (int i=0; i<length; i++){
             getVerbose() ? printf("%x", qt->data[i]):0;
         }
@@ -685,7 +685,7 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
     huffman_table->length = length;
     huffman_table->data = huffman_data;
     if ( (huffman_table->huffman_tree = build_huffman_tree(huffman_data)) == NULL) {
-        fprintf(stderr, RED("ERROR : BUILD HUFFMAN TREE - extract.c > get_DHT() > huffman_table->huffman_tree\n"));
+        fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_DHT() > huffman_table->huffman_tree\n"));
         free(huffman_data);
         free(huffman_table);
         return NULL;
