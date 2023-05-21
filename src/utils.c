@@ -2,7 +2,7 @@
 
 int8_t check_memory_allocation(void *allocated_data){
     if(allocated_data == NULL) {
-        fprintf(stderr, RED("Erreur d'allocation mémoire\n"));
+        fprintf(stderr, RED("ERROR : MEMORY - utils.c > check_memory_allocation()\n"));
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
