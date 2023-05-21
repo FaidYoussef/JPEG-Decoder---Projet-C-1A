@@ -1,30 +1,17 @@
 #include <IQ.h>
 
 
-bool isOverflow(int16_t a, int16_t b) {
-    // Check if either of them is zero
-    if (a == 0 || b == 0)
-        return false;
-     
-    int16_t result = a * b;
-    if (a == result / b) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
 
 // Inverse quantization function
-void IQ_function(int16_t *mcu, const uint8_t *qtable){
+void IQ_function(int16_t *mcu, const uint8_t *qtable) {
     for (int8_t k = 0; k < 64; k++) {
-        if (isOverflow(mcu[k], qtable[k]) && mcu[k] < 0) {
-            mcu[k] = -32768;
-        } else if (isOverflow(mcu[k], qtable[k]) && mcu[k] > 0) {
-            mcu[k] = 32767;
-        } else {
-            mcu[k] = mcu[k] * qtable[k];
-        }
+        int32_t result = (int32_t)mcu[k] * qtable[k];
+        if (result > INT16_MAX)
+            mcu[k] = INT16_MAX;
+        else if (result < INT16_MIN)
+            mcu[k] = INT16_MIN;
+        else
+            mcu[k] = (int16_t)result;
     }
 }
 

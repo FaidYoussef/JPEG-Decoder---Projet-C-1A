@@ -10,8 +10,6 @@
 #include <extract.h>
 #include <utils.h>
 
-// Fonction qui permet de savoir si on a un overflow
-bool isOverflow(int16_t a, int16_t b);
 
 // Inverse quantization function
 void IQ_function(int16_t *mcu, const uint8_t *qtable);
