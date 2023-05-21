@@ -31,6 +31,7 @@ int8_t write_ppm(const char *output_filename, struct JPEG *jpeg, bool force_gray
 
         // On écrit l'en-tête du fichier PPM
         fprintf(output_file, "P6\n%d %d\n255\n", width, height);
+        
     } else {
         output_file = NULL;     // On ne se retrouvera jamais ici puisque nb_components est forcément égal à 1 ou 3 après vérification 
         return EXIT_FAILURE;    // dans extract.c > extract()   ........... juste pour virer le warning à la compilation
