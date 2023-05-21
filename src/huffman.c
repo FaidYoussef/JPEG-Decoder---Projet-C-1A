@@ -183,7 +183,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
     int8_t nombre_de_valeurs_decodees = 0;
     
 
-    getHighlyVerbose() ? fprintf(stderr, "Decoding MCUs:\n"):0;
+    getHighlyVerbose() ? fprintf(stderr, "Decoding MCU:\n"):0;
     getHighlyVerbose() ? fprintf(stderr, "\tMCU#%ld:\n", MCU_number):0;
     getHighlyVerbose() ? fprintf(stderr, "\t\tComponent#%d\n", component_index):0;
     getHighlyVerbose() ? fprintf(stderr, "\t\t\tDC huffman table id: %d\n", get_DC_huffman_table_id(component)):0;

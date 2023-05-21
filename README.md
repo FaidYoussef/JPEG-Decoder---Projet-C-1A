@@ -1,6 +1,6 @@
 # Décodeur JPEG
 
-Projet C à réaliser en 1A à l'Ensimag
+Projet C à réaliser en 1A à l'Ensimag.
 Réalisation d'un décodeur JPEG.
 
 ![JPEG encoder/decoder architecture](http://JonathanMAROTTA.github.io/JPEG_encoder_decoder_architecture.png?raw=true)
@@ -13,17 +13,14 @@ Réalisation d'un décodeur JPEG.
 
 ## TODO
 
-- upsampling (partiel + complet)
-- régler le problème de double free() et éventuelle fuite mémoire sur les images couleurs
-- refaire fonctionner les tests avec toutes les fonctions !!!
-- apparemment il nous faut un Gantt chart ou équivalent dégueulasse ... cf. fin de cette page
-- thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream et avant YCbCr2RGB
-- Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment
-- ajouter une boucle while (! feof(input)) pour chercher SOI+APP0 dans un fichier PUIS enchainer avec extraction des données >>> pour gérer les fichiers polyglotes
-- voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille
-- ajouter l'upsampling dans le schéma du README.MD
+- upsampling (partiel ~ok + complet)    // Youssef + Jon
+- régler le problème de double free() et éventuelle fuite mémoire sur les images couleurs   // Jon + ?
+- refaire fonctionner les tests avec toutes les fonctions !!!   // Jon
+- apparemment il nous faut un Gantt chart ou équivalent dégueulasse ... cf. fin de cette page   // Gwen
+- thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream et avant YCbCr2RGB  // Jon
+- Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment    // Gwen
+- voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille   // tout le monde pour re-checker ?
 - Ajouter une musique de victoire + défaite (et un gif de chatons)
-- prévoir de reformater nos sorties du mode verbose pour rendre la lecture plus facile&jolie ... s'inspirer de jpeg2blabla ?
 
 ## Features
 
@@ -46,9 +43,9 @@ Réalisation d'un décodeur JPEG.
 
     - gestion des erreurs
         - vérification de la validité du fichier JPEG (via magic number JPEG classique FFD8FF & via présence de l'APP0 JFIF)
-        - génération d'un message d'erreur à chacune des étapes où l'on catch un problème
-    -> cf. fichiers de tests forgés pour tester les erreurs
-        - Note : on ne gère pas les fichiers polyglotes (sauf si les données jpeg sont en début de fichier)
+        - génération d'un message d'erreur à chacune des étapes où l'on catch un problème  
+        -> cf. fichiers de tests forgés pour tester les erreurs
+        - Note : on gère les fichiers polyglotes (Spécifications JPEG forcent les données jpeg en début de fichier)
 
     - Tests unitaires
         - mode standard et mode verbose (utiliser `-hv`) pour voir les détails
@@ -65,6 +62,7 @@ make
 jpeg2ppm [-h] [-v|-hv] [--force-grayscale] <jpeg_file>
 
 make tests
+extract-test
 huffman-test [-hv]
 IDCT-test
 IQ-test [-hv]
