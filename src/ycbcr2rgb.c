@@ -71,7 +71,7 @@ int8_t YCbCr2RGB(struct JPEG *jpeg, bool force_grayscale){
 
             }
             
-            for (uint8_t v = get_JPEG_Sampling_Factor_Y(jpeg) -1; v < get_JPEG_Sampling_Factor_Y(jpeg); v--){
+            for (uint8_t v = Sampling_Factor_Y -1; v < Sampling_Factor_Y; v--){
                 for (uint8_t h = Sampling_Factor_X -1; h < Sampling_Factor_X; h--){
                     
                     int16_t *MCU_Y = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_0_INDEX))[(y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h)];

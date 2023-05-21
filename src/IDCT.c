@@ -316,8 +316,8 @@ int8_t IDCT(struct JPEG * jpeg) {
                 // On récupère les MCUs de la composante
                 int16_t** MCUs = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), i));
                 
-                for (int8_t v = 0; v < get_JPEG_Sampling_Factor_Y(jpeg); v++) {
-                    for (int8_t h = 0; h < get_JPEG_Sampling_Factor_X(jpeg); h++) {
+                for (int8_t v = 0; v < get_sampling_factor_y(get_sof_component(get_sof_components(get_JPEG_sof(jpeg)[0]), i)); v++) {
+                    for (int8_t h = 0; h < get_sampling_factor_x(get_sof_component(get_sof_components(get_JPEG_sof(jpeg)[0]), i)); h++) {
                         // On récupère le MCU
                         int16_t *mcu = MCUs[(y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h)];
 

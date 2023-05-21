@@ -658,6 +658,8 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
             jpeg->Sampling_Factor_Y = sampling_factor_y;
 
         } else {
+            // ce if sert à detecter si on a bien des composantes chrominance avec un facteur d'échantillonnage de 1
+            // car on devrait avoir un Cb et un Cr par MCU
             // if ( sampling_factor_x != 1 || sampling_factor_y != 1  ) {
             //     fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > sampling_factor\n"));
             //     return EXIT_FAILURE;
