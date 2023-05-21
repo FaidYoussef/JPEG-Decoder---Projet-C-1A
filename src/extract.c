@@ -1,4 +1,4 @@
-    #include <extract.h>
+#include <extract.h>
 
 //**********************************************************************************************************************
 // Quantization tables
@@ -607,12 +607,12 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     if (jpeg->start_of_scan[0]->nb_components == nb_components) {
 
         for (int8_t i=0; i < nb_components; i++) {
-            (&(jpeg->start_of_scan[0]->components[i]))->nb_of_MCUs = jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted;
+            jpeg->start_of_scan[0]->components[i].nb_of_MCUs = jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted;
 
             (&(jpeg->start_of_scan[0]->components[i]))->MCUs = (int16_t **) malloc(jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted * sizeof(int16_t *));
             if (check_memory_allocation((void *) (&(jpeg->start_of_scan[0]->components[i]))->MCUs)) return EXIT_FAILURE;
 
-            for (size_t j=0; j < jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted; i++) {
+            for (size_t j=0; j < jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted; j++) {
                 (&(jpeg->start_of_scan[0]->components[i]))->MCUs[j] = (int16_t *) malloc(64 * sizeof(int16_t));
                 if (check_memory_allocation((void *) (&(jpeg->start_of_scan[0]->components[i]))->MCUs[j])) return EXIT_FAILURE;
             }
