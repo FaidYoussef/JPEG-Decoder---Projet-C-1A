@@ -67,7 +67,94 @@ jpeg2ppm [-h] [-v|-hv] [--force-grayscale] <jpeg_file>
 
 
 ## Architecture du code
-- schéma modules ou directement visible dans VSCode avec les différents dossiers et sous-dossiers
+- Architecture en modules avec tests unitaires séparés.
+    - extract.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [FILE *]	// input_file  
+	    - OUT : [struct JPEG * jpeg | NULL]	// NULL si erreur lors de l'extraction des données  
+	   ```
+        > vérification conformité fichier
+		    > présence SOI + APPO
+	    	> présence de toutes les informations nécessaires au décodage
+	    > extraction des données du header et de l'image compressée avec stockage dans une super structure (struct JPEG)
+		    > Start Of Frame
+		    > DHT (conversion des tables en arbres binaires de recherche)
+		    > DQT
+		    > Start Of Scan
+		    > EOI
+        ```
+
+    - huffman.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction
+         ```
+    	> décode le bitstream
+    	> prise en charge de l'upsampling
+    	> utilisation des arbres binaires de recherche pour récupérer les symboles (Run/Size) associés
+    	> lecture du bon nombre de bits pour récupérer les valeurs des coefficients DC/AC
+    	> remplissage des MCUs de chaque composante présente
+    	 ```
+
+    - IQ.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction
+        ```
+        > procède à la quantification inverse  
+        > prise en charge de l'upsampling  
+        > utilisation des tables de quantification associée aux composantes  
+        > modification en place des valeurs des MCUs de chaque composante présente
+        ```
+
+    - IZZ.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction
+        ```
+        > procède au zig-zag inverse de chacun des MCUs  
+        > modification des valeurs des MCUs de chaque composante présente
+        ```
+
+    - IDCT.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction  
+        ```
+        > procède à la transformée en cosinus discrète inverse  
+        > prise en charge de l'upsampling  
+        > fast IDCT via algorithme de Loeffler *et al.*  
+        > modification des valeurs des MCUs de chaque composante présente
+        ```
+
+    - YCbCr2RGB.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *], [int8_t]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction
+        ```
+        > procède à la conversion en RGB  
+        > prise en charge de l'upsampling  
+        > possibilité de forcer la conversion en niveau de gris via la ligne de commande qui modifie la valeur du paramètre d'entrée `force_grayscale`  
+        > modification en place des valeurs des MCUs de chaque composante présente
+        ```
+
+    - ppm.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction
+        ```
+        > procède à la transformée en cosinus discrète inverse  
+        > prise en charge de l'upsampling  
+        > fast IDCT via algorithme de Loeffler et al.  
+        > modification des valeurs des MCUs de chaque composante présente
+        ```
+
+    - free_JPEG_struct() in extract.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [ ]
+        ```
+	    > procède à la libération de la mémoire dynamique allouée
+	    ```
+
 - schéma "sitemap" de la struct JPEG
 ![struct JPEG architecture](http://JonathanMAROTTA.github.io/jpeg2ppm_sitemap_graph_6_layer-1.png?raw=true)
 
