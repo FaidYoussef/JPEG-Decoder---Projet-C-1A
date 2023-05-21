@@ -220,11 +220,15 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             
             // (3) On récupère l'indice dans la classe de magnitude associé
             // Il faut lire le bon nombre de bit(s) ... et reconstruire l'indice bit après bit
+            getHighlyVerbose() ? fprintf(stderr, "\t\t\tmagnitude_DC = %x - indice_dans_la_classe_de_magnitude : ", magnitude_DC):0;
             int16_t indice_dans_classe_magnitude_DC = 0;
             for (int8_t j = 0; j < magnitude_DC; j++){
                 indice_dans_classe_magnitude_DC <<= 1;
-                indice_dans_classe_magnitude_DC += (bitstream[(i + 1 + j) / 8] >> (7 - ((i + 1 + j) % 8))) & 1;
+                int8_t current_bit = (bitstream[(i + 1 + j) / 8] >> (7 - ((i + 1 + j) % 8))) & 1;
+                indice_dans_classe_magnitude_DC += current_bit;
+                getHighlyVerbose() ? fprintf(stderr, "%d", current_bit):0;
             }
+            getHighlyVerbose() ? fprintf(stderr, "\n"):0;
 
             // (4) On récupère finalement la valeur du coefficient DC à partir de la magnitude et de l'indice dans la classe de magnitude
             int16_t DC_value = recover_DC_coeff_value(magnitude_DC, indice_dans_classe_magnitude_DC, jpeg) + *previous_DC_value;
@@ -319,8 +323,9 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     int16_t indice_dans_classe_magnitude_AC = 0;
                     for (uint8_t j = 0; j < magnitude_AC; j++){
                         indice_dans_classe_magnitude_AC <<= 1;
-                        indice_dans_classe_magnitude_AC += (bitstream[(int)((*current_pos + 1 + j) / 8)] >> (7 - ((*current_pos + 1 + j) % 8))) & 1;
-                        getHighlyVerbose() ? fprintf(stderr, "%x", indice_dans_classe_magnitude_AC):0;
+                        uint8_t current_bit = (bitstream[(int)((*current_pos + 1 + j) / 8)] >> (7 - ((*current_pos + 1 + j) % 8))) & 1;
+                        indice_dans_classe_magnitude_AC += current_bit;
+                        getHighlyVerbose() ? fprintf(stderr, "%d", current_bit):0;
                     }
                     getHighlyVerbose() ? fprintf(stderr, "\n"):0;
 
