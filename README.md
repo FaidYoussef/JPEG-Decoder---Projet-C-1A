@@ -61,7 +61,17 @@ Réalisation d'un décodeur JPEG.
 ## Usage
 
 ```sh
+make
 jpeg2ppm [-h] [-v|-hv] [--force-grayscale] <jpeg_file>
+
+make tests
+huffman-test [-hv]
+IDCT-test
+IQ-test [-hv]
+IZZ-test [-hv]
+ppm-test
+ycbcr2rgb-test [-hv]
+
 ```
 ![struct JPEG architecture](http://JonathanMAROTTA.github.io/jpeg2ppm-usage.png?raw=true)
 
@@ -122,7 +132,7 @@ jpeg2ppm [-h] [-v|-hv] [--force-grayscale] <jpeg_file>
         ```
         > procède à la transformée en cosinus discrète inverse  
         > prise en charge de l'upsampling  
-        > fast IDCT via algorithme de Loeffler *et al.*  
+        > fast IDCT via algorithme de Loeffler et al.  
         > modification des valeurs des MCUs de chaque composante présente
         ```
 
@@ -142,10 +152,8 @@ jpeg2ppm [-h] [-v|-hv] [--force-grayscale] <jpeg_file>
 	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction
         ```
-        > procède à la transformée en cosinus discrète inverse  
-        > prise en charge de l'upsampling  
-        > fast IDCT via algorithme de Loeffler et al.  
-        > modification des valeurs des MCUs de chaque composante présente
+        > procède à l'écriture d'un fichier PGM (grayscale) ou PPM  
+        > optimisation de la taille du fichier via écriture en binaire
         ```
 
     - free_JPEG_struct() in extract.c  
