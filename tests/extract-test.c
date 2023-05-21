@@ -39,6 +39,7 @@ int main() {
     int fils22;
     int fils23;
     int fils24;
+    int fils25;
 
 
     char *programme1 = "jpeg2ppm tests/images/poupoupidou_invalid_component_id_in_QT___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_qt.jpg";
@@ -65,6 +66,7 @@ int main() {
     char *programme22 = "jpeg2ppm tests/images/invader_invalid_encoded_data_not_enough_values_before_eof2___ERROR_-_INCONSISTENT_DATA_-_huffman.c_decode_MCU_not_enough_values_for_current_MCU.jpeg";
     char *programme23 = "jpeg2ppm tests/images/invader_invalid_marker_length.jpeg";
     char *programme24 = "jpeg2ppm tests/images/invader_no_data_between_SOI_APP0_and_EOI.jpeg";
+    char *programme25 = "jpeg2ppm tests/images/polyglot_JFIF_PDF.jpeg";
 
     char *arguments[] = {NULL};
     
@@ -182,7 +184,7 @@ int main() {
             fprintf(stderr, RED("Test 8 KO - Error in execution of jpeg2ppm\n"));
             exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
     }
-    
+
     wait(&fils8);
     fprintf(stderr, GREEN("Test 8 OK\n"));
 
@@ -410,6 +412,20 @@ int main() {
 
     wait(&fils24);
     fprintf(stderr, GREEN("Test 24 OK\n"));
+
+    //**************************************************************************************************************************
+    // Test 25
+    switch (fils25 = fork()) {
+        case -1:
+            erreur("Error can't fork !");
+        case 0:
+            execv(programme25, arguments);
+            fprintf(stderr, RED("Test 25 KO - Error in execution of jpeg2ppm\n"));
+            exit(EXIT_FAILURE); 
+    }
+
+    wait(&fils25);
+    fprintf(stderr, GREEN("Test 25 OK\n"));
 
 
     return EXIT_SUCCESS;
