@@ -41,7 +41,7 @@ Réalisation d'un décodeur JPEG.
     - Optimisations temps d'exécution et utilisation mémoire
         - fast_IDCT d'après [PRACTICAL FAST 1-D DCT ALGORITHMS WITH 11 MULTIPLICATIONS (Loeffler *et al.*)](https://formationc.pages.ensimag.fr/projet/jpeg/jpeg/distrib/loeffler.pdf)
         - multiprocessing (vérification de la possibilité via Makefile)
-        - utilisation des instructions SIMD via AVX et AVX2 si disponibles (vérification de la possibilité via Makefile)
+        - vectorisation via utilisation des instructions SIMD AVX et AVX2 si disponibles (vérification de la possibilité via Makefile)
         - optimisation utilisation mémoire (écriture et accès)  
 
     - gestion des erreurs
@@ -84,7 +84,7 @@ ycbcr2rgb-test [-hv]
 	   ```
         > vérification conformité fichier
 		    > présence SOI + APPO
-	    	> présence de toutes les informations nécessaires au décodage
+	        > présence de toutes les informations nécessaires au décodage
 	    > extraction des données du header et de l'image compressée avec stockage dans une super structure (struct JPEG)
 		    > Start Of Frame
 		    > DHT (conversion des tables en arbres binaires de recherche)
