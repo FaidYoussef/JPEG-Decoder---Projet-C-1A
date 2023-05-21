@@ -1,6 +1,6 @@
 # Décodeur JPEG
 
-Projet C à réaliser en 1A à l'Ensimag.
+Projet C à réaliser en 1A à l'Ensimag
 Réalisation d'un décodeur JPEG.
 
 ![JPEG encoder/decoder architecture](http://JonathanMAROTTA.github.io/JPEG_encoder_decoder_architecture.png?raw=true)
