@@ -125,9 +125,9 @@ int main(int argc, char **argv) {
     if (write_ppm(filename, jpeg, force_grayscale)) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
-    };
-
-    fprintf(stderr, GREEN("Image %s décodée avec succès !\n"), filename);
+    } else {
+        fprintf(stderr, GREEN("Image %s décodée avec succès !\n"), filename);
+    }
     
     
     // On libère la mémoire
