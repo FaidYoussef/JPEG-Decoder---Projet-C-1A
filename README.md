@@ -13,7 +13,6 @@ Réalisation d'un décodeur JPEG.
 
 ## TODO
 
-- new remote repository
 - upsampling (partiel + complet)
 - régler le problème de double free() et éventuelle fuite mémoire sur les images couleurs
 - refaire fonctionner les tests avec toutes les fonctions !!!
@@ -48,7 +47,7 @@ Réalisation d'un décodeur JPEG.
     - gestion des erreurs
         - vérification de la validité du fichier JPEG (via magic number JPEG classique FFD8FF & via présence de l'APP0 JFIF)
         - génération d'un message d'erreur à chacune des étapes où l'on catch un problème
-    -> cf. fichiers de tests forgés pour tester les erreurs
+        -> cf. fichiers de tests forgés pour tester les erreurs
         - Note : on ne gère pas les fichiers polyglotes (sauf si les données jpeg sont en début de fichier)
 
     - Tests unitaires
@@ -63,15 +62,18 @@ Réalisation d'un décodeur JPEG.
 ```sh
 jpeg2ppm [-h] [-v|-hv] [--force-grayscale] <jpeg_file>
 ```
-![struct JPEG architecture](http://JonathanMAROTTA.github.io/jpeg2ppm-usage.png?raw=true)
+![jpeg2ppm usage printscreen](http://JonathanMAROTTA.github.io/jpeg2ppm-usage.png?raw=true)
 
 
 ## Architecture du code
 - schéma modules ou directement visible dans VSCode avec les différents dossiers et sous-dossiers
 - schéma "sitemap" de la struct JPEG
-![struct JPEG architecture](http://JonathanMAROTTA.github.io/jpeg2ppm_sitemap_graph_6_layer-1.png?raw=true)
+![struct JPEG - sitemap visualization](http://JonathanMAROTTA.github.io/jpeg2ppm_sitemap_graph_6_layer-1.png?raw=true)
 
 
+## Architecture fichier JPEG
+
+![architecture fichier JPEG](http://JonathanMAROTTA.github.io/jpegrgb_dissected.png?raw=true)
 
 ## Blabla init
 
