@@ -13,17 +13,14 @@ Réalisation d'un décodeur JPEG.
 
 ## TODO
 
-- upsampling (partiel + complet)
-- régler le problème de double free() et éventuelle fuite mémoire sur les images couleurs
-- refaire fonctionner les tests avec toutes les fonctions !!!
-- apparemment il nous faut un Gantt chart ou équivalent dégueulasse ... cf. fin de cette page
-- thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream et avant YCbCr2RGB
-- Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment
-- ajouter une boucle while (! feof(input)) pour chercher SOI+APP0 dans un fichier PUIS enchainer avec extraction des données >>> pour gérer les fichiers polyglotes
-- voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille
-- ajouter l'upsampling dans le schéma du README.MD
+- upsampling (partiel ~ok + complet)    // Youssef + Jon
+- régler le problème de double free() et éventuelle fuite mémoire sur les images couleurs   // Jon + ?
+- refaire fonctionner les tests avec toutes les fonctions !!!   // Jon
+- apparemment il nous faut un Gantt chart ou équivalent dégueulasse ... cf. fin de cette page   // Gwen
+- thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream et avant YCbCr2RGB  // Jon
+- Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment    // Gwen
+- voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille   // tout le monde pour re-checker ?
 - Ajouter une musique de victoire + défaite (et un gif de chatons)
-- prévoir de reformater nos sorties du mode verbose pour rendre la lecture plus facile&jolie ... s'inspirer de jpeg2blabla ?
 
 ## Features
 
@@ -41,18 +38,19 @@ Réalisation d'un décodeur JPEG.
     - Optimisations temps d'exécution et utilisation mémoire
         - fast_IDCT d'après [PRACTICAL FAST 1-D DCT ALGORITHMS WITH 11 MULTIPLICATIONS (Loeffler *et al.*)](https://formationc.pages.ensimag.fr/projet/jpeg/jpeg/distrib/loeffler.pdf)
         - multiprocessing (vérification de la possibilité via Makefile)
-        - utilisation des instructions SIMD via AVX et AVX2 si disponibles (vérification de la possibilité via Makefile)
+        - vectorisation via utilisation des instructions SIMD AVX et AVX2 si disponibles (vérification de la possibilité via Makefile)
         - optimisation utilisation mémoire (écriture et accès)  
 
     - gestion des erreurs
         - vérification de la validité du fichier JPEG (via magic number JPEG classique FFD8FF & via présence de l'APP0 JFIF)
-        - génération d'un message d'erreur à chacune des étapes où l'on catch un problème
+        - génération d'un message d'erreur à chacune des étapes où l'on catch un problème  
         -> cf. fichiers de tests forgés pour tester les erreurs
-        - Note : on ne gère pas les fichiers polyglotes (sauf si les données jpeg sont en début de fichier)
+        - Note : on gère les fichiers polyglotes (Spécifications JPEG forcent les données jpeg en début de fichier)
 
     - Tests unitaires
         - mode standard et mode verbose (utiliser `-hv`) pour voir les détails
-        - coloration sympa pour voir rapidement les tests qui passent et ceux qui ne passent pas
+        
+        ![tests unitaires printscreen](http://JonathanMAROTTA.github.io/tests_unitaires.png?raw=true)
 
 
 - Décodeur JPEG `Mode progressive` #TODO
@@ -60,13 +58,109 @@ Réalisation d'un décodeur JPEG.
 ## Usage
 
 ```sh
+make
 jpeg2ppm [-h] [-v|-hv] [--force-grayscale] <jpeg_file>
+
+make tests
+extract-test
+huffman-test [-hv]
+IDCT-test
+IQ-test [-hv]
+IZZ-test [-hv]
+ppm-test
+ycbcr2rgb-test [-hv]
+
 ```
 ![jpeg2ppm usage printscreen](http://JonathanMAROTTA.github.io/jpeg2ppm-usage.png?raw=true)
 
 
 ## Architecture du code
-- schéma modules ou directement visible dans VSCode avec les différents dossiers et sous-dossiers
+- Architecture en modules avec tests unitaires séparés.
+    - extract.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [FILE *]	// input_file  
+	    - OUT : [struct JPEG * jpeg | NULL]	// NULL si erreur lors de l'extraction des données  
+	   ```
+        > vérification conformité fichier
+		    > présence SOI + APPO
+	        > présence de toutes les informations nécessaires au décodage
+	    > extraction des données du header et de l'image compressée avec stockage dans une super structure (struct JPEG)
+		    > Start Of Frame
+		    > DHT (conversion des tables en arbres binaires de recherche)
+		    > DQT
+		    > Start Of Scan
+		    > EOI
+        ```
+
+    - huffman.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction
+         ```
+    	> décode le bitstream
+    	> prise en charge de l'upsampling
+    	> utilisation des arbres binaires de recherche pour récupérer les symboles (Run/Size) associés
+    	> lecture du bon nombre de bits pour récupérer les valeurs des coefficients DC/AC
+    	> remplissage des MCUs de chaque composante présente
+    	 ```
+
+    - IQ.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction
+        ```
+        > procède à la quantification inverse  
+        > prise en charge de l'upsampling  
+        > utilisation des tables de quantification associée aux composantes  
+        > modification en place des valeurs des MCUs de chaque composante présente
+        ```
+
+    - IZZ.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction
+        ```
+        > procède au zig-zag inverse de chacun des MCUs  
+        > modification des valeurs des MCUs de chaque composante présente
+        ```
+
+    - IDCT.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction  
+        ```
+        > procède à la transformée en cosinus discrète inverse  
+        > prise en charge de l'upsampling  
+        > fast IDCT via algorithme de Loeffler et al.  
+        > modification des valeurs des MCUs de chaque composante présente
+        ```
+
+    - YCbCr2RGB.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *], [int8_t]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction
+        ```
+        > procède à la conversion en RGB  
+        > prise en charge de l'upsampling  
+        > possibilité de forcer la conversion en niveau de gris via la ligne de commande qui modifie la valeur du paramètre d'entrée `force_grayscale`  
+        > modification en place des valeurs des MCUs de chaque composante présente
+        ```
+
+    - ppm.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// EXIT_FAILURE = 1 : erreur lors de l'exécution de la fonction
+        ```
+        > procède à l'écriture d'un fichier PGM (grayscale) ou PPM  
+        > optimisation de la taille du fichier via écriture en binaire
+        ```
+
+    - free_JPEG_struct() in extract.c  
+	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+	    - OUT : [ ]
+        ```
+	    > procède à la libération de la mémoire dynamique allouée
+	    ```
+
 - schéma "sitemap" de la struct JPEG
 ![struct JPEG - sitemap visualization](http://JonathanMAROTTA.github.io/jpeg2ppm_sitemap_graph_6_layer-1.png?raw=true)
 

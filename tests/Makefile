@@ -65,7 +65,7 @@ all: $(TESTS)
 IDCT-test: IDCT-test.o ../obj/IDCT.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-IQ-test: IQ-test.o ../obj/IQ.o
+IQ-test: IQ-test.o ../obj/IQ.o ../obj/extract.o ../obj/utils.o ../obj/verbose.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
 IZZ-test: IZZ-test.o ../obj/IZZ.o

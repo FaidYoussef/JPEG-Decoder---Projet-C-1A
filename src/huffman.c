@@ -45,7 +45,7 @@ struct node * build_huffman_tree(unsigned char *ht_data) {
     getHighlyVerbose() ? fprintf(stderr, "\tHuffman Tree :\n"):0;
     // On vérifie que le pointeur de la table de Huffman existe
     if (ht_data == NULL) {
-        fprintf(stderr, RED("Error: invalid Huffman table\n"));
+        fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > build_huffman_tree()\n"));
         return NULL;
     }
     // Il faut également vérifier que le nombre de code pour chaque longueur est valide ... ne fait pas vraiment le job mais c'est un début
@@ -54,7 +54,7 @@ struct node * build_huffman_tree(unsigned char *ht_data) {
         getHighlyVerbose() ? fprintf(stderr, "\t\tnb_max_symbols_per_level: %d\n", nb_max_symbols_per_level):0;
         getHighlyVerbose() ? fprintf(stderr, "\t\tNombre de codes: %d\n", ht_data[i]):0;
         if (ht_data[i] > nb_max_symbols_per_level) {
-            fprintf(stderr, RED("Error: invalid Huffman table - too much symbols per level\n"));
+            fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > build_huffman_tree() | too much error per level\n"));
             return NULL;
         }
     }
@@ -143,7 +143,7 @@ void print_huffman_codes(int *bit_lengths, int8_t *symbols, int n) {
 // Renvoie la valeur du coefficient DC à partir de sa magnitude et de son indice dans la classe de magnitude
 int16_t recover_DC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude, struct JPEG *jpeg) {
     if (indice_dans_classe_magnitude < 0){
-        fprintf(stderr, RED("Error: invalid DC coefficient\n"));
+        fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > recover_DC_coeff_value()\n"));
         free_JPEG_struct(jpeg);
         exit(EXIT_FAILURE);
     }
@@ -157,7 +157,7 @@ int16_t recover_DC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magn
 // Renvoie la valeur du coefficient AC à partir de sa magnitude et de son indice dans la classe de magnitude
 int16_t recover_AC_coeff_value(int8_t magnitude, int16_t indice_dans_classe_magnitude, struct JPEG *jpeg) {
     if (indice_dans_classe_magnitude < 0){
-        fprintf(stderr, RED("Error: invalid AC coefficient\n"));
+        fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > recover_AC_coeff_value()\n"));
         free_JPEG_struct(jpeg);
         exit(EXIT_FAILURE);
     }
@@ -202,7 +202,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 
         // On détecte une erreur éventuelle d'encodage
         if (!current_node) {
-            fprintf(stderr, RED("Error: invalid Huffman code\n"));
+            fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_MCU()\n"));
             return EXIT_FAILURE;
         }
         
@@ -212,20 +212,24 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             getHighlyVerbose() ? fprintf(stderr, "\t\t\tmagnitude_DC :%x\n", magnitude_DC):0;
 
             if (magnitude_DC < 0) {
-                fprintf(stderr, RED("Error: invalid DC magnitude - negative value\n"));
+                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_MCU() | magnitude_DC < 0\n"));
                 return EXIT_FAILURE;
             } else if (magnitude_DC > MAX_MAGNITUDE_DC_VALUE) {
-                fprintf(stderr, RED("Error: invalid DC magnitude - value over 11\n"));
+                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_MCU() | magnitude_DC > MAX_MAGNITUDE_DC_VALUE\n"));
                 return EXIT_FAILURE;
             }
             
             // (3) On récupère l'indice dans la classe de magnitude associé
             // Il faut lire le bon nombre de bit(s) ... et reconstruire l'indice bit après bit
+            getHighlyVerbose() ? fprintf(stderr, "\t\t\tmagnitude_DC = %x - indice_dans_la_classe_de_magnitude : ", magnitude_DC):0;
             int16_t indice_dans_classe_magnitude_DC = 0;
             for (int8_t j = 0; j < magnitude_DC; j++){
                 indice_dans_classe_magnitude_DC <<= 1;
-                indice_dans_classe_magnitude_DC += (bitstream[(i + 1 + j) / 8] >> (7 - ((i + 1 + j) % 8))) & 1;
+                int8_t current_bit = (bitstream[(i + 1 + j) / 8] >> (7 - ((i + 1 + j) % 8))) & 1;
+                indice_dans_classe_magnitude_DC += current_bit;
+                getHighlyVerbose() ? fprintf(stderr, "%d", current_bit):0;
             }
+            getHighlyVerbose() ? fprintf(stderr, "\n"):0;
 
             // (4) On récupère finalement la valeur du coefficient DC à partir de la magnitude et de l'indice dans la classe de magnitude
             int16_t DC_value = recover_DC_coeff_value(magnitude_DC, indice_dans_classe_magnitude_DC, jpeg) + *previous_DC_value;
@@ -244,7 +248,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 
         // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
             if (nombre_de_valeurs_decodees < NB_OF_COEFF_IN_8x8_BLOCK && *current_pos == bitstream_size_in_bits) {
-                fprintf(stderr, RED("Error: invalid bitstream - does not contain enough values for current MCU#%ld\n"), MCU_number);
+                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_MCU() | not enough DC values for current MCU #%ld\n"), MCU_number);
                 return EXIT_FAILURE;
             }
     }
@@ -263,7 +267,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 
             // On détecte une erreur éventuelle d'encodage
             if (!current_node) {
-                fprintf(stderr, RED("Error: invalid Huffman code\n"));
+                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_MCU()\n"));
                 return EXIT_FAILURE;
             }
 
@@ -293,7 +297,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                         getHighlyVerbose() ? fprintf(stderr, "\t\t\t| %hx-%d |\n", 0x0, nombre_de_valeurs_decodees):0;
 
                         if (nombre_de_valeurs_decodees > NB_OF_COEFF_IN_8x8_BLOCK){
-                            fprintf(stderr, RED("Error: invalid number of decoded values - RLE exeeded MCU size\n"));
+                            fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_MCU() | RLE exceeded MCU size\n"));
                             return EXIT_FAILURE;
                         }
 
@@ -310,18 +314,19 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
                     // (4) Puis on récupère la magnitude du coefficient AC
                     uint8_t magnitude_AC = run_and_size & 0x0F; // on récupère les 4 LSB en appliquant un masque
                     if (magnitude_AC > MAX_MAGNITUDE_AC_VALUE){
-                        fprintf(stderr, RED("Error: invalid magnitude_AC value - value over 10\n"));
+                        fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_MCU() | magnitude_AC exceeds 15\n"));
                         return EXIT_FAILURE;
                     } else if (magnitude_AC < MIN_MAGNITUDE_AC_VALUE){
-                        fprintf(stderr, RED("Error: invalid magnitude_AC value - value equals 0\n"));
+                        fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_MCU() | magnitude_AC is negative\n"));
                         return EXIT_FAILURE;
                     }
                     getHighlyVerbose() ? fprintf(stderr, "\t\t\tmagnitude_AC = %x - indice_dans_la_classe_de_magnitude : ", magnitude_AC):0;
                     int16_t indice_dans_classe_magnitude_AC = 0;
                     for (uint8_t j = 0; j < magnitude_AC; j++){
                         indice_dans_classe_magnitude_AC <<= 1;
-                        indice_dans_classe_magnitude_AC += (bitstream[(int)((*current_pos + 1 + j) / 8)] >> (7 - ((*current_pos + 1 + j) % 8))) & 1;
-                        getHighlyVerbose() ? fprintf(stderr, "%x", indice_dans_classe_magnitude_AC):0;
+                        uint8_t current_bit = (bitstream[(int)((*current_pos + 1 + j) / 8)] >> (7 - ((*current_pos + 1 + j) % 8))) & 1;
+                        indice_dans_classe_magnitude_AC += current_bit;
+                        getHighlyVerbose() ? fprintf(stderr, "%d", current_bit):0;
                     }
                     getHighlyVerbose() ? fprintf(stderr, "\n"):0;
 
@@ -345,7 +350,7 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
 
             // On prévoit le cas où on a atteint la fin du bitstream sans avoir trouvé les 64 valeurs du MCU en cours de décodage
             if (nombre_de_valeurs_decodees < NB_OF_COEFF_IN_8x8_BLOCK && *current_pos == bitstream_size_in_bits +1) {
-                fprintf(stderr, RED("Error: invalid bitstream dans boucle AC - does not contain enough values for current MCU#%ld\n"), MCU_number);
+                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_MCU() | not enough AC values for current MCU#%ld\n"), MCU_number);
                 exit(EXIT_FAILURE);
             }
         }
