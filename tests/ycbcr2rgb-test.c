@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes avant conversion YCbCr vers RGB : Y=%d Cb=%d Cr=%d\n", Y, Cb, Cr):0;
     getHighlyVerbose() ? fprintf(stderr, "Valeurs attendues après conversion YCbCr vers RGB       : R=%d G=%d B=%d\n", expected_output1[0], expected_output1[1], expected_output1[2]):0;
     
-    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 1);
+    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 1, 0);
 
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes après conversion YCbCr vers RGB : R=%d G=%d B=%d\n", Y, Cb, Cr):0;
 
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes avant conversion YCbCr vers RGB : Y=%d Cb=%d Cr=%d\n", Y, Cb, Cr):0;
     getHighlyVerbose() ? fprintf(stderr, "Valeurs attendues après conversion YCbCr vers RGB       : R=%d G=%d B=%d\n", expected_output2[0], expected_output2[1], expected_output2[2]):0;
     
-    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 3);
+    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 3, 0);
 
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes après conversion YCbCr vers RGB : R=%d G=%d B=%d\n", Y, Cb, Cr):0;
 
@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "Valeurs attendues après conversion YCbCr vers RGB       : R=%d G=%d B=%d\n", expected_output3[0], expected_output3[1], expected_output3[2]):0;
 
 
-    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 1);
+    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 1, 0);
 
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes après conversion YCbCr vers RGB : R=%d G=%d B=%d\n", Y, Cb, Cr):0;
 
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes avant conversion YCbCr vers RGB : Y=%d Cb=%d Cr=%d\n", Y, Cb, Cr):0;
     getHighlyVerbose() ? fprintf(stderr, "Valeurs attendues après conversion YCbCr vers RGB       : R=%d G=%d B=%d\n", expected_output4[0], expected_output4[1], expected_output4[2]):0;
     
-    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 3);
+    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 3, 0);
 
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes après conversion YCbCr vers RGB : R=%d G=%d B=%d\n", Y, Cb, Cr):0;
 
@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes avant conversion YCbCr vers RGB : Y=%d Cb=%d Cr=%d\n", Y, Cb, Cr):0;
     getHighlyVerbose() ? fprintf(stderr, "Valeurs attendues après conversion YCbCr vers RGB       : R=%d G=%d B=%d\n", expected_output5[0], expected_output5[1], expected_output5[2]):0;
     
-    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 1);
+    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 1, 0);
 
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes après conversion YCbCr vers RGB : R=%d G=%d B=%d\n", Y, Cb, Cr):0;
 
@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes avant conversion YCbCr vers RGB : Y=%d Cb=%d Cr=%d\n", Y, Cb, Cr):0;
     getHighlyVerbose() ? fprintf(stderr, "Valeurs attendues après conversion YCbCr vers RGB       : R=%d G=%d B=%d\n", expected_output6[0], expected_output6[1], expected_output6[2]):0;
     
-    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 3);
+    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 3, 0);
 
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes après conversion YCbCr vers RGB : R=%d G=%d B=%d\n", Y, Cb, Cr):0;
 
@@ -177,7 +177,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes avant conversion YCbCr vers RGB : Y=%d Cb=%d Cr=%d\n", Y, Cb, Cr):0;
     getHighlyVerbose() ? fprintf(stderr, "Valeurs attendues après conversion YCbCr vers RGB       : R=%d G=%d B=%d\n", expected_output7[0], expected_output7[1], expected_output7[2]):0;
 
-    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 1);
+    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 1, 0);
 
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes après conversion YCbCr vers RGB : R=%d G=%d B=%d\n", Y, Cb, Cr):0;
 
@@ -194,7 +194,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes avant conversion YCbCr vers RGB : Y=%d Cb=%d Cr=%d\n", Y, Cb, Cr):0;
     getHighlyVerbose() ? fprintf(stderr, "Valeurs attendues après conversion YCbCr vers RGB       : R=%d G=%d B=%d\n", expected_output8[0], expected_output8[1], expected_output8[2]):0;
 
-    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 3);
+    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 3, 0);
 
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes après conversion YCbCr vers RGB : R=%d G=%d B=%d\n", Y, Cb, Cr):0;
 
@@ -210,7 +210,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes avant conversion YCbCr vers RGB : Y=%d Cb=%d Cr=%d\n", Y, Cb, Cr):0;
     getHighlyVerbose() ? fprintf(stderr, "Valeurs attendues après conversion YCbCr vers RGB       : R=%d G=%d B=%d\n", expected_output9[0], expected_output9[1], expected_output9[2]):0;
 
-    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 1);
+    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 1, 0);
 
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes après conversion YCbCr vers RGB : R=%d G=%d B=%d\n", Y, Cb, Cr):0;
 
@@ -226,7 +226,7 @@ int main(int argc, char **argv) {
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes avant conversion YCbCr vers RGB : Y=%d Cb=%d Cr=%d\n", Y, Cb, Cr):0;
     getHighlyVerbose() ? fprintf(stderr, "Valeurs attendues après conversion YCbCr vers RGB       : R=%d G=%d B=%d\n", expected_output10[0], expected_output10[1], expected_output10[2]):0;
 
-    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 3);
+    pixel_YCbCr2RGB(&Y, &Cb, &Cr, 3, 0);
 
     getHighlyVerbose() ? fprintf(stderr, "Valeurs des composantes après conversion YCbCr vers RGB : R=%d G=%d B=%d\n", Y, Cb, Cr):0;
 

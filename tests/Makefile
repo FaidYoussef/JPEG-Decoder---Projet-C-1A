@@ -37,11 +37,10 @@ endif
 
 LDFLAGS = -lm
 
-TESTS = IQ-test \
+TESTS = extract-test \
+	IQ-test \
 	IZZ-test \
-	huffman-test \
 	IDCT-test \
-	ppm-test \
 	ycbcr2rgb-test
 
 SRC = $(TESTS:=.c)
@@ -62,19 +61,19 @@ all: $(TESTS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-IDCT-test: IDCT-test.o ../obj/IDCT.o
+extract-test: extract-test.o ../obj/extract.o ../obj/huffman.o ../obj/IDCT.o ../obj/IQ.o ../obj/IZZ.o ../obj/ppm.o ../obj/utils.o ../obj/verbose.o ../obj/ycbcr2rgb.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-IQ-test: IQ-test.o ../obj/IQ.o ../obj/extract.o ../obj/utils.o ../obj/verbose.o
+IDCT-test: IDCT-test.o ../obj/IDCT.o ../obj/extract.o ../obj/huffman.o ../obj/utils.o ../obj/verbose.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-IZZ-test: IZZ-test.o ../obj/IZZ.o
+IQ-test: IQ-test.o ../obj/IQ.o ../obj/extract.o ../obj/huffman.o ../obj/utils.o ../obj/verbose.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-ppm-test: ppm-test.o ../obj/ppm.o
+IZZ-test: IZZ-test.o ../obj/IZZ.o ../obj/extract.o ../obj/huffman.o ../obj/utils.o ../obj/verbose.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-ycbcr2rgb-test: ycbcr2rgb-test.o ../obj/ycbcr2rgb.o
+ycbcr2rgb-test: ycbcr2rgb-test.o ../obj/ycbcr2rgb.o ../obj/extract.o ../obj/huffman.o ../obj/utils.o ../obj/verbose.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
 # .PHONY: clean

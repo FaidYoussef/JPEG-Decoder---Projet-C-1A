@@ -94,16 +94,12 @@ int main(int argc, char **argv) {
     char *filename = argv[argc - 1];
 
     struct JPEG *jpeg = extract(filename);
-
     if (jpeg == NULL) return EXIT_FAILURE;
 
     if (decode_bitstream(jpeg)) {
         free_JPEG_struct(jpeg);
-        fclose(input_file);
         return EXIT_FAILURE;
     };
-
-    fclose(input_file);
 
     if (IQ(jpeg)) {
         free_JPEG_struct(jpeg);
@@ -131,9 +127,11 @@ int main(int argc, char **argv) {
     } else {
         fprintf(stderr, GREEN("Image %s décodée avec succès !\n"), filename);
     }
-
+    
+    
     // On libère la mémoire
     free_JPEG_struct(jpeg);
+
 
     return EXIT_SUCCESS;
 }

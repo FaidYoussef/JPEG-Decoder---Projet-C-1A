@@ -1,9 +1,12 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-#include <extract.h>
-
+#include <utils.h>
+#include <verbose.h>
 
 int main() {
 
@@ -42,9 +45,9 @@ int main() {
     int fils25;
 
 
-    char *programme1 = "jpeg2ppm tests/images/poupoupidou_invalid_component_id_in_QT___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_qt.jpg";
-    char *programme2 = "jpeg2ppm tests/images/poupoupidou_invalid_nb_of_components_2_in_SOF___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_SOF_nb_components.jpg";
-    char *programme3 = "jpeg2ppm tests/images/poupoupidou_invalid_nb_of_components_4_in_SOF___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_SOF_nb_components.jpg";
+    char *programme1 = ".././jpeg2ppm images-tests/poupoupidou_invalid_component_id_in_QT___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_qt.jpg";
+    char *programme2 = ".././jpeg2ppm images/poupoupidou_invalid_nb_of_components_2_in_SOF___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_SOF_nb_components.jpg";
+    char *programme3 = ".././jpeg2ppm images/poupoupidou_invalid_nb_of_components_4_in_SOF___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_SOF_nb_components.jpg";
     char *programme4 = "jpeg2ppm tests/images/poupoupidou_invalid_nb_of_components_7_in_SOF___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_SOF_nb_components.jpg";
     char *programme5 = "jpeg2ppm tests/images/poupoupidou_invalid_huffman_table_invalid_level_number___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_DHT_huffman_table_build_huffman_tree.jpg";
     char *programme6 = "jpeg2ppm tests/images/poupoupidou_invalid_huffman_table_invalid_too_much_symbols___NO-ERROR.jpg";   // génère bien le fichier
@@ -62,7 +65,7 @@ int main() {
     char *programme18 = "jpeg2ppm tests/images/invader_invalid_encoded_data_not_enough_values_before_eof2___ERROR_-_INCONSISTENT_DATA_-_huffman.c_decode_MCU_not_enough_values_for_current_MCU.jpeg";
     char *programme19 = "jpeg2ppm tests/images/invader_invalid_marker_length.jpeg";
     char *programme20 = "jpeg2ppm tests/images/polyglot_JFIF_PDF.pdf";
-    char *programme21 = "jpeg2ppm tests/images/poupoupidou_invalid_sampling_factor___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_SOF_sampling_factor.jpg"; // erreur pas relevée par le programme
+    char *programme21 = "jpeg2ppm tests/images/poupoupidou_invalid_sampling_factor___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_SOF_sampling_factor.jpg"; // fprintf RED(pas relevée par le p)rogramme
     char *programme22 = "jpeg2ppm tests/images/poupoupidou_invalid_huffman_table_invalid_level_number2___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_DHT_huffman_table_build_huffman_tree.jpg";    // segfault
     char *programme23 = "jpeg2ppm tests/images/poupoupidou_invalid_huffman_table_invalid_not_enough_symbols___ERROR_-_INCONSISTENT_DATA_-_extract.c_get_DHT_huffman_table_build_huffman_tree.jpg";   // segfault
     char *programme24 = "jpeg2ppm tests/images/poupoupidou_no_huffman_tables___ERROR_-_INCONSISTENT_DATA_-_huffman.c_build_huffman_tree.jpg";   // segfault
@@ -70,16 +73,17 @@ int main() {
 
     char *arguments[] = {NULL};
     
+    execv(programme1, arguments);
+    execv(programme2, arguments);
     
     //**************************************************************************************************************************
     // Test 1
-    switch (fils1 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme1, arguments);
-            fprintf(stderr, RED("Test 1 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
+    if ((fils1 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+    execv(programme1, arguments);
+    // fprintf(stderr, RED("Test 1 KO - Error in execution of jpeg2ppm\n"));
+    // exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
     }
 
     wait(&fils1);
@@ -87,14 +91,13 @@ int main() {
 
 
     //**************************************************************************************************************************
-    // Test 1
-    switch (fils2 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme2, arguments);
-            fprintf(stderr, RED("Test 2 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
+    // Test 2
+    if ((fils2 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme2, arguments);
+        fprintf(stderr, RED("Test 2 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
     }
 
     wait(&fils2);
@@ -103,43 +106,40 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 3
-    switch (fils3 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme3, arguments);
-            fprintf(stderr, RED("Test 3 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
+    if ((fils3 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme3, arguments);
+        fprintf(stderr, RED("Test 3 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
     }
 
-    wait(&fils2);
+    wait(&fils3);
     fprintf(stderr, GREEN("Test 3 OK\n"));
 
 
     //**************************************************************************************************************************
     // Test 4
-    switch (fils4 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme4, arguments);
-            fprintf(stderr, RED("Test 4 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
+    if ((fils4 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme4, arguments);
+        fprintf(stderr, RED("Test 4 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
     }
 
-    wait(&fils2);
+    wait(&fils4);
     fprintf(stderr, GREEN("Test 4 OK\n"));
 
 
     //**************************************************************************************************************************
     // Test 5
-    switch (fils5 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme5, arguments);
-            fprintf(stderr, RED("Test 5 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
+    if ((fils5 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme5, arguments);
+        fprintf(stderr, RED("Test 5 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
     }
 
     wait(&fils5);
@@ -148,13 +148,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 6
-    switch (fils6 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme6, arguments);
-            fprintf(stderr, RED("Test 6 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
+    if ((fils6 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme6, arguments);
+        fprintf(stderr, RED("Test 6 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
     }
 
     wait(&fils6);
@@ -162,13 +161,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 7
-    switch (fils7 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme7, arguments);
-            fprintf(stderr, RED("Test 7 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
+    if ((fils7 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme7, arguments);
+        fprintf(stderr, RED("Test 7 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
     }
 
     wait(&fils7);
@@ -176,13 +174,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 8
-    switch (fils8 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme8, arguments);
-            fprintf(stderr, RED("Test 8 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
+    if ((fils8 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme8, arguments);
+        fprintf(stderr, RED("Test 8 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); // normalement pas besoin, si on revient ici c'est que execv s'est mal passé
     }
 
     wait(&fils8);
@@ -190,13 +187,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 9
-    switch (fils9 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme9, arguments);
-            fprintf(stderr, RED("Test 9 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils9 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme9, arguments);
+        fprintf(stderr, RED("Test 9 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils9);
@@ -205,13 +201,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 10
-    switch (fils10 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme10, arguments);
-            fprintf(stderr, RED("Test 10 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils10 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme10, arguments);
+        fprintf(stderr, RED("Test 10 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils10);
@@ -219,13 +214,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 11
-    switch (fils11 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme11, arguments);
-            fprintf(stderr, RED("Test 11 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils11 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme11, arguments);
+        fprintf(stderr, RED("Test 11 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils11);
@@ -233,13 +227,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 12
-    switch (fils12 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme12, arguments);
-            fprintf(stderr, RED("Test 12 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils12 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme12, arguments);
+        fprintf(stderr, RED("Test 12 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils12);
@@ -247,13 +240,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 13
-    switch (fils13 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme13, arguments);
-            fprintf(stderr, RED("Test 13 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils13 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme13, arguments);
+        fprintf(stderr, RED("Test 13 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils13);
@@ -261,13 +253,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 14
-    switch (fils14 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme14, arguments);
-            fprintf(stderr, RED("Test 14 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils14 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme14, arguments);
+        fprintf(stderr, RED("Test 14 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils14);
@@ -275,13 +266,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 15
-    switch (fils15 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme15, arguments);
-            fprintf(stderr, RED("Test 15 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils15 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme15, arguments);
+        fprintf(stderr, RED("Test 15 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils15);
@@ -289,13 +279,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 16
-    switch (fils16 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme16, arguments);
-            fprintf(stderr, RED("Test 16 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils16 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme16, arguments);
+        fprintf(stderr, RED("Test 16 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils16);
@@ -303,13 +292,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 17
-    switch (fils17 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme17, arguments);
-            fprintf(stderr, RED("Test 17 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils17 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme17, arguments);
+        fprintf(stderr, RED("Test 17 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils17);
@@ -317,13 +305,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 18
-    switch (fils18 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme18, arguments);
-            fprintf(stderr, RED("Test 18 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils18 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme18, arguments);
+        fprintf(stderr, RED("Test 18 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils18);
@@ -331,13 +318,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 19
-    switch (fils19 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme19, arguments);
-            fprintf(stderr, RED("Test 19 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils19 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme19, arguments);
+        fprintf(stderr, RED("Test 19 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils19);
@@ -345,13 +331,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 20
-    switch (fils20 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme20, arguments);
-            fprintf(stderr, RED("Test 20 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils20 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme20, arguments);
+        fprintf(stderr, RED("Test 20 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils20);
@@ -359,13 +344,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 21
-    switch (fils21 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme21, arguments);
-            fprintf(stderr, RED("Test 21 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils21 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme21, arguments);
+        fprintf(stderr, RED("Test 21 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils21);
@@ -373,13 +357,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 22
-    switch (fils22 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme22, arguments);
-            fprintf(stderr, RED("Test 22 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils22 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme22, arguments);
+        fprintf(stderr, RED("Test 22 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils22);
@@ -387,13 +370,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 23
-    switch (fils23 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme23, arguments);
-            fprintf(stderr, RED("Test 23 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils23 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme23, arguments);
+        fprintf(stderr, RED("Test 23 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils23);
@@ -401,13 +383,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 24
-    switch (fils24 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme24, arguments);
-            fprintf(stderr, RED("Test 24 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils24 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme24, arguments);
+        fprintf(stderr, RED("Test 24 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils24);
@@ -415,13 +396,12 @@ int main() {
 
     //**************************************************************************************************************************
     // Test 25
-    switch (fils25 = fork()) {
-        case -1:
-            erreur("Error can't fork !");
-        case 0:
-            execv(programme25, arguments);
-            fprintf(stderr, RED("Test 25 KO - Error in execution of jpeg2ppm\n"));
-            exit(EXIT_FAILURE); 
+    if ((fils25 = fork()) == -1) {
+        fprintf(stderr, RED("Error can't fork !"));
+    } else {
+        execv(programme25, arguments);
+        fprintf(stderr, RED("Test 25 KO - Error in execution of jpeg2ppm\n"));
+        exit(EXIT_FAILURE); 
     }
 
     wait(&fils25);

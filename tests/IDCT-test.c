@@ -3,7 +3,6 @@
 
 #include <IDCT.h>
 
-bool verbose = 1;
 
 int main() {
 

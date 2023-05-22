@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include <IZZ.h>
+#include <extract.h>
 #include <utils.h>
 #include <verbose.h>
 

@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include <extract.h>
+#include <huffman.h>
 #include <IQ.h>
 #include <utils.h>
 #include <verbose.h>
