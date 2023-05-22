@@ -823,13 +823,13 @@ int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
             size_t nb_mcu_width = (jpeg->width + 7) / 8;
             size_t nb_mcu_height = (jpeg->height + 7) / 8;
 
-            components[i].nb_of_MCUs = nb_mcu_width * nb_mcu_height;
-            components[i].MCUs = (int16_t **) malloc(nb_mcu_width * nb_mcu_height * sizeof(int16_t *));
+            components[i].nb_of_MCUs = jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted;
+            components[i].MCUs = (int16_t **) malloc(jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted * sizeof(int16_t *));
             if (check_memory_allocation((void *) components[i].MCUs)) {
                 free(components);
                 return EXIT_FAILURE;
             }
-            for (size_t j=0; j < nb_mcu_width * nb_mcu_height; j++) {
+            for (size_t j=0; j < jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted; j++) {
                 (components[i].MCUs)[j] = (int16_t *) malloc(64 * sizeof(int16_t));
                 if (check_memory_allocation((void *) components[i].MCUs[j])) {
                     free(components);
