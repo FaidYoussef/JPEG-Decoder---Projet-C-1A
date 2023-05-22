@@ -820,8 +820,8 @@ int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
         // On met à jour le nombre de mcus à partir des informations du Start Of Frame s'il existe
         // (si oui, la donnée de hauteur et largeur de l'image a été mise à jour dans la structure jpeg)
         if (jpeg->start_of_frame[0]->nb_components == nb_components) {
-            size_t nb_mcu_width = (jpeg->width + 7) / 8;
-            size_t nb_mcu_height = (jpeg->height + 7) / 8;
+            // size_t nb_mcu_width = (jpeg->width + 7) / 8;
+            // size_t nb_mcu_height = (jpeg->height + 7) / 8;
 
             components[i].nb_of_MCUs = jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted;
             components[i].MCUs = (int16_t **) malloc(jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted * sizeof(int16_t *));

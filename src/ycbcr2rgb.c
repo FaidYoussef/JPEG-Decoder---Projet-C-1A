@@ -46,6 +46,10 @@ void MCU_YCbCr2RGB(int16_t *MCU_Y, int16_t *MCU_Cb, int16_t *MCU_Cr, const uint8
             const uint8_t CbCr_pixel_row = y / Sampling_Factor_Y + 4 * v;
             const uint8_t CbCr_pixel_col = x / Sampling_Factor_X + 4 * h;
             const uint8_t CbCr_pixel_index = CbCr_pixel_row * 8 + CbCr_pixel_col;
+            // fprintf(stderr, "pixel_index = %u\n", pixel_index);
+            // fprintf(stderr, "CbCr_pixel_row = %u\n", CbCr_pixel_row);
+            // fprintf(stderr, "CbCr_pixel_col = %u\n", CbCr_pixel_col);
+            // fprintf(stderr, "CbCr_pixel_index = %u\n", CbCr_pixel_index);
             pixel_YCbCr2RGB(&MCU_Y[pixel_index], &MCU_Cb[CbCr_pixel_index], &MCU_Cr[CbCr_pixel_index], nb_components, force_grayscale);
         }
     }
@@ -73,12 +77,23 @@ int8_t YCbCr2RGB(struct JPEG *jpeg, bool force_grayscale){
             
             for (uint8_t v = Sampling_Factor_Y -1; v < Sampling_Factor_Y; v--){
                 for (uint8_t h = Sampling_Factor_X -1; h < Sampling_Factor_X; h--){
+
+                    // fprintf(stderr, "index MCU = %zu\n", (y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h));
+                    // fprintf(stderr, "index CbCr = %zu\n", (y + v) * 8 + (x + h));
+                    // fprintf(stderr, "y = %zu\n", y);
+                    // fprintf(stderr, "x = %zu\n", x);
+                    // fprintf(stderr, "v = %u\n", v);
+                    // fprintf(stderr, "h = %u\n", h);
+                    // fprintf(stderr, "Sampling_Factor_X = %u\n", Sampling_Factor_X);
+                    // fprintf(stderr, "Sampling_Factor_Y = %u\n", Sampling_Factor_Y);
                     
                     int16_t *MCU_Y = get_MCUs(get_sos_component(get_sos_components(get_JPEG_sos(jpeg)[0]), COMPONENT_0_INDEX))[(y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h)];
 
                     MCU_YCbCr2RGB(MCU_Y, MCU_Cb, MCU_Cr, Sampling_Factor_X, Sampling_Factor_Y, v, h, get_sos_nb_components(get_JPEG_sos(jpeg)[0]), force_grayscale);
                 }
             }
+
+
         }
     }
     return EXIT_SUCCESS;

@@ -89,22 +89,19 @@ int main(int argc, char **argv) {
         display_help(argv);
         return EXIT_FAILURE;
     }
+    fclose(input_file);
 
 
     // Now decoding JPEG
     char *filename = argv[argc - 1];
 
     struct JPEG *jpeg = extract(filename);
-
-
     if (jpeg == NULL) return EXIT_FAILURE;
 
     if (decode_bitstream(jpeg)) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
     };
-
-    fprintf(stderr, GREEN("Image %s décodée avec succès !\n"), filename);
 
     if (IQ(jpeg)) {
         free_JPEG_struct(jpeg);
@@ -129,14 +126,13 @@ int main(int argc, char **argv) {
     if (write_ppm(filename, jpeg, force_grayscale)) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
-    };
-
+    } else {
+        fprintf(stderr, GREEN("Image %s décodée avec succès !\n"), filename);
+    }
     
     
     // On libère la mémoire
     free_JPEG_struct(jpeg);
-
-    printf("\a");
 
 
     return EXIT_SUCCESS;

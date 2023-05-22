@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include <IZZ.h>
+#include <extract.h>
 #include <utils.h>
 #include <verbose.h>
 
@@ -24,6 +25,11 @@ int main(int argc, char **argv) {
 
     // Mode verbose
     if (argc > 1 && strcmp(argv[1], "-hv") == 0) setHighlyVerbose(true);
+
+    //*************************************************************************************************
+    // TEST HEADER
+    fprintf(stderr, "\n");
+    fprintf(stderr, YELLOW("================== TESTS IZZ ===================\n\n"));
 
     int16_t initial_data[64] = {
         0, 1, 8, 16, 9, 2, 3, 10,
@@ -53,6 +59,8 @@ int main(int argc, char **argv) {
     }
     result ? fprintf(stderr, GREEN("test : OK\n")) : fprintf(stderr, RED("test : KO !!!\n"));
 
+
+    fprintf(stderr, YELLOW("\n================================================\n"));
 
     return EXIT_SUCCESS;
 }

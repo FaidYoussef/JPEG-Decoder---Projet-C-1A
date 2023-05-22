@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include <extract.h>
+#include <huffman.h>
 #include <IQ.h>
 #include <utils.h>
 #include <verbose.h>
@@ -97,15 +98,26 @@ const uint8_t test_qt255[64] = {
     255, 255, 255, 255, 255, 255, 255, 255
 };
 
-const int16_t expected_result256[64] = {
-    -32768, 32767, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1
+const int16_t expected_result255[64] = {
+    1020, 2040, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255
+};
+
+const int16_t expected_result255_no_overflow[64] = {
+    -32768, 32767, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255
 };
 
 
@@ -138,6 +150,11 @@ int main(int argc, char **argv) {
     };
 
     //*************************************************************************************************
+    // TEST HEADER
+    fprintf(stderr, "\n");
+    fprintf(stderr, YELLOW("========= TESTS INVERSE QUANTIFICATION =========\n\n"));
+
+    //*************************************************************************************************
     // test 1 : on multiplie par 0
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
     print_block(initial_data, 0, 0);
@@ -153,7 +170,7 @@ int main(int argc, char **argv) {
     for(int i = 0; i < 64; i++){
         if(initial_data[i] != test_qt0[i]) result = false;
     }
-    result ? fprintf(stderr, GREEN("test_1 : OK\n")) : fprintf(stderr, RED("test_1 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("\t\ttest_1 : OK\n")) : fprintf(stderr, RED("\t\ttest_1 : KO\n"));
 
 
     //*************************************************************************************************
@@ -175,7 +192,7 @@ int main(int argc, char **argv) {
     for(int i = 0; i < 64; i++){
         if(initial_data[i] != expected_result1[i]) result = false;
     }
-    result ? fprintf(stderr, GREEN("test_2 : OK\n")) : fprintf(stderr, RED("test_2 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("\t\ttest_2 : OK\n")) : fprintf(stderr, RED("\t\ttest_2 : KO\n"));
 
 
     //*************************************************************************************************
@@ -197,7 +214,7 @@ int main(int argc, char **argv) {
     for(int i = 0; i < 64; i++){
         if(initial_data[i] != expected_result2[i]) result = false;
     }
-    result ? fprintf(stderr, GREEN("test_3 : OK\n")) : fprintf(stderr, RED("test_3 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("\t\ttest_3 : OK\n")) : fprintf(stderr, RED("\t\ttest_3 : KO\n"));
 
 
     //*************************************************************************************************
@@ -219,7 +236,7 @@ int main(int argc, char **argv) {
     for(int i = 0; i < 64; i++){
         if(initial_data[i] != expected_result1and2[i]) result = false;
     }
-    result ? fprintf(stderr, GREEN("test_4 : OK\n")) : fprintf(stderr, RED("test_4 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("\t\ttest_4 : OK\n")) : fprintf(stderr, RED("\t\ttest_4 : KO\n"));
 
 
     //*************************************************************************************************
@@ -239,9 +256,9 @@ int main(int argc, char **argv) {
 
     result = true;
     for(int i = 0; i < 64; i++){
-        if(initial_data[i] != expected_result256[i]) result = false;
+        if(initial_data[i] != expected_result255[i]) result = false;
     }
-    result ? fprintf(stderr, GREEN("test_5 : OK\n")) : fprintf(stderr, RED("test_5 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("\t\ttest_5 : OK\n")) : fprintf(stderr, RED("\t\ttest_5 : KO\n"));
 
 
     //*************************************************************************************************
@@ -263,11 +280,12 @@ int main(int argc, char **argv) {
 
     result = true;
     for(int i = 0; i < 64; i++){
-        if(initial_data[i] != expected_result1[i]) result = false;
+        if(initial_data[i] != expected_result255_no_overflow[i]) result = false;
     }
-    result ? fprintf(stderr, GREEN("test_6 : OK\n")) : fprintf(stderr, RED("test_6 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("\t\ttest_6 : OK\n")) : fprintf(stderr, RED("\t\ttest_6 : KO\n"));
 
 
+    fprintf(stderr, YELLOW("\n================================================\n"));
 
     return EXIT_SUCCESS;
 }
