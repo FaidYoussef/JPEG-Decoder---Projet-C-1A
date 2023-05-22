@@ -39,7 +39,7 @@ endif
 
 # -lm on lie la bibliothèque mathématique (sqrt, cos, etc.)
 # Note : ce flag DOIT se trouver en fin de ligne !!!
-CFLAGS += -pg -lm
+CFLAGS += -lm
 LDFLAGS =
 
 # Par défaut, on compile tous les fichiers source (.c) qui se trouvent dans le

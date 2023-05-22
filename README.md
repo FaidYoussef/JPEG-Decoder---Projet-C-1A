@@ -23,9 +23,9 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
 ## Features
 
 - Décodeur JPEG `Mode baseline DCT`  ✨Done✨
-    - grayscale et couleurs (Note : on ne gère que 3 composantes au maximum, sinon on détecte et annonce la non implémentation)
+    - Niveaux de gris et couleurs (on ne gère que 3 composantes au maximum, sinon on détecte et annonce la non-implémentation)
     
-    - Options (Note : on peut placer les options dans n'importe quel sens dans la ligne de commande)  
+    - Options (on peut placer les options dans n'importe quel sens dans la ligne de commande)  
         `-h` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; affiche l'aide  
         `-v` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mode verbose  
         `-hv` &nbsp;&nbsp;&nbsp;&nbsp; mode highly verbose  
@@ -50,8 +50,6 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
         
         ![tests unitaires printscreen](http://JonathanMAROTTA.github.io/tests_unitaires.png?raw=true)
 
-
-- Décodeur JPEG `Mode progressive` #TODO
 
 ## Usage
 
