@@ -6,12 +6,14 @@ struct QuantizationTable{
     int8_t id;
     size_t length;
     uint8_t *data;
+    bool set;
 };
 
-int8_t initialize_qt(struct QuantizationTable *qt, int8_t id, size_t length, unsigned char *data){
+int8_t initialize_qt(struct QuantizationTable *qt, int8_t id, size_t length, unsigned char *data, bool set){
     qt->id = id;
     qt->length = length;
     qt->data = data;
+    qt->set = set;
 
     return EXIT_SUCCESS;
 }
@@ -26,6 +28,10 @@ size_t get_qt_length(struct QuantizationTable *qt){
 
 uint8_t * get_qt_data(struct QuantizationTable *qt){
     return qt->data;
+}
+
+bool get_qt_set(struct QuantizationTable *qt){
+    return qt->set;
 }
 
 
@@ -65,9 +71,10 @@ int8_t get_num_quantization_table(struct ComponentSOF *component){
 struct StartOfFrame {
     int8_t nb_components;
     struct ComponentSOF *components;
+    bool set;
 };
 
-int8_t initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table){
+int8_t initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table, bool set){
     sof->nb_components = nb_components; // 1 = greyscale, 3 = YCbCr or YIQ, 4 = CMYK
     
     if (nb_components == 0) {
@@ -79,6 +86,7 @@ int8_t initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id,
             initialize_component_sof(&(sof->components[i]), id, sampling_factor_x, sampling_factor_y, num_quantization_table);
         }
     }
+    sof->set = set;
 
     return EXIT_SUCCESS;
 }
@@ -95,6 +103,9 @@ struct ComponentSOF * get_sof_component(struct ComponentSOF * components, int8_t
     return &components[index];
 }
 
+bool get_sof_set(struct StartOfFrame *sof){
+    return sof->set;
+}
 
 //**********************************************************************************************************************
 // DHT (Tables de Huffman)
@@ -195,9 +206,10 @@ void set_value_in_MCU(struct ComponentSOS *component, int index_of_mcu, int inde
 struct StartOfScan {
     int8_t nb_components;
     struct ComponentSOS *components;
+    bool set;
 };
 
-int8_t initialize_sos(struct StartOfScan *sos, int8_t nb_components, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCU){
+int8_t initialize_sos(struct StartOfScan *sos, int8_t nb_components, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCU, bool set){
     sos->nb_components = nb_components; // 1 = greyscale, 3 = YCbCr or YIQ, 4 = CMYK
 
     if (nb_components == 0) {
@@ -218,6 +230,9 @@ int8_t initialize_sos(struct StartOfScan *sos, int8_t nb_components, int8_t id_t
             }
         }
     }
+
+    sos->set = set;
+
     return EXIT_SUCCESS;
 }
 
@@ -231,6 +246,10 @@ struct ComponentSOS * get_sos_components(struct StartOfScan *sos){
 
 struct ComponentSOS * get_sos_component(struct ComponentSOS * components, int8_t index){
     return &components[index];
+}
+
+bool get_sos_set(struct StartOfScan *sos){
+    return sos->set;
 }
 
 
@@ -251,6 +270,8 @@ struct JPEG {
     struct StartOfScan **start_of_scan;
     unsigned char *image_data;
     unsigned long long image_data_size_in_bits;
+    uint8_t nb_huffman;
+    uint8_t nb_quantization;
 };
 
 int8_t initialize_JPEG_struct(struct JPEG *jpeg){
@@ -270,6 +291,10 @@ int8_t initialize_JPEG_struct(struct JPEG *jpeg){
 
     jpeg->Sampling_Factor_Y = 1;
 
+    jpeg->nb_huffman = 0;
+
+    jpeg->nb_quantization = 0;
+
     jpeg->quantization_tables = (struct QuantizationTable **) malloc(MAX_NUMBER_OF_QUANTIZATION_TABLES * sizeof(struct QuantizationTable *));
     if (check_memory_allocation((void *) jpeg->quantization_tables)) {
         free_JPEG_struct(jpeg);
@@ -281,7 +306,7 @@ int8_t initialize_JPEG_struct(struct JPEG *jpeg){
             free_JPEG_struct(jpeg);
             return EXIT_FAILURE;
         }
-        initialize_qt(jpeg->quantization_tables[i], -1, 0, NULL);
+        initialize_qt(jpeg->quantization_tables[i], -1, 0, NULL, false);
     }
 
     jpeg->start_of_frame = (struct StartOfFrame **) malloc(1 * sizeof(struct StartOfFrame *));  // pour l'instant on a un seul frame ... à modifier pour mode progressif
@@ -294,7 +319,7 @@ int8_t initialize_JPEG_struct(struct JPEG *jpeg){
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
     }
-    if (initialize_sof(jpeg->start_of_frame[0], 0, -1, -1, -1, -1)) {
+    if (initialize_sof(jpeg->start_of_frame[0], 0, -1, -1, -1, -1, false)) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
     }
@@ -323,7 +348,7 @@ int8_t initialize_JPEG_struct(struct JPEG *jpeg){
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
     }
-    if(initialize_sos(jpeg->start_of_scan[0], 0, -1, -1, -1, 0)) {
+    if(initialize_sos(jpeg->start_of_scan[0], 0, -1, -1, -1, 0, false)) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;
     }
@@ -399,9 +424,9 @@ void free_JPEG_struct(struct JPEG *jpeg){
                                 }
                             }
                             free((&((jpeg->start_of_scan[i])->components[j]))->MCUs);
-                            free(&((jpeg->start_of_scan[i])->components[j]));
                         }
                     }
+                    free((jpeg->start_of_scan[i])->components);
                 }
                 free(jpeg->start_of_scan[i]);
             }
@@ -483,6 +508,17 @@ int8_t ignore_bytes(FILE *input, int nb_bytes){
     return EXIT_SUCCESS;
 }
 
+bool is_full_initialized(struct JPEG *jpeg){
+    if (jpeg->start_of_frame[0]->set != true) return false;
+    if (jpeg->start_of_scan[0]->set != true) return false;
+    for (uint8_t i=0; i<jpeg->nb_huffman; i++){
+        if (jpeg->huffman_tables[i]->set != true) return false;
+    }
+    for (uint8_t i=0; i<jpeg->nb_quantization; i++){
+        if (jpeg->quantization_tables[i]->set != true) return false;
+    }
+    return true;
+}
 
 //**********************************************************************************************************************
 // Récupère les données de la table de quantification
@@ -548,6 +584,7 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
         fprintf(stderr, RED("ERROR : READ - extract.c > get_qt()"));
     }
     qt->length = length;
+    qt->set = true;
 
     return qt;
 }
@@ -688,6 +725,8 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
     jpeg->start_of_frame[0]->nb_components = nb_components;
     jpeg->start_of_frame[0]->components = components;
 
+    jpeg->start_of_frame[0]->set = true;
+
     return EXIT_SUCCESS;
 }
 
@@ -715,7 +754,6 @@ struct HuffmanTable * get_DHT(FILE *input, unsigned char *buffer) {
     // 0 : DC or lossless table,
     // 1 : AC
     // Les 4 bits de poids faible indiquent la destination de la table (luminance ou chrominance)
-    // Specifies one of four possible destinations at the decoder into which the Huffman table shall be installed
     // 0 : luminance
     // 1 : chrominance
     int8_t class = id_table >> 4;
@@ -820,9 +858,7 @@ int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
         // On met à jour le nombre de mcus à partir des informations du Start Of Frame s'il existe
         // (si oui, la donnée de hauteur et largeur de l'image a été mise à jour dans la structure jpeg)
         if (jpeg->start_of_frame[0]->nb_components == nb_components) {
-            // size_t nb_mcu_width = (jpeg->width + 7) / 8;
-            // size_t nb_mcu_height = (jpeg->height + 7) / 8;
-
+            
             components[i].nb_of_MCUs = jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted;
             components[i].MCUs = (int16_t **) malloc(jpeg->nb_Mcu_Width_Strechted * jpeg->nb_Mcu_Height_Strechted * sizeof(int16_t *));
             if (check_memory_allocation((void *) components[i].MCUs)) {
@@ -846,6 +882,7 @@ int8_t get_SOS(FILE *input, unsigned char *buffer, struct JPEG *jpeg){
     } // Octet de début de spectre, octet de fin de spectre, approximation (ignorés)
 
     jpeg->start_of_scan[0]->components = components;
+    jpeg->start_of_scan[0]->set = true;
 
     return EXIT_SUCCESS;
 }
@@ -955,6 +992,7 @@ struct JPEG * extract(char *filename) {
                     if (jpeg->quantization_tables[1] != NULL) free(jpeg->quantization_tables[1]);
                     jpeg->quantization_tables[1] = quantization_table;
                 }
+                jpeg->nb_quantization++;
 
             //**********************************************************************************************************************
             } else if (id[0] == SOF_0){
@@ -1010,6 +1048,7 @@ struct JPEG * extract(char *filename) {
                         jpeg->huffman_tables[3] = huffman_table;
                     }
                 }
+                jpeg->nb_huffman++;
 
                 getHighlyVerbose() ? fprintf(stderr, "\t\tTables de Huffman:\n") : 0;
                 getHighlyVerbose() ? fprintf(stderr, "\t\t\tDC Luminance   : %p\n", jpeg->huffman_tables[0]) : 0;
@@ -1072,6 +1111,11 @@ struct JPEG * extract(char *filename) {
                             }
                             getVerbose() ? printf("\nFin du fichier\n\n"):0;
                             fclose(input);
+                            if (!is_full_initialized(jpeg)) {
+                                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > extract() | JPEG structure is not fully initialized\n"));
+                                free_JPEG_struct(jpeg);
+                                return NULL;
+                            }
                             return jpeg;
 
                         } else if (feof(input)){    // On atteint la fin du fichier avant d'avoir lu un marker EOI
@@ -1099,6 +1143,11 @@ struct JPEG * extract(char *filename) {
             } else if (id[0] == EOI){
                 getVerbose() ? printf("Fin du fichier\n"):0;
                 fclose(input);
+                if (!is_full_initialized(jpeg)) {
+                    fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > extract() | JPEG structure is not fully initialized\n"));
+                    free_JPEG_struct(jpeg);
+                    return NULL;
+                }
                 break;
             }
         }

@@ -38,7 +38,7 @@ struct JPEG;
 #include <huffman.h>
 //**********************************************************************************************************************
 struct QuantizationTable;
-int8_t initialize_qt(struct QuantizationTable *qt, int8_t id, size_t length, unsigned char *data);
+int8_t initialize_qt(struct QuantizationTable *qt, int8_t id, size_t length, unsigned char *data, bool set);
 int8_t get_qt_id(struct QuantizationTable *qt);
 size_t get_qt_length(struct QuantizationTable *qt);
 uint8_t * get_qt_data(struct QuantizationTable *qt);
@@ -52,7 +52,7 @@ int8_t get_sampling_factor_y(struct ComponentSOF *component);
 int8_t get_num_quantization_table(struct ComponentSOF *component);
 
 struct StartOfFrame;
-int8_t initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table);
+int8_t initialize_sof(struct StartOfFrame *sof, int8_t nb_components, int8_t id, int8_t sampling_factor_x, int8_t sampling_factor_y, int8_t num_quantization_table, bool set);
 int8_t get_sof_nb_components(struct StartOfFrame *sof);
 struct ComponentSOF * get_sof_components(struct StartOfFrame *sof);
 struct ComponentSOF * get_sof_component(struct ComponentSOF * components, int8_t index);
@@ -76,7 +76,7 @@ int16_t **get_MCUs(struct ComponentSOS *component);
 void set_value_in_MCU(struct ComponentSOS *component, int index_of_mcu, int index_of_pixel_in_mcu, int16_t value);
 
 struct StartOfScan;
-int8_t initialize_sos(struct StartOfScan *sos, int8_t nb_components, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCU);
+int8_t initialize_sos(struct StartOfScan *sos, int8_t nb_components, int8_t id_table, int8_t DC_huffman_table_id, int8_t AC_huffman_table_id, size_t nb_of_MCU, bool set);
 int8_t get_sos_nb_components(struct StartOfScan *sos);
 struct ComponentSOS * get_sos_components(struct StartOfScan *sos);
 struct ComponentSOS * get_sos_component(struct ComponentSOS * components, int8_t index);
