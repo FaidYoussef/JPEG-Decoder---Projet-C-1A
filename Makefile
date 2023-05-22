@@ -39,7 +39,7 @@ endif
 
 # -lm on lie la bibliothèque mathématique (sqrt, cos, etc.)
 # Note : ce flag DOIT se trouver en fin de ligne !!!
-CFLAGS += -lm
+CFLAGS += -pg -lm
 LDFLAGS =
 
 # Par défaut, on compile tous les fichiers source (.c) qui se trouvent dans le
@@ -60,8 +60,8 @@ obj/%.o: src/%.c
 tests: $(OBJ_FILES)
 	make -C tests/
 
-test-huffman: obj/huffman.o
-	make -C tests/ huffman-test 
+test-extract: obj/extract.o
+	make -C tests/ extract-test 
 
 test-IDCT: obj/IDCT.o
 	make -C tests/ IDCT-test 
@@ -71,9 +71,6 @@ test-IQ: obj/IQ.o
 
 test-IZZ: obj/IZZ.o
 	make -C tests/ IZZ-test
-
-test-ppm: obj/ppm.o
-	make -C tests/ ppm-test 
 
 test-ycbcr2rgb: obj/ycbcr2rgb.o
 	make -C tests/ ycbcr2rgb-test 
