@@ -116,6 +116,8 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     };
 
+    stretch_function(jpeg);
+
     if (YCbCr2RGB(jpeg, force_grayscale)) {
         free_JPEG_struct(jpeg);
         return EXIT_FAILURE;

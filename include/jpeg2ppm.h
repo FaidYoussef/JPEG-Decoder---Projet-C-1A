@@ -7,6 +7,7 @@
 #include <ppm.h>
 #include <IQ.h>
 #include <IZZ.h>
+#include <stretch.h>
 #include <utils.h>
 #include <verbose.h>
 #include <ycbcr2rgb.h>

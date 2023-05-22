@@ -18,7 +18,7 @@ uint8_t saturer(int16_t valeur);
 void pixel_YCbCr2RGB(int16_t *pixel_Y, int16_t *pixel_Cb, int16_t *pixel_Cr, int8_t nb_components, bool force_grayscale);
 
 // Fonction pour convertir un MCU YCbCr en pixel RGB
-void MCU_YCbCr2RGB(int16_t *MCU_Y, int16_t *MCU_Cb, int16_t *MCU_Cr, const uint8_t Sampling_Factor_X, const uint8_t Sampling_Factor_Y, const uint8_t v, const uint8_t h, int8_t nb_components, bool force_grayscale);
+void MCU_YCbCr2RGB(int16_t *MCU_Y, int16_t *MCU_Cb, int16_t *MCU_Cr, int8_t nb_components, bool force_grayscale);
 
 int8_t YCbCr2RGB(struct JPEG *jpeg, bool force_grayscale);
 
