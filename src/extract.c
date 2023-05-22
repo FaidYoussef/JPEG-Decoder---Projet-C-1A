@@ -568,7 +568,7 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
             (&(jpeg->start_of_scan[0]->components[i]))->MCUs = (int16_t **) malloc(nb_mcu_width * nb_mcu_height * sizeof(int16_t *));
             if (check_memory_allocation((void *) (&(jpeg->start_of_scan[0]->components[i]))->MCUs)) return EXIT_FAILURE;
 
-            for (size_t j=0; j < nb_mcu_width * nb_mcu_height; i++) {
+            for (size_t j=0; j < nb_mcu_width * nb_mcu_height; j++) {
                 (&(jpeg->start_of_scan[0]->components[i]))->MCUs[j] = (int16_t *) malloc(64 * sizeof(int16_t));
                 if (check_memory_allocation((void *) (&(jpeg->start_of_scan[0]->components[i]))->MCUs[j])) return EXIT_FAILURE;
             }
