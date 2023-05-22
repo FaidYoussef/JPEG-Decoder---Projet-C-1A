@@ -265,7 +265,7 @@ int main(int argc, char **argv) {
     // test 6 : on multiplie par 255 et on évite les overflows
     re_initialize_data(initial_data);
     initial_data[0] = -32768;
-    initial_data[63] = 32767;
+    initial_data[1] = 32767;
 
 
     getHighlyVerbose() ? fprintf(stderr, "MCU avant IQ\n"):0;
