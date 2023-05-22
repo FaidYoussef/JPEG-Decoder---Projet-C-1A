@@ -1,7 +1,6 @@
 # Décodeur JPEG
 
-Projet C à réaliser en 1A à l'Ensimag.
-Réalisation d'un décodeur JPEG.
+Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
 
 ![JPEG encoder/decoder architecture](http://JonathanMAROTTA.github.io/JPEG_encoder_decoder_architecture.png?raw=true)
 
@@ -14,7 +13,6 @@ Réalisation d'un décodeur JPEG.
 ## TODO
 
 - upsampling (partiel ~ok + complet)    // Youssef + Jon
-- régler le problème de double free() et éventuelle fuite mémoire sur les images couleurs   // Jon + ?
 - refaire fonctionner les tests avec toutes les fonctions !!!   // Jon
 - apparemment il nous faut un Gantt chart ou équivalent dégueulasse ... cf. fin de cette page   // Gwen
 - thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream et avant YCbCr2RGB  // Jon
