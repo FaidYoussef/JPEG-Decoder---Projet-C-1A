@@ -91,7 +91,6 @@ int main(int argc, char **argv) {
     }
     fclose(input_file);
 
-
     // Now decoding JPEG
     char *filename = argv[argc - 1];
 
