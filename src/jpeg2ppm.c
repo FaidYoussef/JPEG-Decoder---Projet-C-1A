@@ -89,6 +89,7 @@ int main(int argc, char **argv) {
         display_help(argv);
         return EXIT_FAILURE;
     }
+    fclose(input_file);
 
     // Now decoding JPEG
     char *filename = argv[argc - 1];
@@ -128,10 +129,8 @@ int main(int argc, char **argv) {
         fprintf(stderr, GREEN("Image %s décodée avec succès !\n"), filename);
     }
     
-    
     // On libère la mémoire
     free_JPEG_struct(jpeg);
-
 
     return EXIT_SUCCESS;
 }
