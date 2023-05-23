@@ -117,7 +117,9 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     };
 
-    stretch_function(jpeg);
+    if (get_JPEG_Sampling_Factor_X(jpeg) != 1 || get_JPEG_Sampling_Factor_Y(jpeg) != 1) {
+        stretch_function(jpeg);
+    }
 
     if (YCbCr2RGB(jpeg, force_grayscale)) {
         free_JPEG_struct(jpeg);
