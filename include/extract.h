@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <math.h>
 
-
 #include <utils.h>
 #include <verbose.h>
 
@@ -34,6 +33,13 @@
 #define MAX_NUMBER_OF_QUANTIZATION_TABLES 3
 
 struct JPEG;
+
+//**********************************************************************************************************************
+// Structure représentant un noeud de l'arbre de huffman
+struct node;
+
+// Crée un nouveau noeud de l'arbre de Huffman
+struct node * create_node(int8_t symbol, struct node *left, struct node *right);
 
 #include <huffman.h>
 //**********************************************************************************************************************

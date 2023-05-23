@@ -100,6 +100,7 @@ int8_t write_ppm(const char *input_filename, struct JPEG *jpeg, bool force_grays
     }
 
     fclose(output_file);
+    free(output_filename);
     return EXIT_SUCCESS;
 
 }
