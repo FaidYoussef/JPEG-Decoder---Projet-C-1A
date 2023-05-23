@@ -6,25 +6,25 @@
 
 
 
-const int16_t expected_output1[3] = {255, 255, 255};
+const int16_t expected_output1[3] = {255, 128, 128};
 
 const int16_t expected_output2[3] = {255, 255, 255};
 
-const int16_t expected_output3[3] = {0, 0, 0};
+const int16_t expected_output3[3] = {0, 128, 128};
 
 const int16_t expected_output4[3] = {0, 0, 0};
 
-const int16_t expected_output5[3] = {82, 82, 82};
+const int16_t expected_output5[3] = {82, 90, 240};
 
 const int16_t expected_output6[3] = {239, 15, 15};
 
-const int16_t expected_output7[3] = {145, 145, 145};
+const int16_t expected_output7[3] = {145, 54, 34};
 
 const int16_t expected_output8[3] = {13, 238, 14};
 
-const int16_t expected_output9[3] = {41, 41, 41};
+const int16_t expected_output9[3] = {41, 240, 110};
 
-const int16_t expected_output10[3] = {16, 15, 240};
+const int16_t expected_output10[3] = {16, 15, 239};
 
 
 void initialize_values_white(int16_t *Y, int16_t *Cb, int16_t *Cr){
@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 
     bool result = true;
     if(Y != expected_output1[0] || Cb != expected_output1[1] || Cr != expected_output1[2]) result = false;
-    result ? fprintf(stderr, GREEN("test_1 : OK\n")) : fprintf(stderr, RED("test_1 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("test 1 : OK\n")) : fprintf(stderr, RED("test 1 : KO\n"));
 
 
      //*************************************************************************************************
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 
     result = true;
     if(Y != expected_output2[0] || Cb != expected_output2[1] || Cr != expected_output2[2]) result = false;
-    result ? fprintf(stderr, GREEN("test_2 : OK\n")) : fprintf(stderr, RED("test_3 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("test 2 : OK\n")) : fprintf(stderr, RED("test 2 : KO\n"));
 
 
     //*************************************************************************************************
@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
 
     result = true;
     if(Y != expected_output3[0] || Cb != expected_output3[1] || Cr != expected_output3[2]) result = false;
-    result ? fprintf(stderr, GREEN("test_3 : OK\n")) : fprintf(stderr, RED("test_3 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("test 3 : OK\n")) : fprintf(stderr, RED("test 3 : KO\n"));
 
 
     //*************************************************************************************************
@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
 
     result = true;
     if(Y != expected_output4[0] || Cb != expected_output4[1] || Cr != expected_output4[2]) result = false;
-    result ? fprintf(stderr, GREEN("test_4 : OK\n")) : fprintf(stderr, RED("test_4 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("test 4 : OK\n")) : fprintf(stderr, RED("test 4 : KO\n"));
 
 
     //*************************************************************************************************
@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
 
     result = true;
     if(Y != expected_output5[0] || Cb != expected_output5[1] || Cr != expected_output5[2]) result = false;
-    result ? fprintf(stderr, GREEN("test_5 : OK\n")) : fprintf(stderr, RED("test_5 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("test 5 : OK\n")) : fprintf(stderr, RED("test 5 : KO\n"));
 
 
     //*************************************************************************************************
@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
 
     result = true;
     if(Y != expected_output6[0] || Cb != expected_output6[1] || Cr != expected_output6[2]) result = false;
-    result ? fprintf(stderr, GREEN("test_6 : OK\n")) : fprintf(stderr, RED("test_6 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("test 6 : OK\n")) : fprintf(stderr, RED("test 6 : KO\n"));
 
 
     //*************************************************************************************************
@@ -183,7 +183,7 @@ int main(int argc, char **argv) {
 
     result = true;
     if(Y != expected_output7[0] || Cb != expected_output7[1] || Cr != expected_output7[2]) result = false;
-    result ? fprintf(stderr, GREEN("test_7 : OK\n")) : fprintf(stderr, RED("test_7 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("test 7 : OK\n")) : fprintf(stderr, RED("test 7 : KO\n"));
 
 
     //*************************************************************************************************
@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
 
     result = true;
     if(Y != expected_output8[0] || Cb != expected_output8[1] || Cr != expected_output8[2]) result = false;
-    result ? fprintf(stderr, GREEN("test_8 : OK\n")) : fprintf(stderr, RED("test_8 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("test 8 : OK\n")) : fprintf(stderr, RED("test 8 : KO\n"));
 
     //*************************************************************************************************
     // test 9 : bleu, 1 composante = niveau de gris
@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
 
     result = true;
     if(Y != expected_output9[0] || Cb != expected_output9[1] || Cr != expected_output9[2]) result = false;
-    result ? fprintf(stderr, GREEN("test_9 : OK\n")) : fprintf(stderr, RED("test_9 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("test 9 : OK\n")) : fprintf(stderr, RED("test 9 : KO\n"));
 
     //*************************************************************************************************
     // test 10 : bleu, 3 composantes = couleur
@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
 
     result = true;
     if(Y != expected_output10[0] || Cb != expected_output10[1] || Cr != expected_output10[2]) result = false;
-    result ? fprintf(stderr, GREEN("test_10 : OK\n")) : fprintf(stderr, RED("test_10 : KO !!!\n"));
+    result ? fprintf(stderr, GREEN("test 10 : OK\n")) : fprintf(stderr, RED("test 10 : KO\n"));
 
 
     return EXIT_SUCCESS;

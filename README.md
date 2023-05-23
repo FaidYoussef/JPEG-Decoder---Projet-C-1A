@@ -62,13 +62,10 @@ jpeg2ppm [-h] [-v|-hv] [--force-grayscale] <jpeg_file>
 
 make tests
 extract-test
-huffman-test [-hv]
-IDCT-test
+IDCT-test [-hv]
 IQ-test [-hv]
 IZZ-test [-hv]
-ppm-test
 ycbcr2rgb-test [-hv]
-
 ```
 ![jpeg2ppm usage printscreen](http://JonathanMAROTTA.github.io/jpeg2ppm-usage.png?raw=true)
 
