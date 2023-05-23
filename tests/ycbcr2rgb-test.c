@@ -6,23 +6,23 @@
 
 
 
-const int16_t expected_output1[3] = {255, 255, 255};
+const int16_t expected_output1[3] = {255, 128, 128};
 
 const int16_t expected_output2[3] = {255, 255, 255};
 
-const int16_t expected_output3[3] = {0, 0, 0};
+const int16_t expected_output3[3] = {0, 128, 128};
 
 const int16_t expected_output4[3] = {0, 0, 0};
 
-const int16_t expected_output5[3] = {82, 82, 82};
+const int16_t expected_output5[3] = {82, 90, 240};
 
 const int16_t expected_output6[3] = {239, 15, 15};
 
-const int16_t expected_output7[3] = {145, 145, 145};
+const int16_t expected_output7[3] = {145, 54, 34};
 
 const int16_t expected_output8[3] = {13, 238, 14};
 
-const int16_t expected_output9[3] = {41, 41, 41};
+const int16_t expected_output9[3] = {41, 240, 110};
 
 const int16_t expected_output10[3] = {16, 15, 239};
 

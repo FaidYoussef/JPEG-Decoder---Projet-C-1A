@@ -34,8 +34,11 @@ void pixel_YCbCr2RGB(int16_t *pixel_Y, int16_t *pixel_Cb, int16_t *pixel_Cr, int
         }
 
         *pixel_Y = saturer(r);
-        *pixel_Cb = saturer(g);
-        *pixel_Cr = saturer(b);
+
+        if (!force_grayscale && nb_components > 1){
+            *pixel_Cb = saturer(g);
+            *pixel_Cr = saturer(b);
+        }
     
 }
 
