@@ -508,7 +508,7 @@ int8_t ignore_bytes(FILE *input, int nb_bytes){
     return EXIT_SUCCESS;
 }
 
-bool is_full_initialized(struct JPEG *jpeg){
+bool is_full_initialized(struct JPEG *jpeg) {
     //fprintf(stderr, "%d\n", jpeg->start_of_frame[0]->set);
     //fprintf(stderr, "%d\n", jpeg->start_of_scan[0]->set);
     
@@ -525,6 +525,16 @@ bool is_full_initialized(struct JPEG *jpeg){
     }
     return true;
 }
+
+
+int8_t is_valid_sampling_factors(uint8_t sampling_factor_x, uint8_t sampling_factor_y) {
+    return 1 <= sampling_factor_x && sampling_factor_x <= 4 && 1 <= sampling_factor_y && sampling_factor_y <= 4 && sampling_factor_x * sampling_factor_y <= 10;
+}
+
+int8_t divide_Y_sampling_factor(uint8_t chrominance_sampling_factor, uint8_t luminance_sampling_factor) {
+    return luminance_sampling_factor % chrominance_sampling_factor == 0;
+}
+
 
 //**********************************************************************************************************************
 // Récupère les données de la table de quantification
@@ -686,6 +696,11 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
         int8_t sampling_factor_x = sampling_factor >> 4;
         int8_t sampling_factor_y = sampling_factor & 0x0F;
 
+        if (!is_valid_sampling_factors(sampling_factor_x, sampling_factor_y)) {
+            fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > sampling_factor\n"));
+            return EXIT_FAILURE;
+        }
+
 
         if (i == 0) {
             // && sampling_factor_x != 4 && sampling_factor_y != 4) {
@@ -704,6 +719,12 @@ int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg) {
             jpeg->Sampling_Factor_Y = sampling_factor_y;
 
         } else {
+
+            if (!divide_Y_sampling_factor(sampling_factor_x, jpeg->Sampling_Factor_X) || !divide_Y_sampling_factor(sampling_factor_y, jpeg->Sampling_Factor_Y)){
+                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > get_SOF() > sampling_factor\n"));
+                return EXIT_FAILURE;
+            }
+
             // ce if sert à detecter si on a bien des composantes chrominance avec un facteur d'échantillonnage de 1
             // car on devrait avoir un Cb et un Cr par MCU
             // if ( sampling_factor_x != 1 || sampling_factor_y != 1  ) {

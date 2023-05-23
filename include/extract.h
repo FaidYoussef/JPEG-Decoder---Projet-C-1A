@@ -103,6 +103,10 @@ unsigned long long get_JPEG_image_data_size_in_bits(struct JPEG* jpeg);
 //**********************************************************************************************************************
 int8_t ignore_bytes(FILE *input, int nb_bytes);
 
+int8_t is_valid_sampling_factors(uint8_t sampling_factor_x, uint8_t sampling_factor_y);
+
+int8_t divide_Y_sampling_factor(uint8_t chrominance_sampling_factor, uint8_t luminance_sampling_factor);
+
 struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer);
 
 int8_t get_SOF(FILE *input, unsigned char *buffer, struct JPEG *jpeg);
