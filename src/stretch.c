@@ -184,50 +184,68 @@ void stretch_function(struct JPEG *jpeg) {
     size_t nb_mcu_to_stretch = get_JPEG_nb_Mcu_Width_Strechted(jpeg) * get_JPEG_nb_Mcu_Height_Strechted(jpeg);
     fprintf(stderr, "nb_mcu_to_stretch = %ld\n", nb_mcu_to_stretch);
 
-    fprintf(stderr, "+++++++++++++++++++++++++++++\n");
-    print_matrix(MCUs_Cb[0]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cb[1]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cb[2]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cb[3]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cr[0]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cr[1]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cr[2]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cr[3]);
+    // fprintf(stderr, "+++++++++++++++++++++++++++++\n");
+    // print_matrix(MCUs_Cb[0]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cb[1]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cb[2]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cb[3]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cr[0]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cr[1]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cr[2]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cr[3]);
 
-    for (long long i = 0; i < nb_mcu_to_stretch; i+=Y_sampling_factor_horizontal) {
-        fprintf(stderr, "i = %lld\n", i);
+    // for (long long i = 0; i < nb_mcu_to_stretch; i+=Y_sampling_factor_horizontal) {
+    //     // fprintf(stderr, "i = %lld\n", i);
+    //     // print_matrix(MCUs_Cb[2]);
+    //     // fprintf(stderr, "\n\n");
+    //     // print_matrix(MCUs_Cr[2]);
+    //     // fprintf(stderr, "\n\n");
+    //     transformX(MCUs_Cb[i], MCUs_Cb[i], MCUs_Cb[i+1]);
+    //     transformX(MCUs_Cr[i], MCUs_Cr[i], MCUs_Cr[i+1]);
+    // }
+        
+
+    for (long long i = 0; i < nb_mcu_to_stretch - get_JPEG_nb_Mcu_Width_Strechted(jpeg); i++) {
+        // fprintf(stderr, "i = %lld\n", i);
+        if (i == nb_mcu_to_stretch - get_JPEG_nb_Mcu_Width_Strechted(jpeg) ){
+            break;
+        }
+        
+        if (i % get_JPEG_nb_Mcu_Width_Strechted(jpeg) == 0 && i != 0 ) {
+            i += get_JPEG_nb_Mcu_Width_Strechted(jpeg); 
+        }
         // print_matrix(MCUs_Cb[2]);
         // fprintf(stderr, "\n\n");
         // print_matrix(MCUs_Cr[2]);
         // fprintf(stderr, "\n\n");
-        transformX(MCUs_Cb[i], MCUs_Cb[i], MCUs_Cb[i+1]);
-        transformX(MCUs_Cr[i], MCUs_Cr[i], MCUs_Cr[i+1]);
+        transformY(MCUs_Cb[i], MCUs_Cb[i], MCUs_Cb[i+ get_JPEG_nb_Mcu_Width_Strechted(jpeg)]);
+        transformY(MCUs_Cr[i], MCUs_Cr[i], MCUs_Cr[i+ get_JPEG_nb_Mcu_Width_Strechted(jpeg)]);
         
     }
 
-    fprintf(stderr, "===================================\n");
-    print_matrix(MCUs_Cb[0]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cb[1]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cb[2]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cb[3]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cr[0]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cr[1]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cr[2]);
-    fprintf(stderr, "\n\n");
-    print_matrix(MCUs_Cr[3]);
+    // fprintf(stderr, "===================================\n");
+    // print_matrix(MCUs_Cb[0]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cb[1]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cb[2]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cb[3]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cr[0]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cr[1]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cr[2]);
+    // fprintf(stderr, "\n\n");
+    // print_matrix(MCUs_Cr[3]);
 }
 
 // int main() {
