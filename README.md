@@ -14,7 +14,6 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
 
 - upsampling (partiel ~ok + complet)    // Youssef + Jon
 - refaire fonctionner les tests avec toutes les fonctions !!!   // Jon
-- apparemment il nous faut un Gantt chart ou équivalent dégueulasse ... cf. fin de cette page   // Gwen
 - thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream et avant YCbCr2RGB  // Jon
 - Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment    // Gwen
 - voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille   // tout le monde pour re-checker ?
@@ -39,7 +38,7 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
         - vectorisation via utilisation des instructions SIMD AVX et AVX2 si disponibles (vérification de la possibilité via Makefile)
         - optimisation utilisation mémoire (écriture et accès)  
 
-        ![meme Asterix&Obélix FREE](http://JonathanMAROTTA.github.io/Asterix30GalereObelixRep-1024x1010.jpg?raw=true){width=50%}
+        ![meme Asterix&Obélix FREE](http://JonathanMAROTTA.github.io/Asterix30GalereObelixRep-1024x1010.jpg?width=32&height=32
 
     - gestion des erreurs
         - vérification de la validité du fichier JPEG (via magic number JPEG classique FFD8FF & via présence de l'APP0 JFIF)
