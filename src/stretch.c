@@ -77,7 +77,7 @@
 
 
 void transformXY(int16_t src[SIZE*SIZE], int16_t matA[SIZE*SIZE], int16_t matB[SIZE*SIZE], int16_t matC[SIZE*SIZE], int16_t matD[SIZE*SIZE]) {
-    int dest[2*SIZE*SIZE+2*SIZE];
+    int dest[2*SIZE*SIZE*2];
     for(int8_t i = 0; i < SIZE; i++) {
         for(int8_t j = 0; j < SIZE; j++) {
             dest[2*i*SIZE+2*j] = src[i*SIZE+j];
@@ -103,7 +103,7 @@ void transformXY(int16_t src[SIZE*SIZE], int16_t matA[SIZE*SIZE], int16_t matB[S
 }
 
 void transformY(int16_t src[SIZE*SIZE], int16_t matA[SIZE*SIZE], int16_t matB[SIZE*SIZE]) {
-    int dest[(2*SIZE)*SIZE+SIZE];
+    int dest[SIZE * SIZE * 2];
     for(int8_t i = 0; i < SIZE; i++) {
         for(int8_t j = 0; j < SIZE; j++) {
             dest[2*i*SIZE+j] = src[i*SIZE+j];
@@ -176,121 +176,46 @@ void stretch_function(struct JPEG *jpeg) {
 
     int8_t Y_sampling_factor_horizontal = get_JPEG_Sampling_Factor_X(jpeg);
     int8_t Y_sampling_factor_vertical = get_JPEG_Sampling_Factor_Y(jpeg);
-    fprintf(stderr, "Y_sampling_factor_horizontal = %d\n", Y_sampling_factor_horizontal);
-    fprintf(stderr, "Y_sampling_factor_vertical = %d\n", Y_sampling_factor_vertical);
-    fprintf(stderr, "get_JPEG_nb_Mcu_Width_Strechted(jpeg)= %ld\n", get_JPEG_nb_Mcu_Width_Strechted(jpeg));
-    fprintf(stderr, "get_JPEG_nb_Mcu_Height_Strechted(jpeg)= %ld\n", get_JPEG_nb_Mcu_Height_Strechted(jpeg));
+
 
     size_t nb_mcu_to_stretch = get_JPEG_nb_Mcu_Width_Strechted(jpeg) * get_JPEG_nb_Mcu_Height_Strechted(jpeg);
-    fprintf(stderr, "nb_mcu_to_stretch = %ld\n", nb_mcu_to_stretch);
 
-    // fprintf(stderr, "+++++++++++++++++++++++++++++\n");
-    // print_matrix(MCUs_Cb[0]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cb[1]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cb[2]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cb[3]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cr[0]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cr[1]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cr[2]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cr[3]);
+    if (Y_sampling_factor_horizontal == 2) {
+        for (long long i = 0; i < nb_mcu_to_stretch; i+=Y_sampling_factor_horizontal) {
+    
+            transformX(MCUs_Cb[i], MCUs_Cb[i], MCUs_Cb[i+1]);
+            transformX(MCUs_Cr[i], MCUs_Cr[i], MCUs_Cr[i+1]);
+        }
+    }     
 
-    // for (long long i = 0; i < nb_mcu_to_stretch; i+=Y_sampling_factor_horizontal) {
-    //     // fprintf(stderr, "i = %lld\n", i);
+    if (Y_sampling_factor_vertical == 2) {
+        for (long long i = 0; i < nb_mcu_to_stretch - get_JPEG_nb_Mcu_Width_Strechted(jpeg); i++) {
+            if (i == nb_mcu_to_stretch - get_JPEG_nb_Mcu_Width_Strechted(jpeg) ){
+                break;
+            }
+            if (i % get_JPEG_nb_Mcu_Width_Strechted(jpeg) == 0 && i != 0 ) {
+                i += get_JPEG_nb_Mcu_Width_Strechted(jpeg); 
+            }
+            transformY(MCUs_Cb[i], MCUs_Cb[i], MCUs_Cb[i+ get_JPEG_nb_Mcu_Width_Strechted(jpeg)]);
+            transformY(MCUs_Cr[i], MCUs_Cr[i], MCUs_Cr[i+ get_JPEG_nb_Mcu_Width_Strechted(jpeg)]);
+        }
+    }
+    // for (long long i = 0; i < nb_mcu_to_stretch - get_JPEG_nb_Mcu_Width_Strechted(jpeg); i+=2) {
+    //     // fprintf(stderr, "i = %lld ", i);
+    //     if (i == nb_mcu_to_stretch - get_JPEG_nb_Mcu_Width_Strechted(jpeg) ){
+    //         break;
+    //     }
+        
+    //     if (i % get_JPEG_nb_Mcu_Width_Strechted(jpeg) == 0 && i != 0 ) {
+    //         i += get_JPEG_nb_Mcu_Width_Strechted(jpeg); 
+    //     }
     //     // print_matrix(MCUs_Cb[2]);
     //     // fprintf(stderr, "\n\n");
     //     // print_matrix(MCUs_Cr[2]);
     //     // fprintf(stderr, "\n\n");
-    //     transformX(MCUs_Cb[i], MCUs_Cb[i], MCUs_Cb[i+1]);
-    //     transformX(MCUs_Cr[i], MCUs_Cr[i], MCUs_Cr[i+1]);
+    //     transformXY(MCUs_Cb[i], MCUs_Cb[i],MCUs_Cb[i+1], MCUs_Cb[i+ get_JPEG_nb_Mcu_Width_Strechted(jpeg)], MCUs_Cb[i+ get_JPEG_nb_Mcu_Width_Strechted(jpeg) + 1]);
+    //     transformXY(MCUs_Cr[i], MCUs_Cr[i],MCUs_Cr[i+1], MCUs_Cr[i+ get_JPEG_nb_Mcu_Width_Strechted(jpeg)], MCUs_Cr[i+ get_JPEG_nb_Mcu_Width_Strechted(jpeg) + 1]);
+        
     // }
-        
 
-    for (long long i = 0; i < nb_mcu_to_stretch - get_JPEG_nb_Mcu_Width_Strechted(jpeg); i++) {
-        // fprintf(stderr, "i = %lld\n", i);
-        if (i == nb_mcu_to_stretch - get_JPEG_nb_Mcu_Width_Strechted(jpeg) ){
-            break;
-        }
-        
-        if (i % get_JPEG_nb_Mcu_Width_Strechted(jpeg) == 0 && i != 0 ) {
-            i += get_JPEG_nb_Mcu_Width_Strechted(jpeg); 
-        }
-        // print_matrix(MCUs_Cb[2]);
-        // fprintf(stderr, "\n\n");
-        // print_matrix(MCUs_Cr[2]);
-        // fprintf(stderr, "\n\n");
-        transformY(MCUs_Cb[i], MCUs_Cb[i], MCUs_Cb[i+ get_JPEG_nb_Mcu_Width_Strechted(jpeg)]);
-        transformY(MCUs_Cr[i], MCUs_Cr[i], MCUs_Cr[i+ get_JPEG_nb_Mcu_Width_Strechted(jpeg)]);
-        
-    }
-
-    // fprintf(stderr, "===================================\n");
-    // print_matrix(MCUs_Cb[0]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cb[1]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cb[2]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cb[3]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cr[0]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cr[1]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cr[2]);
-    // fprintf(stderr, "\n\n");
-    // print_matrix(MCUs_Cr[3]);
 }
-
-// int main() {
-//     int matrix[SIZE][SIZE] = {
-//         {0,1,2,3,4,5,6,7},
-//         {8,9,10,11,12,13,14,15},
-//         {16,17,18,19,20,21,22,23},
-//         {24,25,26,27,28,29,30,31},
-//         {32,33,34,35,36,37,38,39},
-//         {40,41,42,43,44,45,46,47},
-//         {48,49,50,51,52,53,54,55},
-//         {56,57,58,59,60,61,62,63}};
-    
-//     int matA[SIZE][SIZE];
-//     int matB[SIZE][SIZE];
-//     int matC[SIZE][SIZE];
-//     int matD[SIZE][SIZE];
-    
-//     // transform(matrix, matA, matB, matC, matD);
-
-//     // printf("Matrix A:\n");
-//     // print_matrix(matA);
-//     // printf("\n");
-
-//     // printf("Matrix B:\n");
-//     // print_matrix(matB);
-//     // printf("\n");
-
-//     // printf("Matrix C:\n");
-//     // print_matrix(matC);
-//     // printf("\n");
-
-//     // printf("Matrix D:\n");
-//     // print_matrix(matD);
-//     // printf("\n");
-
-//     transformY(matrix, matA, matB);
-//     printf("Matrix A:\n");
-//     print_matrix(matA);
-//     printf("\n");
-
-//     printf("Matrix B:\n");
-//     print_matrix(matB);
-//     printf("\n");
-
-    
-//     return 0;
-// }
