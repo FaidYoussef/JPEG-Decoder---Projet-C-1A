@@ -141,6 +141,13 @@ ycbcr2rgb-test [-hv]
         > modification en place des valeurs des MCUs de chaque composante présente
         ```
 
+    - stretch.c  
+        - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+        - OUT : []
+        ```
+        > procède à l'étirement des valeurs des pixels de l'image (upsampling)
+        ```
+
     - ppm.c  
 	    - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
 	    - OUT : [int8_t]	// EXIT_SUCCESS = 0 : pas d'erreur lors de l'exécution de la fonction  
