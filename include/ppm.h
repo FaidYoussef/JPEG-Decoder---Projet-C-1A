@@ -8,6 +8,9 @@
 #include <extract.h>
 #include <utils.h>
 
-int8_t write_ppm(const char *output_filename, struct JPEG *jpeg, bool force_grayscale);
+
+char* generate_output_filename(const char *input_filename, uint8_t nb_components);
+
+int8_t write_ppm(const char *input_filename, struct JPEG *jpeg, bool force_grayscale);
 
 #endif

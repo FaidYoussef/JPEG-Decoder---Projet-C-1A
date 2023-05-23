@@ -1,17 +1,46 @@
 #include <ppm.h>
 
-int8_t write_ppm(const char *output_filename, struct JPEG *jpeg, bool force_grayscale) {
+
+
+// Fonction qui génère le nom du fichier de sortie
+char* generate_output_filename(const char *input_filename, uint8_t nb_components) {
+    size_t dot_index = 0;
+    char *output_filename = malloc(500*sizeof(char)); // Si quelqu'un veut vraiment abuser ...
+    strcpy(output_filename, input_filename);
+
+    while(input_filename[dot_index] != '.') {
+        dot_index ++;
+    }
+
+    output_filename[dot_index + 1] = 'p';
+    output_filename[dot_index + 2] = 'p';
+
+    if(nb_components == 1) output_filename[dot_index + 2] = 'g';
+    output_filename[dot_index + 3] = 'm';
+
+    output_filename[dot_index + 4] = '\0';
+
+    return output_filename;
+}
+
+
+int8_t write_ppm(const char *input_filename, struct JPEG *jpeg, bool force_grayscale) {
 
     int8_t nb_components = get_sof_nb_components(get_JPEG_sof(jpeg)[0]);
     if (force_grayscale) nb_components = 1;
+
     int16_t width = get_JPEG_width(jpeg);
     int16_t height = get_JPEG_height(jpeg);
 
+
     // On prépare le fichier de sortie
     FILE *output_file;
+    char* output_filename = generate_output_filename(input_filename, nb_components);
+
+
     if (nb_components == 1) {
         // On vérifie que le fichier a bien été créé/ouvert
-        output_file = fopen("YOUSSEF.pgm", "wb");
+        output_file = fopen(output_filename, "wb");
         if (!output_file) {
             fprintf(stderr, RED("ERROR : OPEN - ppm.c > write_ppm() %s\n"), output_filename);
             return EXIT_FAILURE;
@@ -23,7 +52,7 @@ int8_t write_ppm(const char *output_filename, struct JPEG *jpeg, bool force_gray
 
     } else if (nb_components == 3) {
         // On vérifie que le fichier a bien été créé/ouvert
-        output_file = fopen("YOUSSEF.ppm", "wb");
+        output_file = fopen(output_filename, "wb");
         if (!output_file) {
             fprintf(stderr, RED("ERROR : OPEN - ppm.c > write_ppm() %s\n"), output_filename);
             return EXIT_FAILURE;
