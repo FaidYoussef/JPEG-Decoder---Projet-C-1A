@@ -54,7 +54,7 @@ struct node * build_huffman_tree(unsigned char *ht_data) {
         getHighlyVerbose() ? fprintf(stderr, "\t\tnb_max_symbols_per_level: %d\n", nb_max_symbols_per_level):0;
         getHighlyVerbose() ? fprintf(stderr, "\t\tNombre de codes: %d\n", ht_data[i]):0;
         if (ht_data[i] > nb_max_symbols_per_level) {
-            fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > build_huffman_tree() | too much error per level\n"));
+            fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > build_huffman_tree() | too much symbols per level\n"));
             return NULL;
         }
     }
@@ -378,7 +378,7 @@ int8_t decode_bitstream(struct JPEG * jpeg){
                 for (int8_t v = 0; v < get_sampling_factor_y(get_sof_component(get_sof_components(get_JPEG_sof(jpeg)[0]), i)); v++) {
                     for (int8_t h = 0; h < get_sampling_factor_x(get_sof_component(get_sof_components(get_JPEG_sof(jpeg)[0]), i)); h++) {
                         if (decode_MCU(jpeg, (y + v) * get_JPEG_nb_Mcu_Width_Strechted(jpeg) + (x + h), i, &previous_DC_values[i], &current_pos)) {
-                        fprintf(stderr, "(x, y, i, v, h) = (%ld, %ld, %d, %d, %d)\n", x, y, i, v, h);
+                            fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_bitstream()\n"));
                             return EXIT_FAILURE;
                         }
                     }
