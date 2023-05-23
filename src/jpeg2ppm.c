@@ -87,6 +87,7 @@ int main(int argc, char **argv) {
     FILE *input_file = fopen(argv[argc - 1], "r");
     if (!input_file) {
         display_help(argv);
+        fprintf(stderr, RED("ERROR : OPEN - jpeg2ppm.c > main() while trying to open %s\n"), argv[argc - 1]);
         return EXIT_FAILURE;
     }
     fclose(input_file);
@@ -99,21 +100,25 @@ int main(int argc, char **argv) {
 
     if (decode_bitstream(jpeg)) {
         free_JPEG_struct(jpeg);
+        fprintf(stderr, RED("ERROR : GLOBAL - jpeg2ppm.c > main() > decode_bitstream()\n"));
         return EXIT_FAILURE;
     };
 
     if (IQ(jpeg)) {
         free_JPEG_struct(jpeg);
+        fprintf(stderr, RED("ERROR : GLOBAL - jpeg2ppm.c > main() > IQ()\n"));
         return EXIT_FAILURE;
     };
 
     if (IZZ(jpeg)) {
         free_JPEG_struct(jpeg);
+        fprintf(stderr, RED("ERROR : GLOBAL - jpeg2ppm.c > main() > IZZ()\n"));
         return EXIT_FAILURE;
     };
 
     if (IDCT(jpeg)) {
         free_JPEG_struct(jpeg);
+        fprintf(stderr, RED("ERROR : GLOBAL - jpeg2ppm.c > main() > IDCT()\n"));
         return EXIT_FAILURE;
     };
 
@@ -123,11 +128,13 @@ int main(int argc, char **argv) {
 
     if (YCbCr2RGB(jpeg, force_grayscale)) {
         free_JPEG_struct(jpeg);
+        fprintf(stderr, RED("ERROR : GLOBAL - jpeg2ppm.c > main() > YCbCr2RGB()\n"));
         return EXIT_FAILURE;
     };
 
     if (write_ppm(filename, jpeg, force_grayscale)) {
         free_JPEG_struct(jpeg);
+        fprintf(stderr, RED("ERROR : GLOBAL - jpeg2ppm.c > main() > write_ppm()\n"));
         return EXIT_FAILURE;
     } else {
         fprintf(stderr, GREEN("Image %s décodée avec succès !\n"), filename);
