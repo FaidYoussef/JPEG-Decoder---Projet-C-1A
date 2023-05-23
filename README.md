@@ -32,11 +32,11 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
 
         ![--force-grayscale printscreen](http://JonathanMAROTTA.github.io/--force-grayscale.png?raw=true)
 
-    - Optimisations temps d'exécution et utilisation mémoire
+    - Optimisations pour améliorer le temps d'exécution et l'utilisation de la mémoire
         - fast_IDCT d'après [PRACTICAL FAST 1-D DCT ALGORITHMS WITH 11 MULTIPLICATIONS (Loeffler *et al.*)](https://formationc.pages.ensimag.fr/projet/jpeg/jpeg/distrib/loeffler.pdf)
         - multiprocessing (vérification de la possibilité via Makefile)
         - vectorisation via utilisation des instructions SIMD AVX et AVX2 si disponibles (vérification de la possibilité via Makefile)
-        - optimisation utilisation mémoire (écriture et accès)  
+        - optimisation de l'utilisation de la mémoire (écriture et accès)  
 
         <div align="center">
             <img alt="meme Asterix&Obélix FREE" src="http://JonathanMAROTTA.github.io/Asterix30GalereObelixRep-1024x1010.jpg" margin="center" width="300" height="300">

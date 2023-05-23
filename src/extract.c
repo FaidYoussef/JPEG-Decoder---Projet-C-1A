@@ -1166,8 +1166,6 @@ struct JPEG * extract(char *filename) {
                     }
                 }
 
-                // On n'arrive jamais ici (impossible de break correctement)
-
             //**********************************************************************************************************************
             } else if (id[0] == EOI){
                 getVerbose() ? printf("Fin du fichier\n"):0;
