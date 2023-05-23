@@ -13,7 +13,6 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
 ## TODO
 
 - upsampling (partiel ~ok + complet)    // Youssef + Jon
-- refaire fonctionner les tests avec toutes les fonctions !!!   // Jon
 - thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream et avant YCbCr2RGB  // Jon
 - Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment    // Gwen
 - voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille   // tout le monde pour re-checker ?
@@ -61,11 +60,12 @@ make
 jpeg2ppm [-h] [-v|-hv] [--force-grayscale] <jpeg_file>
 
 make tests
-extract-test
-IDCT-test [-hv]
-IQ-test [-hv]
-IZZ-test [-hv]
-ycbcr2rgb-test [-hv]
+./tests/extract-test
+./tests/IDCT-test [-hv]
+./tests/IQ-test [-hv]
+./tests/IZZ-test [-hv]
+./tests/ycbcr2rgb-test [-hv]
+(Note: execute tests from `team6/` directory !)
 ```
 ![jpeg2ppm usage printscreen](http://JonathanMAROTTA.github.io/jpeg2ppm-usage.png?raw=true)
 
