@@ -125,9 +125,15 @@ void pixel_YCbCr2RGB(int16_t *pixel_Y, int16_t *pixel_Cb, int16_t *pixel_Cr, int
         int16_t b = *pixel_Y;
 
         if (!force_grayscale && nb_components > 1){
-            r += 1.402 * (*pixel_Cr - 128);
-            g += - 0.34414 * (*pixel_Cb - 128) - 0.71414 * (*pixel_Cr - 128);
-            b += 1.772 * (*pixel_Cb - 128);
+            
+            r += -0.0009267 * (*pixel_Cb - 128) + 1.4016868 * (*pixel_Cr - 128);
+            g += - 0.3436954 * (*pixel_Cb - 128) - 0.7141690 * (*pixel_Cr - 128);
+            b += 1.7721604 * (*pixel_Cb - 128) + 0.0009902 * (*pixel_Cr - 128);
+
+            // Forumles simplifiées
+            // r += 1.402 * (*pixel_Cr - 128);
+            // g += - 0.34414 * (*pixel_Cb - 128) - 0.71414 * (*pixel_Cr - 128);
+            // b += 1.772 * (*pixel_Cb - 128);
         }
 
         *pixel_Y = saturer(r);
