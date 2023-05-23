@@ -4,20 +4,12 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-
-#include <extract.h>
 #include <utils.h>
 #include <verbose.h>
+#include <extract.h>
 
 #define DC_VALUE_INDEX 0
 
-
-//**********************************************************************************************************************
-// Structure représentant un noeud de l'arbre de huffman
-struct node;
-
-// Crée un nouveau noeud de l'arbre de Huffman
-struct node * create_node(int8_t symbol, struct node *left, struct node *right);
 
 //**********************************************************************************************************************
 // Construit l'arbre de huffman à partir de la table de huffman

@@ -50,9 +50,9 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
 
     - Tests unitaires
         - mode standard et mode verbose (utiliser `-hv`) pour voir les détails
-        
-        ![tests unitaires printscreen](http://JonathanMAROTTA.github.io/tests_unitaires.png?raw=true)
-
+        <div align="center">
+            ![tests unitaires printscreen](http://JonathanMAROTTA.github.io/tests_unitaires.png?raw=true)
+        </div>
 
 ## Usage
 
@@ -139,6 +139,13 @@ ycbcr2rgb-test [-hv]
         > prise en charge de l'upsampling  
         > possibilité de forcer la conversion en niveau de gris via la ligne de commande qui modifie la valeur du paramètre d'entrée `force_grayscale`  
         > modification en place des valeurs des MCUs de chaque composante présente
+        ```
+
+    - stretch.c  
+        - IN &nbsp;&nbsp;&nbsp;: [struct JPEG *]
+        - OUT : []
+        ```
+        > procède à l'étirement des valeurs des pixels de l'image (upsampling)
         ```
 
     - ppm.c  
