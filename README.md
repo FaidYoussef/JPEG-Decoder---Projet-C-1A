@@ -39,6 +39,8 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
         - optimisation utilisation mémoire (écriture et accès)  
 
         ![meme Asterix&Obélix FREE](http://JonathanMAROTTA.github.io/Asterix30GalereObelixRep-1024x1010.jpg?width=32&height=32)
+        ![](http://JonathanMAROTTA.github.io/Asterix30GalereObelixRep-1024x1010.jpg)
+        <img src="http://JonathanMAROTTA.github.io/Asterix30GalereObelixRep-1024x1010.jpg"  width="120" height="120">
 
     - gestion des erreurs
         - vérification de la validité du fichier JPEG (via magic number JPEG classique FFD8FF & via présence de l'APP0 JFIF)
