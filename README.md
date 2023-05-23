@@ -37,8 +37,9 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
         - multiprocessing (vérification de la possibilité via Makefile)
         - vectorisation via utilisation des instructions SIMD AVX et AVX2 si disponibles (vérification de la possibilité via Makefile)
         - optimisation utilisation mémoire (écriture et accès)  
-
-        <img alt="meme Asterix&Obélix FREE" src="http://JonathanMAROTTA.github.io/Asterix30GalereObelixRep-1024x1010.jpg" margin="center" width="300" height="300">
+        <div align="center">
+            <img alt="meme Asterix&Obélix FREE" src="http://JonathanMAROTTA.github.io/Asterix30GalereObelixRep-1024x1010.jpg" margin="center" width="300" height="300">
+        </div>
 
     - gestion des erreurs
         - vérification de la validité du fichier JPEG (via magic number JPEG classique FFD8FF & via présence de l'APP0 JFIF)
