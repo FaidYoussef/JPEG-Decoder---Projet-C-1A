@@ -152,7 +152,7 @@ int main(int argc, char **argv) {
     //*************************************************************************************************
     // TEST HEADER
     fprintf(stderr, "\n");
-    fprintf(stderr, YELLOW("========= TESTS INVERSE QUANTIFICATION =========\n\n"));
+    fprintf(stderr, YELLOW("========= TESTS QUANTIFICATION INVERSE =========\n\n"));
 
     //*************************************************************************************************
     // test 1 : on multiplie par 0
