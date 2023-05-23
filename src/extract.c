@@ -508,20 +508,19 @@ int8_t ignore_bytes(FILE *input, int nb_bytes){
     return EXIT_SUCCESS;
 }
 
-bool is_full_initialized(struct JPEG *jpeg) {
-    //fprintf(stderr, "%d\n", jpeg->start_of_frame[0]->set);
-    //fprintf(stderr, "%d\n", jpeg->start_of_scan[0]->set);
-    
-
+bool is_fully_initialized(struct JPEG *jpeg) {
     if (jpeg->start_of_frame[0]->set != true) return false;
     if (jpeg->start_of_scan[0]->set != true) return false;
-    for (uint8_t i=0; i<jpeg->nb_huffman; i++){
-        if (jpeg->huffman_tables[i]->set != true) return false;
-        fprintf(stderr, "%d\n", jpeg->huffman_tables[i]->set);
+
+    uint8_t nb_huffman = 0;
+    for (uint8_t i=0; i<MAX_NUMBER_OF_HUFFMAN_TABLES; i++){
+        (jpeg->huffman_tables[i]->set == true) ? nb_huffman++ : 0;
     }
-    for (uint8_t i=0; i<jpeg->nb_quantization; i++){
-        if (jpeg->quantization_tables[i]->set != true) return false;
-        //fprintf(stderr, "%d\n", jpeg->quantization_tables[i]->set);
+    if (nb_huffman != jpeg->nb_huffman) return false;
+
+    uint8_t nb_quantization = 0;
+    for (uint8_t j=0; j<MAX_NUMBER_OF_QUANTIZATION_TABLES; j++){
+        (jpeg->quantization_tables[j]->set == true) ? nb_quantization++ : 0;
     }
     return true;
 }
@@ -1141,11 +1140,11 @@ struct JPEG * extract(char *filename) {
                             }
                             getVerbose() ? printf("\nFin du fichier\n\n"):0;
                             fclose(input);
-                            // if (!is_full_initialized(jpeg)) {
-                            //     fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > extract() | JPEG structure is not fully initialized\n"));
-                            //     free_JPEG_struct(jpeg);
-                            //     return NULL;
-                            // }
+                            if (!is_fully_initialized(jpeg)) {
+                                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > extract() | JPEG structure is not fully initialized\n"));
+                                free_JPEG_struct(jpeg);
+                                return NULL;
+                            }
                             return jpeg;
 
                         } else if (feof(input)){    // On atteint la fin du fichier avant d'avoir lu un marker EOI
@@ -1173,11 +1172,11 @@ struct JPEG * extract(char *filename) {
             } else if (id[0] == EOI){
                 getVerbose() ? printf("Fin du fichier\n"):0;
                 fclose(input);
-                // if (!is_full_initialized(jpeg)) {
-                //     fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > extract() | JPEG structure is not fully initialized\n"));
-                //     free_JPEG_struct(jpeg);
-                //     return NULL;
-                // }
+                if (!is_fully_initialized(jpeg)) {
+                    fprintf(stderr, RED("ERROR : INCONSISTENT DATA - extract.c > extract() | JPEG structure is not fully initialized\n"));
+                    free_JPEG_struct(jpeg);
+                    return NULL;
+                }
                 break;
             }
         }
