@@ -4,21 +4,35 @@
 
 // Fonction qui génère le nom du fichier de sortie
 char* generate_output_filename(const char *input_filename, uint8_t nb_components) {
-    size_t dot_index = 0;
     char *output_filename = malloc(500*sizeof(char)); // Si quelqu'un veut vraiment abuser ...
-    strcpy(output_filename, input_filename);
+    char *base_name = basename((char *) input_filename);
+    char *dot = strrchr(base_name, '.');
+    char *dir_name = dirname((char *) input_filename);
 
-    while(input_filename[dot_index] != '.') {
-        dot_index ++;
+    // copy the directory name to output_filename
+    strcpy(output_filename, dir_name);
+    strcat(output_filename, "/");
+
+    if (dot) {
+        // copy the base name up to the dot
+        strncat(output_filename, base_name, dot - base_name);
+    } else {
+        // if no extension, just copy the whole base name
+        strcat(output_filename, base_name);
     }
 
-    output_filename[dot_index + 1] = 'p';
-    output_filename[dot_index + 2] = 'p';
+    // add the new extension
+    strcat(output_filename, ".");
 
-    if(nb_components == 1) output_filename[dot_index + 2] = 'g';
-    output_filename[dot_index + 3] = 'm';
+    strcat(output_filename, "p");
 
-    output_filename[dot_index + 4] = '\0';
+    if(nb_components == 1) {
+        strcat(output_filename, "g");
+    } else {
+        strcat(output_filename, "p");
+    }
+
+    strcat(output_filename, "m");
 
     return output_filename;
 }
