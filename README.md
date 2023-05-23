@@ -39,7 +39,7 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
         - vectorisation via utilisation des instructions SIMD AVX et AVX2 si disponibles (vérification de la possibilité via Makefile)
         - optimisation utilisation mémoire (écriture et accès)  
 
-        ![meme Asterix&Obélix FREE](http://JonathanMAROTTA.github.io/Asterix30GalereObelixRep-1024x1010.jpg?raw=true =50%)
+        ![meme Asterix&Obélix FREE](http://JonathanMAROTTA.github.io/Asterix30GalereObelixRep-1024x1010.jpg?raw=true){width=50%}
 
     - gestion des erreurs
         - vérification de la validité du fichier JPEG (via magic number JPEG classique FFD8FF & via présence de l'APP0 JFIF)
