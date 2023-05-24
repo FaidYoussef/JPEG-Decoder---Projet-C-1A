@@ -548,9 +548,9 @@ struct QuantizationTable * get_qt(FILE *input, unsigned char *buffer) {
     }
     length = (length << 8) | ((length >> 8) & 0xFF);
 
-    getVerbose() ? printf("\tlongueur : %d\n", length):0;
     length = length - 2 - 1;
-
+    getVerbose() ? printf("\tlongueur : %d\n", length):0;
+    
     struct QuantizationTable *qt = (struct QuantizationTable *) malloc(sizeof(struct QuantizationTable));
     if (check_memory_allocation((void *) qt)) return NULL;
     qt->data = (uint8_t *) malloc(length * sizeof(uint8_t *));
