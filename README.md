@@ -10,12 +10,6 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
 - [@Jonathan MAROTTA](https://github.com/JonathanMAROTTA)
 - [@Gwénolé MARTIN](https://gitlab.ensimag.fr/martigwe)
 
-## TODO
-
-- upsampling (partiel ~ok + complet)    // Youssef + Jon
-- Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment    // Gwen
-- voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille   // tout le monde pour re-checker ?
-
 ## Features
 
 - Décodeur JPEG `Mode baseline DCT`  ✨Done✨
