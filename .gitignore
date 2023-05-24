@@ -1,8 +1,16 @@
 *.blabla
 *.o
+
 jpeg2ppm
+extract-test
+IDCT-test
+IQ-test
+IZZ-test
+ycbcr2rgb-test
 
 #vscode stuff
 .vscode/*
 
 images-tests/*
+images/*.ppm
+images/*.pgm
