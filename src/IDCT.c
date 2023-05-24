@@ -6,7 +6,7 @@
 #include <IDCT.h>
 
 
-double C_cos_values[N][N][N][N];
+// double C_cos_values[N][N][N][N];
 const float sqrt_2 = 1.41421356237309504880168872420;
 
 
