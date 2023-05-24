@@ -198,6 +198,11 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
         unsigned char current_bit = (bitstream[(size_t)(i / 8)] >> (7 - (i % 8))) & 1;
 
         // On parcours l'arbre de Huffman à la recherche d'un mot de code
+        if (current_node == NULL){
+            fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_MCU()\n"));
+            return EXIT_FAILURE;
+        }
+
         current_node = (current_bit == 1) ? current_node->right : current_node->left;
 
         // On détecte une erreur éventuelle d'encodage
@@ -261,6 +266,11 @@ int8_t decode_MCU(struct JPEG *jpeg, size_t MCU_number, int8_t component_index, 
             // On détermine le bit actuel en inspectant l'octet approprié dans bitstream
             // puis en décalant et en masquant le bit approprié
             unsigned char current_bit = (bitstream[(size_t)(i / 8)] >> (7 - (i % 8))) & 1;
+
+            if (!current_node) {
+                fprintf(stderr, RED("ERROR : INCONSISTENT DATA - huffman.c > decode_MCU()\n"));
+                return EXIT_FAILURE;
+            }
 
             // On parcours l'arbre de Huffman à la recherche d'un mot de code
             current_node = (current_bit == 1) ? current_node->right : current_node->left;
