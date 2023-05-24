@@ -137,7 +137,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, RED("ERROR : GLOBAL - jpeg2ppm.c > main() > write_ppm()\n"));
         return EXIT_FAILURE;
     } else {
-        fprintf(stderr, GREEN("Image %s décodée avec succès !\n"), filename);
+        fprintf(stderr, GREEN("Image décodée avec succès !\n"));
     }
     
     // On libère la mémoire
