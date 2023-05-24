@@ -13,10 +13,8 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
 ## TODO
 
 - upsampling (partiel ~ok + complet)    // Youssef + Jon
-- thread par composante pour accélérer le traitement pour toutes les étapes après decoding_bitstream et avant YCbCr2RGB  // Jon
 - Vérifier que la longueur lue dans chaque segment correspond bien à la longueur annoncée du segment    // Gwen
 - voir pour améliorer la gestion mémoire en forçant int16_t[64] et [8][8] plutôt que de ne pas annoncer la taille   // tout le monde pour re-checker ?
-- Ajouter une musique de victoire + défaite (et un gif de chatons)
 
 ## Features
 
@@ -33,9 +31,9 @@ Réalisé dans le cadre du projet C en 1ère année à l'Ensimag (2022-2023)
 
     - Optimisations pour améliorer le temps d'exécution et l'utilisation de la mémoire
         - fast_IDCT d'après [PRACTICAL FAST 1-D DCT ALGORITHMS WITH 11 MULTIPLICATIONS (Loeffler *et al.*)](https://formationc.pages.ensimag.fr/projet/jpeg/jpeg/distrib/loeffler.pdf)
-        - multiprocessing (vérification de la possibilité via Makefile)
-        - vectorisation via utilisation des instructions SIMD AVX et AVX2 si disponibles (vérification de la possibilité via Makefile)
         - optimisation de l'utilisation de la mémoire (écriture et accès)  
+        - vectorisation via utilisation des instructions SIMD AVX et AVX2 si disponibles (vérification de la possibilité via Makefile)
+        - tentatives avec multiprocessing infructueuses (certainement dû à la granularité du travail et la gestion des synchronisations)
 
         <div align="center">
             <img alt="meme Asterix&Obélix FREE" src="http://JonathanMAROTTA.github.io/Asterix30GalereObelixRep-1024x1010.jpg" margin="center" width="300" height="300">
