@@ -2,9 +2,14 @@
 
 
 void transformY(int16_t src[SIZE*SIZE], int16_t matA[SIZE*SIZE], int16_t matB[SIZE*SIZE]) {
+
     int dest[SIZE * SIZE * 2];
     for(int8_t i = 0; i < SIZE; i++) {
         for(int8_t j = 0; j < SIZE; j++) {
+            if (i==0 && j==0){
+                getHighlyVerbose() ? fprintf(stderr, "\n"):0;
+            }
+
             dest[2*i*SIZE+j] = src[i*SIZE+j];
             dest[(2*i + 1)*SIZE+j] = src[i*SIZE+j];
         }
@@ -23,10 +28,13 @@ void transformY(int16_t src[SIZE*SIZE], int16_t matA[SIZE*SIZE], int16_t matB[SI
 
 void transformX(int16_t src[SIZE*SIZE], int16_t matA[SIZE*SIZE], int16_t matB[SIZE*SIZE]) {
 
-
     int dest[SIZE*2*SIZE];
     for(int8_t i = 0; i < SIZE; i++) {
         for(int8_t j = 0; j < SIZE; j++) {
+            if (i==0 && j==0){
+                getHighlyVerbose() ? fprintf(stderr, "\n"):0;
+            }
+            
             dest[i*2*SIZE+2*j] = src[i*SIZE+j];
             dest[i*2*SIZE+2*j + 1] = src[i*SIZE+j];
         }
@@ -69,7 +77,7 @@ void stretch_function(struct JPEG *jpeg) {
             transformX(MCUs_Cb[i], MCUs_Cb[i], MCUs_Cb[i+1]);
             transformX(MCUs_Cr[i], MCUs_Cr[i], MCUs_Cr[i+1]);
         }
-    }     
+    }
 
     if (Y_sampling_factor_vertical == 2) {
         for (size_t i = 0; i < nb_mcu_to_stretch - get_JPEG_nb_Mcu_Width_Strechted(jpeg); i++) {
